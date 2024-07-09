@@ -3,6 +3,7 @@ const NodeCache = require("node-cache");
 const cache = new NodeCache({ stdTTL: 60 });
 
 const blog = require("../constant/blog.json");
+const UserCoin = require("../models/userCoinModel");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&sparkline=true&price_change_percentage=1h,7d";
@@ -14,8 +15,10 @@ const apiHighLight = "https://pro-api.coingecko.com/api/v3/coins/categories";
 
 const getAllToken = async (req, res) => {
   let { category, page = 1, size = 10 } = req.query;
+  const userId = req.userId;
   page = parseInt(page);
   size = parseInt(size);
+
   try {
     const cacheKey = `allTokenData_${category || "all"}`;
     const cachedData = cache.get(cacheKey);
@@ -34,18 +37,31 @@ const getAllToken = async (req, res) => {
 
       const dataLength = data.length;
 
-      const startIndex = (page - 1) * size;
-      const endIndex = startIndex + size;
+      let userCoins = await UserCoin.findOne({ userId });
+
       const paginatedData = data
-        .slice(startIndex, endIndex)
         .map((item, index) => ({
           ...item,
-          rank: startIndex + index + 1,
-        }));
+          rank: index + 1,
+          favCoin: userCoins ? userCoins.favCoin.includes(item.id) : false,
+        }))
+        .sort((a, b) => {
+          if (a.favCoin && !b.favCoin) return -1;
+          if (!a.favCoin && b.favCoin) return 1;
+          return a.rank - b.rank;
+        });
 
-      return res
-        .status(200)
-        .json({ success: true, currency: paginatedData, total: dataLength });
+      const startIndex = (page - 1) * size;
+      const paginatedDataSubset = paginatedData.slice(
+        startIndex,
+        startIndex + size
+      );
+
+      return res.status(200).json({
+        status: true,
+        currency: paginatedDataSubset,
+        total: dataLength,
+      });
     }
 
     const response = await axios.get(apiRWACoins, {
@@ -67,27 +83,40 @@ const getAllToken = async (req, res) => {
 
     const dataLength = data.length;
 
-    cache.set(cacheKey, { success: true, data });
+    cache.set(cacheKey, { status: true, data });
 
-    const startIndex = (page - 1) * size;
-    const endIndex = startIndex + size;
+    let userCoins = await UserCoin.findOne({ userId });
+
     const paginatedData = data
-      .slice(startIndex, endIndex)
       .map((item, index) => ({
         ...item,
-        rank: startIndex + index + 1,
-      }));
+        rank: index + 1,
+        favCoin: userCoins ? userCoins.favCoin.includes(item.id) : false,
+      }))
+      .sort((a, b) => {
+        if (a.favCoin && !b.favCoin) return -1;
+        if (!a.favCoin && b.favCoin) return 1;
+        return a.rank - b.rank;
+      });
 
-    console.log("Fetching list of coin data from API");
+    const startIndex = (page - 1) * size;
+    const paginatedDataSubset = paginatedData.slice(
+      startIndex,
+      startIndex + size
+    );
 
-    return res
-      .status(200)
-      .json({ success: true, currency: paginatedData, total: dataLength });
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return res
-      .status(500)
-      .json({ success: false, error: "Internal Server Error" });
+    return res.status(200).json({
+      status: true,
+      currency: paginatedDataSubset,
+      total: dataLength,
+    });
+  } catch (err) {
+    console.error("Error fetching data:", err.message);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+      error: err.message,
+    });
   }
 };
 
@@ -111,7 +140,7 @@ const getCategories = async (req, res) => {
 
       return res
         .status(200)
-        .json({ success: true, category: data, total: dataLength });
+        .json({ status: true, category: data, total: dataLength });
     }
 
     const resp = await axios.get(apiRWACategory, {
@@ -123,12 +152,14 @@ const getCategories = async (req, res) => {
     let categoryData = await resp.data;
 
     if (!categoryData)
-      return res.status(401).json("Could not retrieved category!");
+      return res
+        .status(401)
+        .json({ status: false, message: "Could not retrieved category!" });
 
     const dataLength = categoryData.length;
 
     cache.set(cacheKey, {
-      success: true,
+      status: true,
       category: categoryData,
       total: dataLength,
     });
@@ -140,14 +171,13 @@ const getCategories = async (req, res) => {
     }
 
     return res.status(200).json({
-      success: true,
+      status: true,
       category: categoryData,
       total: dataLength,
     });
   } catch (err) {
-    console.log("EERRR", err.message);
     return res.status(500).json({
-      success: false,
+      status: false,
       message: "Something went wrong!",
       error: err.message,
     });
@@ -177,13 +207,20 @@ const getCoinDetail = async (req, res) => {
 
     const coinDetail = await resp.data;
 
-    if (!coinDetail) return res.status(400).json("Could not fetch detail!");
+    if (!coinDetail)
+      return res
+        .status(400)
+        .json({ status: false, message: "Could not fetch detail!" });
 
-    cache.set(cacheKey, { success: true, detail: coinDetail });
+    cache.set(cacheKey, { status: true, detail: coinDetail });
 
-    return res.status(200).json({ success: true, detail: coinDetail });
+    return res.status(200).json({ status: true, detail: coinDetail });
   } catch (err) {
-    return res.status(500).json("Something went wrong!");
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong!",
+      error: err.message,
+    });
   }
 };
 
@@ -203,13 +240,19 @@ const getHighLightData = async (req, res) => {
     );
 
     if (!highLightData)
-      return res.status(400).json("Could not fetch hightlight data!");
+      return res
+        .status(400)
+        .json({ status: false, message: "Could not fetch hightlight data!" });
 
     return res
       .status(200)
-      .json({ success: true, highlightData: highlightFilter[0] });
+      .json({ status: true, highlightData: highlightFilter[0] });
   } catch (err) {
-    return res.status(500).json("Something went wrong!");
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong!",
+      error: err.message,
+    });
   }
 };
 
@@ -229,11 +272,17 @@ const getCoinGraphData = async (req, res) => {
     const coinOHLCData = await resp.data;
 
     if (!coinOHLCData)
-      return res.status(400).json("Could not fetch graph data!");
+      return res
+        .status(400)
+        .json({ status: false, message: "Could not fetch graph data!" });
 
-    return res.status(200).json({ success: true, graphData: coinOHLCData });
+    return res.status(200).json({ status: true, graphData: coinOHLCData });
   } catch (err) {
-    return res.status(500).json("Something went wrong!");
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong!",
+      error: err.message,
+    });
   }
 };
 
@@ -250,22 +299,33 @@ const getTrends = async (req, res) => {
     );
 
     if (!resp.data)
-      return res.status(400).json("Could not fetch trending coin!");
+      return res
+        .status(400)
+        .json({ status: false, message: "Could not fetch trending coin!" });
 
-    return res.status(200).json({ success: true, trend: resp.data });
+    return res.status(200).json({ status: true, trend: resp.data });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Something went wrong!", err: err.message });
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong!",
+      error: err.message,
+    });
   }
 };
 
 const getBlog = async (req, res) => {
   try {
-    if (!blog) return res.status(400).json("Could not retrieve blog!");
-    return res.status(200).json({ success: true, blog });
+    if (!blog)
+      return res
+        .status(400)
+        .json({ status: false, message: "Could not retrieve blog!" });
+    return res.status(200).json({ status: true, blog });
   } catch (err) {
-    return res.status(500).json("Something went wrong!");
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong!",
+      error: err.message,
+    });
   }
 };
 

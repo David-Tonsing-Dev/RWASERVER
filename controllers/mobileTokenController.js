@@ -75,14 +75,12 @@ const getCategories = async (req, res) => {
       let cacheCategoryData;
       const dataLength = cachedData.length;
 
-      console.log("page and size", page, size);
       if (page && size) {
         const startIndex = (page - 1) * size;
         const endIndex = startIndex + size;
         cacheCategoryData = cachedData.category.slice(startIndex, endIndex);
       }
 
-      console.log("cacheCategoryData", cacheCategoryData);
       return res.status(200).json({
         success: true,
         category: cacheCategoryData,

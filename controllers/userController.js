@@ -3,11 +3,12 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const mg = require("nodemailer-mailgun-transport");
 const UserModel = require("../models/userModel");
+const UserCoin = require("../models/userCoinModel");
 const { capitalizeAfterSpace } = require("../helper/capitalize");
 
-const createToken = (_id) => {
+const createToken = (id) => {
   const jwtkey = process.env.JWT_SECRET_KEY;
-  return jwt.sign({ _id }, jwtkey, { expiresIn: "3d" });
+  return jwt.sign({ id }, jwtkey, { expiresIn: "3d" });
 };
 
 const auth = {
@@ -91,7 +92,6 @@ const signup = async (req, res) => {
       message: "Check your email for verification!",
     });
   } catch (err) {
-    console.log("Err to register user: ", err.message);
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later!",
@@ -112,16 +112,18 @@ const verifyEmail = async (req, res) => {
     );
 
     if (!user) {
-      return res.status(404).json({ success: true, message: "Invalid token!" });
+      return res.status(404).json({ status: false, message: "Invalid token!" });
     }
 
     return res.status(200).json({
-      success: true,
+      status: true,
       message: "Email verification done successfully!!",
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res
+      .status(500)
+      .json({ status: false, message: "Server error", error: err.message });
   }
 };
 
@@ -136,12 +138,15 @@ const signin = async (req, res) => {
 
     let user = await UserModel.findOne({ email });
 
-    if (!user) return res.status(400).json("Invalid email or password!");
+    if (!user)
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid email or password!" });
 
     if (!user.confirmEmail)
       return res
         .status(400)
-        .json({ success: false, message: "Email verification not confirm!" });
+        .json({ status: false, message: "Email verification not confirm!" });
 
     const isValidPassword = await bcrypt.compare(password, user.password);
 
@@ -161,10 +166,10 @@ const signin = async (req, res) => {
       email,
     });
   } catch (err) {
-    console.log("err", err);
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later!",
+      error: err.message,
     });
   }
 };
@@ -177,10 +182,10 @@ const getUsers = async (req, res) => {
       .status(200)
       .json({ status: true, message: "Fetch all users", data: users });
   } catch (err) {
-    console.log("err", err);
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later!",
+      error: err.message,
     });
   }
 };
@@ -205,6 +210,7 @@ const findUser = async (req, res) => {
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later!",
+      error: err.message,
     });
   }
 };
@@ -212,7 +218,6 @@ const findUser = async (req, res) => {
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
-  console.log("email", email);
   try {
     const verificationToken = jwt.sign(
       { email: email },
@@ -243,12 +248,15 @@ const forgotPassword = async (req, res) => {
     );
 
     return res.status(200).json({
-      success: true,
+      status: true,
       message: "Check your email for reset password link!",
     });
   } catch (err) {
-    console.log("ERROR::", err.message);
-    return res.status(500).json("Something went wrong!");
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong!",
+      error: err.message,
+    });
   }
 };
 
@@ -258,10 +266,14 @@ const resetPassword = async (req, res) => {
 
   try {
     if (!password || !confirmPassword)
-      return res.status(400).json("All fields required!");
+      return res
+        .status(400)
+        .json({ status: false, message: "All fields required!" });
 
     if (password !== confirmPassword)
-      return res.status(400).json("Confirm password not match!");
+      return res
+        .status(400)
+        .json({ status: false, message: "Confirm password not match!" });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
@@ -274,14 +286,51 @@ const resetPassword = async (req, res) => {
     );
 
     if (!user) {
-      return res.status(404).json("Invalid token!");
+      return res.status(404).json({ status: false, message: "Invalid token!" });
     }
 
     return res
       .status(200)
-      .json({ success: true, message: "Password reset successfully!" });
+      .json({ status: true, message: "Password reset successfully!" });
   } catch (err) {
-    return res.status(500).json("Something went wrong, try again later!");
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again later!",
+      error: err.message,
+    });
+  }
+};
+
+const addUserFavCoin = async (req, res) => {
+  const { coinId } = req.params;
+  const userId = req.userId;
+
+  try {
+    let userCoin = await UserCoin.findOne({ userId });
+
+    if (!userCoin) {
+      userCoin = new UserCoin({ userId });
+      userCoin.favCoin.push(coinId);
+    } else {
+      const index = userCoin.favCoin.indexOf(coinId);
+      if (index === -1) {
+        userCoin.favCoin.push(coinId);
+      } else {
+        userCoin.favCoin.splice(index, 1);
+      }
+    }
+
+    userCoin = await userCoin.save();
+
+    return res
+      .status(200)
+      .json({ status: true, message: "Coin updated in the favorite!" });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong in adding coin to favorite!",
+      error: err.message,
+    });
   }
 };
 
@@ -293,4 +342,5 @@ module.exports = {
   verifyEmail,
   forgotPassword,
   resetPassword,
+  addUserFavCoin,
 };

@@ -10,8 +10,9 @@ const {
   getTrends,
   getBlog,
 } = require("../controllers/tokenController");
+const { nonAuthMiddleware } = require("../middlewares/authMiddleware");
 
-router.get("/", getAllToken);
+router.get("/", nonAuthMiddleware, getAllToken);
 router.get("/rwa/categories", getCategories);
 router.get("/rwa/coin/:coinId", getCoinDetail);
 router.get("/rwa/highlight", getHighLightData);

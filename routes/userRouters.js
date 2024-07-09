@@ -8,7 +8,9 @@ const {
   verifyEmail,
   forgotPassword,
   resetPassword,
+  addUserFavCoin,
 } = require("../controllers/userController");
+const { authMiddleware } = require("../middlewares/authMiddleware");
 
 router.post("/signup", signup);
 router.post("/signin", signin);
@@ -17,5 +19,6 @@ router.get("/:userId", findUser);
 router.get("/", getUsers);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+router.get("/fav/coin/:coinId", authMiddleware, addUserFavCoin);
 
 module.exports = router;

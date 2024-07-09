@@ -6,7 +6,7 @@ const authMiddleware = (req, res, next) => {
     if (token) {
       token = token.split(" ")[1];
 
-      let user = jwt.verify(token, process.env.SECRET_KEY);
+      let user = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
       req.userId = user.id;
     } else {
@@ -15,14 +15,25 @@ const authMiddleware = (req, res, next) => {
     next();
   } catch (err) {
     console.log(err);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Something went wrong!",
-        error: err.message,
-      });
+    return res.status(500).json(err.message);
   }
 };
 
-module.exports = authMiddleware;
+const nonAuthMiddleware = (req, res, next) => {
+  try {
+    let token = req.headers?.authorization;
+    if (token) {
+      token = token.split(" ")[1];
+
+      let user = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+      req.userId = user.id;
+    }
+    next();
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json(err.message);
+  }
+};
+
+module.exports = { authMiddleware, nonAuthMiddleware };
