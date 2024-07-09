@@ -9,6 +9,7 @@ const {
   getCoinGraphData,
   getTrends,
   getBlog,
+  getNews,
 } = require("../controllers/tokenController");
 const { nonAuthMiddleware } = require("../middlewares/authMiddleware");
 
@@ -19,5 +20,6 @@ router.get("/rwa/highlight", getHighLightData);
 router.get("/rwa/graph/coinOHLC/:coinId", getCoinGraphData);
 router.get("/rwa/trend", getTrends);
 router.get("/rwa/blog", getBlog);
+router.get("/rwa/news", getNews);
 
 module.exports = router;

@@ -10,12 +10,12 @@ const authMiddleware = (req, res, next) => {
 
       req.userId = user.id;
     } else {
-      return res.status(400).json(errorMsg.EBO_009);
+      return res.status(400).json({ status: false, message: "Invalid token!" });
     }
     next();
   } catch (err) {
     console.log(err);
-    return res.status(500).json(err.message);
+    return res.status(500).json({ status: false, message: err.message });
   }
 };
 

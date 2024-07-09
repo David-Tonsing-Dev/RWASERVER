@@ -3,6 +3,7 @@ const NodeCache = require("node-cache");
 const cache = new NodeCache({ stdTTL: 60 });
 
 const blog = require("../constant/blog.json");
+const news = require("../constant/news.json");
 const UserCoin = require("../models/userCoinModel");
 
 const apiRWACoins =
@@ -329,6 +330,22 @@ const getBlog = async (req, res) => {
   }
 };
 
+const getNews = async (req, res) => {
+  try {
+    if (!news)
+      return res
+        .status(400)
+        .json({ status: false, message: "Could not retrieve news!" });
+    return res.status(200).json({ status: true, news: news.news });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong!",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   getAllToken,
   getCategories,
@@ -337,4 +354,5 @@ module.exports = {
   getCoinGraphData,
   getTrends,
   getBlog,
+  getNews,
 };
