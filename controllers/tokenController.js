@@ -346,6 +346,27 @@ const getNews = async (req, res) => {
   }
 };
 
+const getNewsDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!news)
+      return res
+        .status(400)
+        .json({ status: false, message: "Could not retrieve news!" });
+
+    const newsObj = news.news.filter((item) => item.id === id);
+
+    return res.status(200).json({ status: true, news: newsObj[0] });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong!",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   getAllToken,
   getCategories,
@@ -355,4 +376,5 @@ module.exports = {
   getTrends,
   getBlog,
   getNews,
+  getNewsDetails,
 };

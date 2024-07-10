@@ -1,6 +1,7 @@
 {
   "news": [
     {
+      "id": "1",
       "title": "Investment Opportunities in Luxury Assets",
       "date": "2024-07-06",
       "content": "Business professionals are exploring new investment opportunities in luxury assets such as fine art, luxury cars, and real estate properties. The market trends indicate a growing interest in these high-value investments.",
@@ -10,6 +11,7 @@
       }
     },
     {
+      "id": "2",
       "title": "Silver Investment Prospects",
       "date": "2024-07-06",
       "content": "Investors are turning their attention to silver as a stable and valuable real-world asset. Market analyses show promising trends for silver investments in the coming years.",
@@ -19,6 +21,7 @@
       }
     },
     {
+      "id": "3",
       "title": "Gold as a Secure Investment",
       "date": "2024-07-06",
       "content": "Gold continues to be a secure and reliable investment option. Experts discuss the stability and potential of gold investments in today's market.",
@@ -28,6 +31,7 @@
       }
     },
     {
+      "id": "4",
       "title": "Rare Metals Gaining Attention",
       "date": "2024-07-06",
       "content": "Investment opportunities in rare metals like platinum, palladium, and rhodium are on the rise. These metals offer significant potential due to their unique properties and market demand.",
@@ -37,6 +41,7 @@
       }
     },
     {
+      "id": "5",
       "title": "Real Estate Investment Growth",
       "date": "2024-07-06",
       "content": "Real estate continues to be a strong and growing sector for investment. Experts highlight the benefits and potential returns of investing in high-end properties.",
@@ -46,6 +51,7 @@
       }
     },
     {
+      "id": "6",
       "title": "Agricultural Investments on the Rise",
       "date": "2024-07-06",
       "content": "The agriculture sector presents new investment opportunities with its steady growth and essential role in the global economy. Investors are looking at farmland and crop yields as valuable assets.",
@@ -55,6 +61,7 @@
       }
     },
     {
+      "id": "7",
       "title": "The Value of Precious Metals",
       "date": "2024-07-06",
       "content": "Precious metals such as gold, silver, and platinum remain valuable and stable investment options. Market analyses show their continued potential as real-world assets.",
