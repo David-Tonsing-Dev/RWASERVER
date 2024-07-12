@@ -11,7 +11,10 @@ const getPortfolioToken = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const getAllToken = await PortfolioToken.find({ userId });
+    const getAllToken = await PortfolioToken.find({
+      userId,
+      deleted: { $ne: true },
+    });
 
     if (getAllToken.length <= 0)
       return res
