@@ -308,6 +308,11 @@ const addUserFavCoin = async (req, res) => {
   try {
     let userCoin = await UserCoin.findOne({ userId });
 
+    if (!userId)
+      return res
+        .status(400)
+        .json({ status: false, message: "User must signin!" });
+
     if (!userCoin) {
       userCoin = new UserCoin({ userId });
       userCoin.favCoin.push(coinId);

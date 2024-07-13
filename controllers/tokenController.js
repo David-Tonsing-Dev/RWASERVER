@@ -25,7 +25,7 @@ const getAllToken = async (req, res) => {
     const cachedData = cache.get(cacheKey);
 
     if (cachedData) {
-      console.log("Fetching list of coin data from cache");
+      console.log("Fetching list of coin data from cache currencies");
       let data = cachedData.data;
 
       if (category) {
@@ -64,6 +64,8 @@ const getAllToken = async (req, res) => {
         total: dataLength,
       });
     }
+
+    console.log("Not fetching from cache currencies");
 
     const response = await axios.get(apiRWACoins, {
       headers: {
@@ -143,6 +145,8 @@ const getCategories = async (req, res) => {
         .status(200)
         .json({ status: true, category: data, total: dataLength });
     }
+
+    console.log("Not fetching from cache");
 
     const resp = await axios.get(apiRWACategory, {
       headers: {

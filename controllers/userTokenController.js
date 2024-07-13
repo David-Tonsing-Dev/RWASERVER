@@ -177,6 +177,16 @@ const checkPortfolio = async (req, res) => {
     const { id } = req.params;
     const userId = req.userId;
 
+    if (!amount || !quantity)
+      return res
+        .status(400)
+        .json({ status: false, message: "Amount or quantity is missing!" });
+
+    if (!id)
+      return res
+        .status(400)
+        .json({ status: false, message: "id cannot be undefined, check url!" });
+
     let getAllToken = await PortfolioToken.findOneAndUpdate(
       { userId, tokenId: id },
       { amount, quantity },
@@ -227,6 +237,11 @@ const addTokenPortfolio = async (req, res) => {
     const { id } = req.params;
     const userId = req.userId;
 
+    if (!id)
+      return res.status(400).json({
+        status: 400,
+        message: "Getting undefined token id, please check url!",
+      });
     const checkTokenId = await PortfolioToken.findOneAndUpdate(
       { userId, tokenId: id, deleted: false },
       { deleted: true },
