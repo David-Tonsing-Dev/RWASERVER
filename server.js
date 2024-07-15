@@ -24,7 +24,7 @@ app.use("/api/mobile/currencies", rwaMobileRouter);
 app.use("/api/lecture", lectureRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
-  app.listen(PORT, "192.168.1.22", async () => {
+  app.listen(PORT, async () => {
     console.log(`Listening on port ${PORT}`);
     console.log("Database connection established");
   });
