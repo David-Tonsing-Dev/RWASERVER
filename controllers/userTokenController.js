@@ -14,7 +14,7 @@ const getPortfolioToken = async (req, res) => {
     const getAllToken = await PortfolioToken.find({
       userId,
       deleted: { $ne: true },
-    });
+    }).sort({ createdAt: -1 });
 
     if (getAllToken.length <= 0)
       return res
@@ -189,7 +189,7 @@ const checkPortfolio = async (req, res) => {
 
     let getAllToken = await PortfolioToken.findOneAndUpdate(
       { userId, tokenId: id },
-      { amount, quantity },
+      { amount, quantity, deleted: false },
       { new: true }
     );
 
@@ -199,6 +199,7 @@ const checkPortfolio = async (req, res) => {
         userId,
         amount,
         quantity,
+        deleted: false,
       });
       await getAllToken.save();
     }
@@ -284,9 +285,43 @@ const addTokenPortfolio = async (req, res) => {
   }
 };
 
+const removeTokenPortfolio = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    if (!id || id === "undefined")
+      return res.status(400).json({
+        status: 400,
+        message: "Getting undefined token id, please check url!",
+      });
+    const checkTokenId = await PortfolioToken.findOneAndUpdate(
+      { userId, tokenId: id, deleted: false },
+      { deleted: true },
+      { new: true }
+    );
+
+    if (!checkTokenId)
+      return res
+        .status(400)
+        .json({ status: 200, message: "Portfolio doesn't exist!" });
+
+    return res
+      .status(200)
+      .json({ status: 200, message: "Token removed from portfolio!" });
+  } catch (err) {
+    return res.status(500).json({
+      status: 500,
+      message: "Something went wrong!",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   addNewToken,
   checkPortfolio,
   getPortfolioToken,
   addTokenPortfolio,
+  removeTokenPortfolio,
 };

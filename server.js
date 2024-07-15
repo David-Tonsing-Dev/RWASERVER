@@ -10,6 +10,7 @@ const userRouter = require("./routes/userRouters");
 const userTokenRouter = require("./routes/userTokenRouters");
 const rwaRouter = require("./routes/rwaTokenRouters");
 const rwaMobileRouter = require("./routes/rwaMobileRouters");
+const lectureRouter = require("./routes/lectureRouters");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,9 +21,10 @@ app.use("/api/users", userRouter);
 app.use("/api/user/token", userTokenRouter);
 app.use("/api/currencies", rwaRouter);
 app.use("/api/mobile/currencies", rwaMobileRouter);
+app.use("/api/lecture", lectureRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
-  app.listen(PORT, async () => {
+  app.listen(PORT, "192.168.1.22", async () => {
     console.log(`Listening on port ${PORT}`);
     console.log("Database connection established");
   });

@@ -10,12 +10,18 @@ const authMiddleware = (req, res, next) => {
 
       req.userId = user.id;
     } else {
-      return res.status(400).json({ status: false, message: "Invalid token!" });
+      return res
+        .status(400)
+        .json({ status: false, message: "Access token not found!" });
     }
     next();
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ status: false, message: err.message });
+    return res.status(500).json({
+      status: false,
+      message: "Token expired, logout and login again!",
+      error: err.message,
+    });
   }
 };
 
