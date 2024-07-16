@@ -268,7 +268,7 @@ const addTokenPortfolio = async (req, res) => {
       });
     const checkTokenId = await PortfolioToken.findOneAndUpdate(
       { userId, tokenId: id, deleted: false },
-      { deleted: true },
+      { deleted: true, amount: 0, perUnit: 0, quantity: 0 },
       { new: true }
     );
 
@@ -320,7 +320,7 @@ const removeTokenPortfolio = async (req, res) => {
       });
     const checkTokenId = await PortfolioToken.findOneAndUpdate(
       { userId, tokenId: id, deleted: false },
-      { deleted: true },
+      { deleted: true, amount: 0, perUnit: 0, quantity: 0 },
       { new: true }
     );
 
