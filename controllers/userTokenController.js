@@ -7,6 +7,9 @@ const { singleTokenPortfolioCal } = require("../helper/portfolioTokenReturn");
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&sparkline=true&price_change_percentage=1h,7d";
 
+const apiCondoMarketData =
+  "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=condo&sparkline=true&price_change_percentage=1h,7d";
+
 const getPortfolioToken = async (req, res) => {
   try {
     const userId = req.userId;
@@ -27,8 +30,18 @@ const getPortfolioToken = async (req, res) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-
     const allToken = await allTokenResp.data;
+
+    const responseCondo = await axios.get(apiCondoMarketData, {
+      headers: {
+        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    const condoResp = await responseCondo.data;
+
+    const mergedAllToken = [...allToken, ...condoResp];
 
     let tokenPortfolioResult = getAllToken
       .filter((item) => item.tokenId !== "undefined")
@@ -37,7 +50,7 @@ const getPortfolioToken = async (req, res) => {
           item.tokenId,
           item.amount,
           item.quantity,
-          allToken
+          mergedAllToken
         )
       );
 
@@ -210,14 +223,24 @@ const checkPortfolio = async (req, res) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-
     const allToken = await allTokenResp.data;
+
+    const responseCondo = await axios.get(apiCondoMarketData, {
+      headers: {
+        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    const condoRes = await responseCondo.data;
+
+    const mergedAllToken = [...allToken, ...condoRes];
 
     let tokenPortfolioResult = singleTokenPortfolioCal(
       getAllToken.tokenId,
       getAllToken.amount,
       getAllToken.quantity,
-      allToken
+      mergedAllToken
     );
 
     return res.status(200).json({
