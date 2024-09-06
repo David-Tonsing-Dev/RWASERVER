@@ -381,6 +381,8 @@ const getNews = async (req, res) => {
       return res
         .status(400)
         .json({ status: false, message: "Could not retrieve news!" });
+
+    news.news.sort((a, b) => new Date(b["date"]) - new Date(a["date"]));
     return res.status(200).json({ status: true, news: news.news });
   } catch (err) {
     return res.status(500).json({
