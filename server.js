@@ -23,6 +23,8 @@ app.use("/api/currencies", rwaRouter);
 app.use("/api/mobile/currencies", rwaMobileRouter);
 app.use("/api/lecture", lectureRouter);
 
+// app.use("/admin/api/currencies", );
+
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   app.listen(PORT, async () => {
     console.log(`Listening on port ${PORT}`);
