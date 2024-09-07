@@ -8,7 +8,7 @@ const { capitalizeAfterSpace } = require("../helper/capitalize");
 
 const createToken = (id) => {
   const jwtkey = process.env.JWT_SECRET_KEY;
-  return jwt.sign({ id }, jwtkey, { expiresIn: "3d" });
+  return jwt.sign({ id }, jwtkey);
 };
 
 const auth = {
@@ -35,10 +35,10 @@ const signup = async (req, res) => {
 
     const checkEmail = await UserModel.findOne({ email });
 
-    // if (checkEmail)
-    //   return res
-    //     .status(400)
-    //     .json({ status: false, message: "Email already exist!" });
+    if (checkEmail)
+      return res
+        .status(400)
+        .json({ status: false, message: "Email already exist!" });
 
     userName = capitalizeAfterSpace(userName);
 
@@ -50,8 +50,7 @@ const signup = async (req, res) => {
 
     const verificationToken = jwt.sign(
       { email: email },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "1d" }
+      process.env.JWT_SECRET_KEY
     );
 
     const verificationLink = `${process.env.CLIENT_URL}/verify/${verificationToken}`;
