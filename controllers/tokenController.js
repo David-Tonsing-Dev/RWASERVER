@@ -8,7 +8,7 @@ const UserCoin = require("../models/userCoinModel");
 const { trendingCoin } = require("../helper/trendingCoin");
 
 const apiRWACoins =
-  "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&sparkline=true&price_change_percentage=1h,7d";
+  "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&per_page=250&sparkline=true&price_change_percentage=1h,7d";
 const apiCondoMarketData =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=condo&sparkline=true&price_change_percentage=1h,7d";
 
@@ -18,7 +18,7 @@ const apiRWACategory =
 const apiHighLight = "https://pro-api.coingecko.com/api/v3/coins/categories";
 
 const getAllToken = async (req, res) => {
-  let { category, page = 1, size = 10 } = req.query;
+  let { category, page = 1, size = 10, sortDirection, sortBy } = req.query;
   const userId = req.userId;
   page = parseInt(page);
   size = parseInt(size);
@@ -27,7 +27,7 @@ const getAllToken = async (req, res) => {
     const cacheKey = `allTokenData_${category || "all"}`;
     const cachedData = cache.get(cacheKey);
 
-    if (cachedData) {
+    if (cachedData && sortDirection === "" && sortBy === "") {
       console.log("Fetching list of coin data from cache currencies");
       let data = cachedData.data;
 
@@ -113,6 +113,30 @@ const getAllToken = async (req, res) => {
         if (!a.favCoin && b.favCoin) return 1;
         return a.rank - b.rank;
       });
+
+    if (sortDirection || sortDirection !== "" || sortBy || sortBy !== "") {
+      if (sortDirection === "asc") {
+        if (sortBy === "name") {
+          paginatedData.sort((a, b) =>
+            a[sortBy].localeCompare(b[sortBy], undefined, {
+              sensitivity: "base",
+            })
+          );
+        } else {
+          paginatedData.sort((a, b) => a[sortBy] - b[sortBy]);
+        }
+      } else if (sortDirection === "desc") {
+        if (sortBy === "name") {
+          paginatedData.sort((a, b) =>
+            b[sortBy].localeCompare(a[sortBy], undefined, {
+              sensitivity: "base",
+            })
+          );
+        } else {
+          paginatedData.sort((a, b) => b[sortBy] - a[sortBy]);
+        }
+      }
+    }
 
     const startIndex = (page - 1) * size;
     const paginatedDataSubset = paginatedData.slice(
