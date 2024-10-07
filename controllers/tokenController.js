@@ -88,6 +88,13 @@ const getAllToken = async (req, res) => {
 
     data = [...response.data, ...responseCondo.data];
 
+    data.sort((a, b) => {
+      if (a.market_cap_rank === null && b.market_cap_rank === null) return 0;
+      if (a.market_cap_rank === null) return 1;
+      if (b.market_cap_rank === null) return -1;
+      return a.market_cap_rank - b.market_cap_rank;
+    });
+
     if (category) {
       data = data.filter(
         (item) =>
