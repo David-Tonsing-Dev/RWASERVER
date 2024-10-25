@@ -12,6 +12,10 @@ const rwaRouter = require("./routes/rwaTokenRouters");
 const rwaMobileRouter = require("./routes/rwaMobileRouters");
 const lectureRouter = require("./routes/lectureRouters");
 
+const adminUserRouter = require("./admin/routes/userRouters");
+const adminNewsRouter = require("./admin/routes/newsRouters");
+const adminBlogRouter = require("./admin/routes/blogRouters");
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
@@ -22,6 +26,10 @@ app.use("/api/user/token", userTokenRouter);
 app.use("/api/currencies", rwaRouter);
 app.use("/api/mobile/currencies", rwaMobileRouter);
 app.use("/api/lecture", lectureRouter);
+
+app.use("/api/admin/users", adminUserRouter);
+app.use("/api/admin/news", adminNewsRouter);
+app.use("/api/admin/blog", adminBlogRouter);
 
 // app.use("/admin/api/currencies", );
 
