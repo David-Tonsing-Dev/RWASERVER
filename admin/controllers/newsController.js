@@ -1,19 +1,20 @@
 const News = require("../models/newsModel");
 const { capitalizeAfterSpace } = require("../../helper/capitalize");
+const cloudinary = require("../../config/cloudinary");
 
 const addNews = async (req, res) => {
   try {
     const {
       title,
       subTitle,
-      thumbnail,
+      // thumbnail,
       author = "admin",
       content,
       tags = [],
       slug,
     } = req.body;
 
-    if (!title || !thumbnail || !content || !slug || !subTitle)
+    if (!title || !req.file || !content || !slug || !subTitle)
       return res
         .status(400)
         .json({ status: false, message: "All field are required" });
@@ -25,12 +26,22 @@ const addNews = async (req, res) => {
         .status(400)
         .json({ status: false, message: "Slug must be unique" });
 
+    const uploadImg = await cloudinary.uploader.upload(req.file.path, {
+      use_filename: true,
+      folder: "rwa/news",
+    });
+
+    if (!uploadImg)
+      return res
+        .status(500)
+        .json({ status: false, message: "Erro in uploading image" });
+
     const capitalizeAuthor = capitalizeAfterSpace(author);
 
     const addNew = new News({
       title,
       subTitle,
-      thumbnail,
+      thumbnail: uploadImg.secure_url,
       author: capitalizeAuthor,
       content,
       publishDate: new Date(),
@@ -128,6 +139,24 @@ const updateNews = async (req, res) => {
     if (updatedNews.author) {
       const capitalizeAuthor = capitalizeAfterSpace(updatedNews.author);
       updatedNews = { ...updatedNews, author: capitalizeAuthor };
+    }
+
+    if (req.file) {
+      await cloudinary.uploader.upload(
+        req.file.path,
+        {
+          use_filename: true,
+          folder: "rwa/news",
+        },
+        (err, result) => {
+          if (err)
+            return res
+              .status(500)
+              .json({ status: false, message: "Error in updating image" });
+
+          updatedNews = { ...updatedNews, thumbnail: result.secure_url };
+        }
+      );
     }
 
     const updateNews = await News.findOneAndUpdate({ slug }, updatedNews, {

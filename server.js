@@ -34,7 +34,7 @@ app.use("/api/admin/blog", adminBlogRouter);
 // app.use("/admin/api/currencies", );
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
-  app.listen(PORT, async () => {
+  app.listen(PORT, "192.168.31.16", async () => {
     console.log(`Listening on port ${PORT}`);
     console.log("Database connection established");
   });

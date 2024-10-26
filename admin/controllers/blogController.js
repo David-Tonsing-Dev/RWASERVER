@@ -1,5 +1,6 @@
 const Blog = require("../models/blogModel");
 const { capitalizeAfterSpace } = require("../../helper/capitalize");
+const cloudinary = require("../../config/cloudinary");
 
 const getBlogs = async (req, res) => {
   try {
@@ -51,11 +52,11 @@ const getBlogs = async (req, res) => {
 
 const addBlogs = async (req, res) => {
   try {
-    const {
+    let {
       slug,
       title,
       subTitle,
-      thumbnail,
+      // thumbnail,
       author = "admin",
       category,
       sections,
@@ -63,7 +64,10 @@ const addBlogs = async (req, res) => {
       conclusion,
     } = req.body;
 
-    if (!slug || !title || !subTitle || !thumbnail || !category)
+    sections = JSON.parse(sections);
+    blockQuote = JSON.parse(blockQuote);
+
+    if (!slug || !title || !subTitle || !req.file || !category)
       return res
         .status(400)
         .json({ status: false, message: "Fill up all the important field" });
@@ -77,6 +81,16 @@ const addBlogs = async (req, res) => {
 
     const capitalizeAuthor = capitalizeAfterSpace(author);
 
+    const uploadImg = await cloudinary.uploader.upload(req.file.path, {
+      use_filename: true,
+      folder: "rwa/blog",
+    });
+
+    if (!uploadImg)
+      return res
+        .status(500)
+        .json({ status: false, message: "Error in uploading image" });
+
     const { cite, text } = blockQuote;
 
     const capitalizeCite = capitalizeAfterSpace(cite);
@@ -85,7 +99,7 @@ const addBlogs = async (req, res) => {
       slug,
       title,
       subTitle,
-      thumbnail,
+      thumbnail: uploadImg.secure_url,
       author: capitalizeAuthor,
       category,
       publishDate: new Date(),
@@ -114,7 +128,10 @@ const addBlogs = async (req, res) => {
 const updateBlogs = async (req, res) => {
   const { slug } = req.params;
 
-  const { author, blockQuote } = req.body;
+  let { author, blockQuote, sections } = req.body;
+
+  sections = JSON.parse(sections);
+  blockQuote = JSON.parse(blockQuote);
 
   let updateBlog = JSON.parse(JSON.stringify(req.body));
 
@@ -133,6 +150,24 @@ const updateBlogs = async (req, res) => {
         cite: capitalizeCite,
       },
     };
+  }
+
+  if (req.file) {
+    await cloudinary.uploader.upload(
+      req.file.path,
+      {
+        use_filename: true,
+        folder: "rwa/blog",
+      },
+      (err, result) => {
+        if (err)
+          return res
+            .status(500)
+            .json({ status: false, message: "Error in updating image" });
+
+        updateBlog = { ...updateBlog, thumbnail: result.secure_url };
+      }
+    );
   }
 
   const updateBlogs = await Blog.findOneAndUpdate({ slug }, updateBlog, {
