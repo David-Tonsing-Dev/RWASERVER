@@ -1,6 +1,7 @@
 const axios = require("axios");
 const Token = require("../models/newTokenModel");
 const PortfolioToken = require("../models/userTokenPorfolio");
+const cloudinary = require("../config/cloudinary");
 
 const { singleTokenPortfolioCal } = require("../helper/portfolioTokenReturn");
 
@@ -114,7 +115,6 @@ const addNewToken = async (req, res) => {
       explorerLink3,
       exchangeTradeUrl,
     } = req.body;
-    const tokenImage = req.file;
 
     if (
       !nameToken ||
@@ -122,7 +122,7 @@ const addNewToken = async (req, res) => {
       !rwaCategory ||
       !website ||
       !submitter ||
-      !tokenImage
+      !req.file
     )
       return res
         .status(400)
@@ -131,6 +131,16 @@ const addNewToken = async (req, res) => {
     const userId = req.userId;
 
     rwaCategory = rwaCategory.split(",");
+
+    const tokenImage = await cloudinary.uploader.upload("tokenImage", {
+      use_filename: true,
+      folder: "rwa/user/token",
+    });
+
+    if (!tokenImage)
+      return res
+        .status(500)
+        .json({ status: false, message: "Error in uploading image" });
 
     const newTokenObj = {
       userId,
@@ -160,7 +170,7 @@ const addNewToken = async (req, res) => {
       },
       explorerLink: [explorerLink1, explorerLink2, explorerLink3],
       exchangeTradeUrl: [exchangeTradeUrl],
-      tokenImage: tokenImage.filename,
+      tokenImage: tokenImage.secure_url,
       listingTerm: listingTerm === "true" ? true : false,
       supportTerm,
     };
