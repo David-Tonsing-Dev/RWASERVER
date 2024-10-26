@@ -133,7 +133,11 @@ const updateBlogs = async (req, res) => {
   sections = JSON.parse(sections);
   blockQuote = JSON.parse(blockQuote);
 
-  let updateBlog = JSON.parse(JSON.stringify(req.body));
+  let updateBlog = {
+    author: JSON.parse(JSON.stringify(author)),
+    sections,
+    blockQuote,
+  };
 
   if (author) {
     const capitalizeAuthor = capitalizeAfterSpace(author);
