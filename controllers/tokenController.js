@@ -5,6 +5,8 @@ const cache = new NodeCache({ stdTTL: 60 });
 const blog = require("../constant/blog.json");
 const news = require("../constant/news.json");
 const UserCoin = require("../models/userCoinModel");
+const News = require("../admin/models/newsModel");
+const Blog = require("../admin/models/blogModel");
 const { trendingCoin } = require("../helper/trendingCoin");
 
 const apiRWACoins =
@@ -389,14 +391,51 @@ const getTrends = async (req, res) => {
 
 const getBlog = async (req, res) => {
   try {
-    if (!blog)
-      return res
-        .status(400)
-        .json({ status: false, message: "Could not retrieve blog!" });
+    let { page = 1, size = 10, filter } = req.query;
+    page = parseInt(page);
+    size = parseInt(size);
 
-    blog.sort((a, b) => new Date(b["date"]) - new Date(a["date"]));
+    if (!filter || filter === "") {
+      const getBlog = await Blog.find()
+        .skip((page - 1) * size)
+        .limit(size)
+        .sort({ publishDate: -1 });
 
-    return res.status(200).json({ status: true, blog });
+      if (!getBlog || getBlog.length <= 0)
+        return res
+          .status(200)
+          .json({ status: false, message: "No blog found" });
+
+      const total = await Blog.countDocuments();
+
+      return res.status(200).json({ status: true, blog: getBlog, total });
+    }
+
+    const getBlog = await Blog.find({
+      $or: [
+        { title: { $regex: filter, $options: "i" } },
+        { subTitle: { $regex: filter, $options: "i" } },
+        { category: { $regex: filter, $options: "i" } },
+        { author: { $regex: filter, $options: "i" } },
+      ],
+    })
+      .skip((page - 1) * size)
+      .limit(size)
+      .sort({ publishDate: -1 });
+
+    if (!getBlog || getBlog.length <= 0)
+      return res.status(200).json({ status: false, message: "No blog found" });
+
+    const total = await Blog.countDocuments({
+      $or: [
+        { title: { $regex: filter, $options: "i" } },
+        { subTitle: { $regex: filter, $options: "i" } },
+        { category: { $regex: filter, $options: "i" } },
+        { author: { $regex: filter, $options: "i" } },
+      ],
+    });
+
+    return res.status(200).json({ status: true, blog: getBlog, total });
   } catch (err) {
     return res.status(500).json({
       status: false,
@@ -408,13 +447,49 @@ const getBlog = async (req, res) => {
 
 const getNews = async (req, res) => {
   try {
-    if (!news)
-      return res
-        .status(400)
-        .json({ status: false, message: "Could not retrieve news!" });
+    let { page = 1, size = 10, filter } = req.query;
+    page = parseInt(page);
+    size = parseInt(size);
 
-    news.news.sort((a, b) => new Date(b["date"]) - new Date(a["date"]));
-    return res.status(200).json({ status: true, news: news.news });
+    if (!filter || filter === "") {
+      const getNews = await News.find()
+        .skip((page - 1) * size)
+        .limit(size)
+        .sort({ publishDate: -1 });
+
+      if (!getNews || getNews.length <= 0)
+        return res
+          .status(200)
+          .json({ status: false, message: "No news found" });
+
+      const total = await News.countDocuments();
+
+      return res.status(200).json({ status: true, news: getNews, total });
+    }
+
+    const getNews = await News.find({
+      $or: [
+        { title: { $regex: filter, options: "i" } },
+        { subTitle: { $regex: filter, options: "i" } },
+        { author: { $regex: filter, options: "i" } },
+      ],
+    })
+      .skip((page - 1) * size)
+      .limit(size)
+      .sort({ publishDate: -1 });
+
+    if (!getNews || getNews.length <= 0)
+      return res.status(200).json({ status: false, message: "No news found" });
+
+    const total = await News.countDocuments({
+      $or: [
+        { title: { $regex: filter, options: "i" } },
+        { subTitle: { $regex: filter, options: "i" } },
+        { author: { $regex: filter, options: "i" } },
+      ],
+    });
+
+    return res.status(200).json({ status: true, news: getNews, total });
   } catch (err) {
     return res.status(500).json({
       status: false,
@@ -428,19 +503,14 @@ const getNewsDetail = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!news)
-      return res
-        .status(400)
-        .json({ status: false, message: "Could not retrieve news!" });
+    const newsObj = await News.findOne({ _id: id });
 
-    const newsObj = news.news.filter((item) => item.id === id);
-
-    if (newsObj.length <= 0)
+    if (!newsObj)
       return res
         .status(400)
         .json({ status: false, message: "News doesn't exist!" });
 
-    return res.status(200).json({ status: true, news: newsObj[0] });
+    return res.status(200).json({ status: true, news: newsObj });
   } catch (err) {
     return res.status(500).json({
       status: false,
@@ -450,23 +520,18 @@ const getNewsDetail = async (req, res) => {
   }
 };
 
-const getBlogDetail = () => {
+const getBlogDetail = async () => {
   try {
     const { id } = req.params;
 
-    if (!blog)
-      return res
-        .status(400)
-        .json({ status: false, message: "Could not retrieve blog!" });
+    const getBlog = await Blog.findOne({ _id: id });
 
-    const getBlog = blog.filter((item) => item.id === id);
-
-    if (getBlog.length <= 0)
+    if (!getBlog)
       return res
         .status(400)
         .json({ status: false, message: "Blog doesn't exist!" });
 
-    return res.status(200).json({ status: true, blog: getBlog[0] });
+    return res.status(200).json({ status: true, blog: getBlog });
   } catch (err) {
     res.status(500).json({
       status: false,

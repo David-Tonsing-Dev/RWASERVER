@@ -126,7 +126,7 @@ const addBlogs = async (req, res) => {
 };
 
 const updateBlogs = async (req, res) => {
-  const { slug } = req.params;
+  const { id } = req.params;
 
   let { author, blockQuote, sections } = req.body;
 
@@ -174,7 +174,7 @@ const updateBlogs = async (req, res) => {
     );
   }
 
-  const updateBlogs = await Blog.findOneAndUpdate({ slug }, updateBlog, {
+  const updateBlogs = await Blog.findOneAndUpdate({ _id: id }, updateBlog, {
     new: true,
   });
 
@@ -187,9 +187,9 @@ const updateBlogs = async (req, res) => {
 };
 
 const deleteBlogs = async (req, res) => {
-  const { slug } = req.params;
+  const { id } = req.params;
 
-  const deleteBlogs = await Blog.findOneAndDelete({ slug });
+  const deleteBlogs = await Blog.findOneAndDelete({ _id: id });
 
   if (!deleteBlogs)
     return res.status(400).json({ status: false, message: "Blog not found" });

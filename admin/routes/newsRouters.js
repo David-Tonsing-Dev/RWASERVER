@@ -8,10 +8,16 @@ const {
   deleteNews,
   updateNews,
 } = require("../controllers/newsController");
+const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 
-router.get("/", getNews);
-router.post("/add", upload.single("thumbnail"), addNews);
-router.delete("/delete/:slug", deleteNews);
-router.patch("/update/:slug", upload.single("thumbnail"), updateNews);
+router.get("/", adminAuthMiddleware, getNews);
+router.post("/add", adminAuthMiddleware, upload.single("thumbnail"), addNews);
+router.delete("/delete/:id", adminAuthMiddleware, deleteNews);
+router.patch(
+  "/update/:id",
+  adminAuthMiddleware,
+  upload.single("thumbnail"),
+  updateNews
+);
 
 module.exports = router;

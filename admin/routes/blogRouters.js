@@ -8,10 +8,16 @@ const {
   updateBlogs,
   deleteBlogs,
 } = require("../controllers/blogController");
+const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 
-router.get("/", getBlogs);
-router.post("/add", upload.single("thumbnail"), addBlogs);
-router.patch("/update/:slug", upload.single("thumbnail"), updateBlogs);
-router.delete("/delete/:slug", deleteBlogs);
+router.get("/", adminAuthMiddleware, getBlogs);
+router.post("/add", adminAuthMiddleware, upload.single("thumbnail"), addBlogs);
+router.patch(
+  "/update/:id",
+  adminAuthMiddleware,
+  upload.single("thumbnail"),
+  updateBlogs
+);
+router.delete("/delete/:id", adminAuthMiddleware, deleteBlogs);
 
 module.exports = router;

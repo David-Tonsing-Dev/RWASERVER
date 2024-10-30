@@ -62,7 +62,7 @@ const adminSignIn = async (req, res) => {
 
     const token = jwt.sign(
       { id: checkEmail._id, role: "admin" },
-      process.env.JWT_SECRET_KEY
+      process.env.JWT_SECRET_KEY_ADMIN
     );
 
     return res.status(200).json({

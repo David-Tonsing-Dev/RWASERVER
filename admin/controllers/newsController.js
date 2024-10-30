@@ -19,12 +19,12 @@ const addNews = async (req, res) => {
         .status(400)
         .json({ status: false, message: "All field are required" });
 
-    const checkSlug = await News.findOne({ slug });
+    // const checkSlug = await News.findOne({ slug });
 
-    if (checkSlug)
-      return res
-        .status(400)
-        .json({ status: false, message: "Slug must be unique" });
+    // if (checkSlug)
+    //   return res
+    //     .status(400)
+    //     .json({ status: false, message: "Slug must be unique" });
 
     const uploadImg = await cloudinary.uploader.upload(req.file.path, {
       use_filename: true,
@@ -111,9 +111,9 @@ const getNews = async (req, res) => {
 
 const deleteNews = async (req, res) => {
   try {
-    const { slug } = req.params;
+    const { id } = req.params;
 
-    const deleteNews = await News.findOneAndDelete({ slug });
+    const deleteNews = await News.findOneAndDelete({ _id: id });
 
     if (!deleteNews)
       return res.status(400).json({ status: false, message: "News not found" });
@@ -132,7 +132,7 @@ const deleteNews = async (req, res) => {
 
 const updateNews = async (req, res) => {
   try {
-    const { slug } = req.params;
+    const { id } = req.params;
 
     let updatedNews = JSON.parse(JSON.stringify(req.body));
 
@@ -159,7 +159,7 @@ const updateNews = async (req, res) => {
       );
     }
 
-    const updateNews = await News.findOneAndUpdate({ slug }, updatedNews, {
+    const updateNews = await News.findOneAndUpdate({ _id: id }, updatedNews, {
       new: true,
       runValidators: true,
     });
