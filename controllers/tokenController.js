@@ -501,9 +501,9 @@ const getNews = async (req, res) => {
 
 const getNewsDetail = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { slug } = req.params;
 
-    const newsObj = await News.findOne({ _id: id });
+    const newsObj = await News.findOne({ slug });
 
     if (!newsObj)
       return res
@@ -522,9 +522,9 @@ const getNewsDetail = async (req, res) => {
 
 const getBlogDetail = async () => {
   try {
-    const { id } = req.params;
+    const { slug } = req.params;
 
-    const getBlog = await Blog.findOne({ _id: id });
+    const getBlog = await Blog.findOne({ slug });
 
     if (!getBlog)
       return res
