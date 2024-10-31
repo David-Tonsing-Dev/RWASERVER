@@ -16,6 +16,22 @@ const adminUserRouter = require("./admin/routes/userRouters");
 const adminNewsRouter = require("./admin/routes/newsRouters");
 const adminBlogRouter = require("./admin/routes/blogRouters");
 
+const allowedOrigins = ["https://rwa.guide", "http://localhost:3000"];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg =
+        "The CORS policy for this site does not allow access from the specified Origin.";
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
