@@ -16,7 +16,7 @@ const adminUserRouter = require("./admin/routes/userRouters");
 const adminNewsRouter = require("./admin/routes/newsRouters");
 const adminBlogRouter = require("./admin/routes/blogRouters");
 
-const allowedOrigins = ["https://rwa.guide", "http://localhost:3000"];
+const allowedOrigins = ["https://rwa.guide"];
 
 const corsOptions = {
   origin: function (origin, callback) {

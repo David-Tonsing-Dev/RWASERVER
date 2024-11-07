@@ -64,7 +64,7 @@ const addBlogs = async (req, res) => {
       conclusion,
     } = req.body;
 
-    sections = JSON.parse(sections);
+    // sections = JSON.parse(sections);
     blockQuote = JSON.parse(blockQuote);
 
     if (!slug || !title || !subTitle || !req.file || !category)
@@ -128,23 +128,18 @@ const addBlogs = async (req, res) => {
 const updateBlogs = async (req, res) => {
   const { id } = req.params;
 
-  let { author, blockQuote, sections } = req.body;
+  let { author, blockQuote } = req.body;
 
-  sections = JSON.parse(sections);
-  blockQuote = JSON.parse(blockQuote);
-
-  let updateBlog = {
-    author: JSON.parse(JSON.stringify(author)),
-    sections,
-    blockQuote,
-  };
+  let updateBlog = { ...req.body };
 
   if (author) {
+    author = JSON.parse(JSON.stringify(author));
     const capitalizeAuthor = capitalizeAfterSpace(author);
     updateBlog = { ...updateBlog, author: capitalizeAuthor };
   }
 
   if (blockQuote) {
+    blockQuote = JSON.parse(blockQuote);
     const { cite, text } = blockQuote;
     const capitalizeCite = capitalizeAfterSpace(cite);
     updateBlog = {

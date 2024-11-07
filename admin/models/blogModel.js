@@ -53,7 +53,9 @@ const blogSchema = new mongoose.Schema(
         default: "admin",
       },
     },
-    sections: sectionSchema,
+    sections: {
+      type: String,
+    },
     conclusion: {
       type: String,
     },
