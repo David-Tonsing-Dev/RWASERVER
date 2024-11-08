@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const authMiddleware = (req, res, next) => {
   try {
     let token = req.headers.authorization;
-    if (token)
+    if (!token)
       return res
         .status(400)
         .json({ status: false, message: "Access token not found!" });
