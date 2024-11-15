@@ -22,6 +22,7 @@ const allowedOrigins = [
   "https://demoguide.netlify.app",
   "https://newuirwaguide.netlify.app",
   "https://test-guide.netlify.app",
+  "192.168.31.16:3000",
 ];
 
 const corsOptions = {
