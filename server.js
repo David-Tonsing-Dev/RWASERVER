@@ -20,6 +20,7 @@ const allowedOrigins = [
   "https://rwa.guide",
   "http://localhost:3000",
   "https://demoguide.netlify.app",
+  "https://newuirwaguide.netlify.app",
 ];
 
 const corsOptions = {
