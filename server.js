@@ -21,6 +21,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://demoguide.netlify.app",
   "https://newuirwaguide.netlify.app",
+  "https://test-guide.netlify.app",
 ];
 
 const corsOptions = {
