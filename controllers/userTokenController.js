@@ -4,6 +4,7 @@ const PortfolioToken = require("../models/userTokenPorfolio");
 const cloudinary = require("../config/cloudinary");
 
 const { singleTokenPortfolioCal } = require("../helper/portfolioTokenReturn");
+const { trusted } = require("mongoose");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&sparkline=true&price_change_percentage=1h,7d";
@@ -21,9 +22,13 @@ const getPortfolioToken = async (req, res) => {
     }).sort({ createdAt: -1 });
 
     if (getAllToken.length <= 0)
-      return res
-        .status(400)
-        .json({ status: false, message: "Could not found any token!" });
+      return res.status(200).json({
+        status: true,
+        portfolioToken: [],
+        totalAmount: 0,
+        totalReturn: 0,
+        totalPercentage: 0,
+      });
 
     const allTokenResp = await axios.get(apiRWACoins, {
       headers: {
@@ -318,6 +323,58 @@ const addTokenPortfolio = async (req, res) => {
   }
 };
 
+const mobileAddTokenPortfolio = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    if (!id)
+      return res.status(400).json({
+        status: 400,
+        message: "Getting undefined token id, please check url!",
+      });
+    const checkTokenId = await PortfolioToken.findOne({
+      userId,
+      tokenId: id,
+      deleted: false,
+    });
+
+    if (checkTokenId)
+      return res
+        .status(200)
+        .json({ status: 200, message: "Token already exist in portfolio!" });
+
+    const checkTokenDeleted = await PortfolioToken.findOneAndUpdate(
+      { userId, tokenId: id, deleted: true },
+      { deleted: false },
+      { upsert: false, new: true }
+    );
+
+    if (checkTokenDeleted)
+      return res
+        .status(200)
+        .json({ status: 200, message: "Token added to portfolio!" });
+
+    const addTokenObj = {
+      userId,
+      tokenId: id,
+    };
+
+    const addTokenToPortfolio = await PortfolioToken.create(addTokenObj);
+    await addTokenToPortfolio.save();
+
+    return res
+      .status(200)
+      .json({ status: true, message: "Token added to portfolio!" });
+  } catch (err) {
+    return res.status(500).json({
+      status: 500,
+      message: "Something went wrong!",
+      error: err.message,
+    });
+  }
+};
+
 const removeTokenPortfolio = async (req, res) => {
   try {
     const { id } = req.params;
@@ -356,5 +413,6 @@ module.exports = {
   checkPortfolio,
   getPortfolioToken,
   addTokenPortfolio,
+  mobileAddTokenPortfolio,
   removeTokenPortfolio,
 };

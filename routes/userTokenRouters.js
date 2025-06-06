@@ -10,6 +10,7 @@ const {
   checkPortfolio,
   addTokenPortfolio,
   removeTokenPortfolio,
+  mobileAddTokenPortfolio,
 } = require("../controllers/userTokenController");
 
 router.post(
@@ -21,6 +22,11 @@ router.post(
 router.get("/portfolio", authMiddleware, getPortfolioToken);
 router.post("/portfolio/:id", authMiddleware, checkPortfolio);
 router.get("/add/portfolio/:id", authMiddleware, addTokenPortfolio);
+router.get(
+  "/mobile/add/portfolio/:id",
+  authMiddleware,
+  mobileAddTokenPortfolio
+);
 router.delete("/remove/portfolio/:id", authMiddleware, removeTokenPortfolio);
 
 module.exports = router;
