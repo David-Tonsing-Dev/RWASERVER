@@ -159,7 +159,7 @@ const getTopGainer = async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, currency: data, total: dataLength });
+      .json({ success: true, topGainer: data, total: dataLength });
   } catch (error) {
     console.error("Error fetching data:", error);
     return res
