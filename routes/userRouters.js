@@ -9,6 +9,7 @@ const {
   forgotPassword,
   resetPassword,
   addUserFavCoin,
+  deleteUserFavCoin,
 } = require("../controllers/userController");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 
@@ -20,5 +21,6 @@ router.get("/", getUsers);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 router.get("/fav/coin/:coinId", authMiddleware, addUserFavCoin);
+router.delete("/fav/coin/:coinId", authMiddleware, deleteUserFavCoin);
 
 module.exports = router;

@@ -217,7 +217,7 @@ const getFavoriteCoin = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: true, watchList, total: data.length });
+      .json({ status: true, watchList, total: userCoins.favCoin.length });
   } catch (err) {
     return res
       .status(500)

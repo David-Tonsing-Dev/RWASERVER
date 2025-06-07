@@ -338,6 +338,44 @@ const addUserFavCoin = async (req, res) => {
   }
 };
 
+const deleteUserFavCoin = async (req, res) => {
+  const { coinId } = req.params;
+  const userId = req.userId;
+
+  try {
+    let userCoin = await UserCoin.findOne({ userId });
+
+    if (!userId)
+      return res
+        .status(400)
+        .json({ status: false, message: "User must signin!" });
+
+    if (!userCoin)
+      return res
+        .status(400)
+        .json({ status: false, message: "Token not exist in watchlist!" });
+
+    const index = userCoin.favCoin.indexOf(coinId);
+    if (index === -1)
+      return res
+        .status(400)
+        .json({ status: false, message: "Token not exist in watchlist!" });
+    userCoin.favCoin.splice(index, 1);
+
+    userCoin = await userCoin.save();
+
+    return res
+      .status(200)
+      .json({ status: true, message: "Token removed from watchlist!" });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong in removing token from watchlist!",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   signup,
   signin,
@@ -347,4 +385,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   addUserFavCoin,
+  deleteUserFavCoin,
 };
