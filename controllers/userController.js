@@ -303,6 +303,7 @@ const resetPassword = async (req, res) => {
 const addUserFavCoin = async (req, res) => {
   const { coinId } = req.params;
   const userId = req.userId;
+  let add = false;
 
   try {
     let userCoin = await UserCoin.findOne({ userId });
@@ -315,12 +316,15 @@ const addUserFavCoin = async (req, res) => {
     if (!userCoin) {
       userCoin = new UserCoin({ userId });
       userCoin.favCoin.push(coinId);
+      add = true;
     } else {
       const index = userCoin.favCoin.indexOf(coinId);
       if (index === -1) {
         userCoin.favCoin.push(coinId);
+        add = true;
       } else {
         userCoin.favCoin.splice(index, 1);
+        add = false;
       }
     }
 
@@ -328,7 +332,10 @@ const addUserFavCoin = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: true, message: "Coin updated in the favorite!" });
+      .json({
+        status: true,
+        message: `Token ${add ? "added to" : "removed from"} watchlist!`,
+      });
   } catch (err) {
     return res.status(500).json({
       status: false,
