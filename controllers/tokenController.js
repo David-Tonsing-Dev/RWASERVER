@@ -32,7 +32,6 @@ const getAllToken = async (req, res) => {
     if (cachedData && sortDirection === "" && sortBy === "") {
       console.log("Fetching list of coin data from cache currencies");
       let data = cachedData.data;
-      let header = cachedData.header;
 
       if (category) {
         data = data.filter(
@@ -42,7 +41,7 @@ const getAllToken = async (req, res) => {
         );
       }
 
-      const dataLength = header.total + 1;
+      const dataLength = data.length;
 
       let userCoins = await UserCoin.findOne({ userId });
 
