@@ -213,9 +213,11 @@ const getFavoriteCoin = async (req, res) => {
 
     const startIndex = (page - 1) * size;
     const endIndex = startIndex + size;
-    const wishlist = filteredUserCoins.slice(startIndex, endIndex);
+    const watchList = filteredUserCoins.slice(startIndex, endIndex);
 
-    return res.status(200).json({ status: true, wishlist, total: data.length });
+    return res
+      .status(200)
+      .json({ status: true, watchList, total: data.length });
   } catch (err) {
     return res
       .status(500)
