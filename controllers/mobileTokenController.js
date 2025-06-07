@@ -1,10 +1,14 @@
 const axios = require("axios");
 const NodeCache = require("node-cache");
 const cache = new NodeCache({ stdTTL: 600 });
+const UserCoin = require("../models/userCoinModel");
 
 const apiRWACoins =
-  "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&sparkline=true";
+  "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=250&category=real-world-assets-rwa&sparkline=true";
 //&sparkline=true
+
+const apiCondoMarketData =
+  "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=condo&sparkline=true&price_change_percentage=1h,7d";
 
 const apiRWACategory =
   "https://pro-api.coingecko.com/api/v3/coins/categories/list?category_id=real-world-assets-rwa&name=Real World Assets (RWA)";
@@ -43,6 +47,30 @@ const getAllToken = async (req, res) => {
 
     let data = response.data;
 
+    const responseCondo = await axios.get(apiCondoMarketData, {
+      headers: {
+        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    data = [...response.data, ...responseCondo.data];
+
+    data.sort((a, b) => {
+      if (a.market_cap_rank === null && b.market_cap_rank === null) return 0;
+      if (a.market_cap_rank === null) return 1;
+      if (b.market_cap_rank === null) return -1;
+      return a.market_cap_rank - b.market_cap_rank;
+    });
+
+    if (category) {
+      data = data.filter(
+        (item) =>
+          item.name.toLowerCase().includes(category.toLowerCase()) ||
+          item.symbol.toLowerCase().includes(category.toLowerCase())
+      );
+    }
+
     const dataLength = data.length;
 
     cache.set(cacheKey, { success: true, data });
@@ -61,6 +89,137 @@ const getAllToken = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// top coins via max market cap
+// const getTopCoin = async () => {};
+// top gainer via 24h% price
+const getTopGainer = async (req, res) => {
+  const { page, size } = req.query;
+  try {
+    const cacheKey = `allTokenData_${page}_${size}`;
+    const cachedData = cache.get(cacheKey);
+
+    if (cachedData) {
+      console.log("Fetching list of coin data from cache");
+      let data = cachedData.data;
+
+      const dataLength = data.length;
+
+      if (page && size) {
+        const startIndex = (page - 1) * size;
+        const endIndex = startIndex + size;
+        data = data.slice(startIndex, endIndex);
+      }
+
+      return res
+        .status(200)
+        .json({ success: true, currency: data, total: dataLength });
+    }
+
+    const response = await axios.get(apiRWACoins, {
+      headers: {
+        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    let data = response.data;
+
+    const responseCondo = await axios.get(apiCondoMarketData, {
+      headers: {
+        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    data = [...response.data, ...responseCondo.data];
+
+    data.sort((a, b) => {
+      if (
+        a.price_change_percentage_24h === null &&
+        b.price_change_percentage_24h === null
+      )
+        return 0;
+      if (a.price_change_percentage_24h === null) return 1;
+      if (b.price_change_percentage_24h === null) return -1;
+      return b.price_change_percentage_24h - a.price_change_percentage_24h;
+    });
+
+    const dataLength = data.length;
+
+    cache.set(cacheKey, { success: true, data });
+
+    if (page && size) {
+      const startIndex = (page - 1) * size;
+      const endIndex = startIndex + size;
+      data = data.slice(startIndex, endIndex);
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, currency: data, total: dataLength });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
+  }
+};
+// list of wishlist or favorite coin
+const getFavoriteCoin = async (req, res) => {
+  let { page = 1, size = 100 } = req.query;
+  const userId = req.userId;
+  page = parseInt(page);
+  size = parseInt(size);
+
+  try {
+    if (!userId)
+      return res
+        .status(401)
+        .json({ status: false, message: "Unauthorized user!" });
+
+    const response = await axios.get(apiRWACoins, {
+      headers: {
+        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    let data = response.data;
+
+    const responseCondo = await axios.get(apiCondoMarketData, {
+      headers: {
+        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    data = [...response.data, ...responseCondo.data];
+
+    data.sort((a, b) => {
+      if (a.market_cap_rank === null && b.market_cap_rank === null) return 0;
+      if (a.market_cap_rank === null) return 1;
+      if (b.market_cap_rank === null) return -1;
+      return a.market_cap_rank - b.market_cap_rank;
+    });
+
+    let userCoins = await UserCoin.findOne({ userId });
+
+    const filteredUserCoins = data.filter((item) =>
+      userCoins.favCoin.includes(item.id)
+    );
+
+    const startIndex = (page - 1) * size;
+    const endIndex = startIndex + size;
+    const wishlist = filteredUserCoins.slice(startIndex, endIndex);
+
+    return res.status(200).json({ status: true, wishlist });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ status: 500, message: "Internal server error!" });
   }
 };
 
@@ -245,4 +404,6 @@ module.exports = {
   getHighLightData,
   getCoinGraphData,
   coinTrending,
+  getTopGainer,
+  getFavoriteCoin,
 };

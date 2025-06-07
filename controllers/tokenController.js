@@ -20,18 +20,23 @@ const apiRWACategory =
 const apiHighLight = "https://pro-api.coingecko.com/api/v3/coins/categories";
 
 const getAllToken = async (req, res) => {
-  let { category, page = 1, size = 10, sortDirection, sortBy } = req.query;
+  let { category, page = 1, size = 100, sortDirection, sortBy } = req.query;
   const userId = req.userId;
   page = parseInt(page);
   size = parseInt(size);
 
   try {
-    const cacheKey = `allTokenData_${category || "all"}`;
+    if (!userId)
+      return res
+        .status(401)
+        .json({ status: false, message: "Unauthorized user!" });
+    const cacheKey = `allTokenData_${category || "all"}_${page}_${size}`;
     const cachedData = cache.get(cacheKey);
 
     if (cachedData && sortDirection === "" && sortBy === "") {
       console.log("Fetching list of coin data from cache currencies");
       let data = cachedData.data;
+      let header = cachedData.header;
 
       if (category) {
         data = data.filter(
@@ -41,7 +46,7 @@ const getAllToken = async (req, res) => {
         );
       }
 
-      const dataLength = data.length;
+      const dataLength = header.total + 1;
 
       let userCoins = await UserCoin.findOne({ userId });
 
