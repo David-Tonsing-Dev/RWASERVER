@@ -26,10 +26,6 @@ const getAllToken = async (req, res) => {
   size = parseInt(size);
 
   try {
-    if (!userId)
-      return res
-        .status(401)
-        .json({ status: false, message: "Unauthorized user!" });
     const cacheKey = `allTokenData_${category || "all"}_${page}_${size}`;
     const cachedData = cache.get(cacheKey);
 
