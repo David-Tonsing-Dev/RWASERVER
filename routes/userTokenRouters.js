@@ -11,6 +11,7 @@ const {
   addTokenPortfolio,
   removeTokenPortfolio,
   mobileAddTokenPortfolio,
+  addRating,
 } = require("../controllers/userTokenController");
 
 router.post(
@@ -28,5 +29,6 @@ router.get(
   mobileAddTokenPortfolio
 );
 router.delete("/remove/portfolio/:id", authMiddleware, removeTokenPortfolio);
+router.post("/add/rating/:id", authMiddleware, addRating);
 
 module.exports = router;

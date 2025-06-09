@@ -1,6 +1,7 @@
 const axios = require("axios");
 const Token = require("../models/newTokenModel");
 const PortfolioToken = require("../models/userTokenPorfolio");
+const TokenRating = require("../models/tokenRatingModel");
 const cloudinary = require("../config/cloudinary");
 
 const { singleTokenPortfolioCal } = require("../helper/portfolioTokenReturn");
@@ -408,6 +409,57 @@ const removeTokenPortfolio = async (req, res) => {
   }
 };
 
+const addRating = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    if (!userId)
+      return res
+        .status(400)
+        .json({ status: false, message: "Unauthorized user!" });
+
+    const ratingValue = req.body.value;
+
+    let checkTokenRating = await TokenRating.findOne({ tokenId: id });
+
+    if (!checkTokenRating) {
+      checkTokenRating = await TokenRating.create({
+        tokenId: id,
+        averageRating: ratingValue,
+        rating: [{ userId, value: ratingValue }],
+      });
+    } else {
+      const alreadyRated = checkTokenRating.rating.some((r) =>
+        r.userId.equals(userId)
+      );
+
+      if (!alreadyRated) {
+        checkTokenRating.rating.push({ userId, value: ratingValue });
+
+        const total = checkTokenRating.rating.reduce(
+          (sum, r) => sum + r.value,
+          0
+        );
+        checkTokenRating.averageRating = total / checkTokenRating.rating.length;
+
+        await checkTokenRating.save();
+      }
+    }
+
+    return res
+      .status(200)
+      .json({ status: true, message: "Rating updated successfully!" });
+  } catch (err) {
+    console.log("err.message", err.message);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: err.messsage,
+    });
+  }
+};
+
 module.exports = {
   addNewToken,
   checkPortfolio,
@@ -415,4 +467,5 @@ module.exports = {
   addTokenPortfolio,
   mobileAddTokenPortfolio,
   removeTokenPortfolio,
+  addRating,
 };

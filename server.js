@@ -16,6 +16,8 @@ const adminUserRouter = require("./admin/routes/userRouters");
 const adminNewsRouter = require("./admin/routes/newsRouters");
 const adminBlogRouter = require("./admin/routes/blogRouters");
 
+const schedular = require("./cron/schedular");
+
 const allowedOrigins = [
   "https://rwa.guide",
   "http://localhost:3000",
@@ -61,5 +63,6 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
   app.listen(PORT, async () => {
     console.log(`Listening on port ${PORT}`);
     console.log("Database connection established");
+    schedular();
   });
 });

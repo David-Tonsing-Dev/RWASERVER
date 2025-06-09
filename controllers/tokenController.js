@@ -7,6 +7,7 @@ const news = require("../constant/news.json");
 const UserCoin = require("../models/userCoinModel");
 const News = require("../admin/models/newsModel");
 const Blog = require("../admin/models/blogModel");
+const TokenRating = require("../models/tokenRatingModel");
 const { trendingCoin } = require("../helper/trendingCoin");
 
 const apiRWACoins =
@@ -262,9 +263,21 @@ const getCoinDetail = async (req, res) => {
         .status(400)
         .json({ status: false, message: "Could not fetch detail!" });
 
-    cache.set(cacheKey, { status: true, detail: coinDetail });
+    const getRating = await TokenRating.findOne({ tokenId: coinId });
 
-    return res.status(200).json({ status: true, detail: coinDetail });
+    cache.set(cacheKey, {
+      status: true,
+      detail: coinDetail,
+      rating: getRating.averageRating,
+    });
+
+    return res
+      .status(200)
+      .json({
+        status: true,
+        detail: coinDetail,
+        rating: getRating.averageRating,
+      });
   } catch (err) {
     return res.status(500).json({
       status: false,
