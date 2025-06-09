@@ -268,16 +268,14 @@ const getCoinDetail = async (req, res) => {
     cache.set(cacheKey, {
       status: true,
       detail: coinDetail,
-      rating: getRating.averageRating,
+      rating: getRating ? getRating.averageRating : 0,
     });
 
-    return res
-      .status(200)
-      .json({
-        status: true,
-        detail: coinDetail,
-        rating: getRating.averageRating,
-      });
+    return res.status(200).json({
+      status: true,
+      detail: coinDetail,
+      rating: getRating ? getRating.averageRating : 0,
+    });
   } catch (err) {
     return res.status(500).json({
       status: false,
