@@ -297,14 +297,6 @@ const getCoinDetail = async (req, res) => {
   const { coinId } = req.params;
 
   try {
-    // const cacheKey = `coinDetail ${coinId}`;
-    // const cachedData = cache.get(cacheKey);
-
-    // if (cachedData) {
-    //   console.log("Fetching coin data from cache");
-    //   return res.status(200).json(cachedData);
-    // }
-
     const resp = await axios.get(
       `https://pro-api.coingecko.com/api/v3/coins/${coinId}`,
       {

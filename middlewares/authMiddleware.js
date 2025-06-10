@@ -50,6 +50,7 @@ const adminAuthMiddleware = (req, res, next) => {
     token = token.split(" ")[1];
     let user = jwt.verify(token, process.env.JWT_SECRET_KEY_ADMIN);
     req.userId = user.id;
+    req.role = user.role;
     next();
   } catch (err) {
     return res.status(500).json({

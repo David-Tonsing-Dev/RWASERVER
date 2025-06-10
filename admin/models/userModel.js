@@ -13,6 +13,15 @@ const userSchema = new mongoose.Schema({
     minlength: 4,
     maxlength: 1024,
   },
+  username: {
+    type: String,
+    required: true,
+  },
+  role: {
+    type: String,
+    enum: ["SUPERADMIN", "ADMIN", "USER"],
+    default: "ADMIN",
+  },
 });
 
 module.exports = mongoose.model("AdminUser", userSchema);
