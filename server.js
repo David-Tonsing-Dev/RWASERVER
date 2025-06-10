@@ -15,6 +15,7 @@ const lectureRouter = require("./routes/lectureRouters");
 const adminUserRouter = require("./admin/routes/userRouters");
 const adminNewsRouter = require("./admin/routes/newsRouters");
 const adminBlogRouter = require("./admin/routes/blogRouters");
+const adminReviewRouter = require("./admin/routes/reviewRouters");
 
 const schedular = require("./cron/schedular");
 
@@ -56,6 +57,7 @@ app.use("/api/lecture", lectureRouter);
 app.use("/api/admin/users", adminUserRouter);
 app.use("/api/admin/news", adminNewsRouter);
 app.use("/api/admin/blog", adminBlogRouter);
+app.use("/api/admin/review", adminReviewRouter);
 
 // app.use("/admin/api/currencies", );
 

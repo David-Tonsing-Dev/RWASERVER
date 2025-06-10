@@ -9,6 +9,7 @@ const News = require("../admin/models/newsModel");
 const Blog = require("../admin/models/blogModel");
 const TokenRating = require("../models/tokenRatingModel");
 const Token = require("../models/coinTokenModel");
+const Review = require("../admin/models/reviewModel");
 const { trendingCoin } = require("../helper/trendingCoin");
 
 const apiRWACoins =
@@ -321,11 +322,17 @@ const getCoinDetail = async (req, res) => {
     //   rating: getRating ? getRating.averageRating : 0,
     // });
 
+    const getExpertReview = await Review.findOne({ tokenId: coinId }).populate({
+      path: "review.userId",
+      select: "username",
+    });
+
     return res.status(200).json({
       status: true,
       detail: coinDetail,
       rating: getRating ? getRating.averageRating : 0,
       totalRating: getRating ? getRating.rating.length : 0,
+      expertReview: getExpertReview.review,
     });
   } catch (err) {
     return res.status(500).json({
