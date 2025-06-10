@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Types;
 const Review = require("../models/reviewModel");
 
 const addReview = async (req, res) => {
@@ -59,17 +61,44 @@ const addReview = async (req, res) => {
   }
 };
 
-const getReview = async (req, res) => {
-  try {
-    const userId = req.userId;
-    const { tokenId } = req.params;
-  } catch (err) {
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error",
-      error: err.message,
-    });
-  }
-};
+// const deleteReview = async (req, res) => {
+//   try {
+//     const userId = req.userId;
+//     const { tokenId } = req.params;
 
-module.exports = { addReview };
+//     const objectUserIdToDelete = new mongoose.Types.ObjectId(userId);
+
+//     const checkReview = await Review.findOne({
+//       tokenId,
+//       "review.userId": userId,
+//     });
+
+//     if (!checkReview)
+//       return res
+//         .status(400)
+//         .json({ status: false, message: "User's review or token not found" });
+
+//     const newCheckReview = checkReview.review.filter(
+//       (item) => item.userId !== objectUserIdToDelete
+//     );
+
+//     checkReview.review = newCheckReview;
+//     await checkReview.save();
+
+//     if (checkReview.review.length <= 0) {
+//       await Review.findOneAndDelete({ tokenId });
+//     }
+
+//     return res
+//       .status(200)
+//       .json({ status: true, message: "Review deleted successfully" });
+//   } catch (err) {
+//     return res.status(500).json({
+//       status: false,
+//       message: "Internal server error",
+//       error: err.message,
+//     });
+//   }
+// };
+
+module.exports = { addReview, deleteReview };
