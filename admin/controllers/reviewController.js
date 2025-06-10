@@ -61,6 +61,27 @@ const addReview = async (req, res) => {
   }
 };
 
+const getReview = async (req, res) => {
+  const role = req.role;
+
+  try {
+    if (role !== "ADMIN" && role !== "SUPERADMIN")
+      return res
+        .status(401)
+        .json({ status: false, message: "Unauthorized user" });
+
+    const getAllReview = await Review.find();
+
+    return res.status(200).json({ status: true, review: getAllReview });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Interval server error",
+      error: err.message,
+    });
+  }
+};
+
 const deleteReview = async (req, res) => {
   try {
     const userId = req.userId;
@@ -101,4 +122,4 @@ const deleteReview = async (req, res) => {
   }
 };
 
-module.exports = { addReview, deleteReview };
+module.exports = { addReview, deleteReview, getReview };
