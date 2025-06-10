@@ -414,10 +414,11 @@ const addRating = async (req, res) => {
     const { id } = req.params;
     const userId = req.userId;
 
-    if (!userId)
+    if (!userId) {
       return res
         .status(400)
         .json({ status: false, message: "Unauthorized user!" });
+    }
 
     const ratingValue = req.body.value;
 
@@ -430,21 +431,23 @@ const addRating = async (req, res) => {
         rating: [{ userId, value: ratingValue }],
       });
     } else {
-      const alreadyRated = checkTokenRating.rating.some((r) =>
+      const existingRatingIndex = checkTokenRating.rating.findIndex((r) =>
         r.userId.equals(userId)
       );
 
-      if (!alreadyRated) {
+      if (existingRatingIndex === -1) {
         checkTokenRating.rating.push({ userId, value: ratingValue });
-
-        const total = checkTokenRating.rating.reduce(
-          (sum, r) => sum + r.value,
-          0
-        );
-        checkTokenRating.averageRating = total / checkTokenRating.rating.length;
-
-        await checkTokenRating.save();
+      } else {
+        checkTokenRating.rating[existingRatingIndex].value = ratingValue;
       }
+
+      const total = checkTokenRating.rating.reduce(
+        (sum, r) => sum + r.value,
+        0
+      );
+      checkTokenRating.averageRating = total / checkTokenRating.rating.length;
+
+      await checkTokenRating.save();
     }
 
     return res

@@ -8,6 +8,7 @@ const UserCoin = require("../models/userCoinModel");
 const News = require("../admin/models/newsModel");
 const Blog = require("../admin/models/blogModel");
 const TokenRating = require("../models/tokenRatingModel");
+const Token = require("../models/coinTokenModel");
 const { trendingCoin } = require("../helper/trendingCoin");
 
 const apiRWACoins =
@@ -168,6 +169,38 @@ const getAllToken = async (req, res) => {
     });
   }
 };
+// const getAllToken = async (req, res) => {
+//   try {
+//     let { page = 1, size = 100, filter, sortBy, order } = req.query;
+//     page = parseInt(page);
+//     size = parseInt(size);
+//     sortBy = sortBy ? sortBy : "market_cap_rank";
+
+//     if (order) {
+//       order === "ASC" || order === "asc" ? 1 : -1;
+//     }
+
+//     if (filter) {
+//     }
+
+//     const getTokens = await Token.find()
+//       .sort({ sortBy: 1 })
+//       .skip((page - 1) * size)
+//       .limit(skip);
+
+//     const tokenCount = await Token.countDocuments();
+
+//     return res
+//       .status(200)
+//       .json({ status: true, currency: getTokens, total: tokenCount });
+//   } catch (err) {
+//     return res.status(500).json({
+//       status: false,
+//       message: "Internal server error",
+//       error: err.message,
+//     });
+//   }
+// };
 
 const getCategories = async (req, res) => {
   const { category, page, size } = req.query;
