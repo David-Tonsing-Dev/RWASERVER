@@ -61,44 +61,44 @@ const addReview = async (req, res) => {
   }
 };
 
-// const deleteReview = async (req, res) => {
-//   try {
-//     const userId = req.userId;
-//     const { tokenId } = req.params;
+const deleteReview = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { tokenId } = req.params;
 
-//     const objectUserIdToDelete = new mongoose.Types.ObjectId(userId);
+    const objectUserIdToDelete = new mongoose.Types.ObjectId(userId);
 
-//     const checkReview = await Review.findOne({
-//       tokenId,
-//       "review.userId": userId,
-//     });
+    const checkReview = await Review.findOne({
+      tokenId,
+      "review.userId": userId,
+    });
 
-//     if (!checkReview)
-//       return res
-//         .status(400)
-//         .json({ status: false, message: "User's review or token not found" });
+    if (!checkReview)
+      return res
+        .status(400)
+        .json({ status: false, message: "User's review or token not found" });
 
-//     const newCheckReview = checkReview.review.filter(
-//       (item) => item.userId !== objectUserIdToDelete
-//     );
+    const newCheckReview = checkReview.review.filter(
+      (item) => item.userId !== objectUserIdToDelete
+    );
 
-//     checkReview.review = newCheckReview;
-//     await checkReview.save();
+    checkReview.review = newCheckReview;
+    await checkReview.save();
 
-//     if (checkReview.review.length <= 0) {
-//       await Review.findOneAndDelete({ tokenId });
-//     }
+    if (checkReview.review.length <= 0) {
+      await Review.findOneAndDelete({ tokenId });
+    }
 
-//     return res
-//       .status(200)
-//       .json({ status: true, message: "Review deleted successfully" });
-//   } catch (err) {
-//     return res.status(500).json({
-//       status: false,
-//       message: "Internal server error",
-//       error: err.message,
-//     });
-//   }
-// };
+    return res
+      .status(200)
+      .json({ status: true, message: "Review deleted successfully" });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
 
 module.exports = { addReview, deleteReview };
