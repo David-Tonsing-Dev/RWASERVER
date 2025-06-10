@@ -21,186 +21,211 @@ const apiRWACategory =
 
 const apiHighLight = "https://pro-api.coingecko.com/api/v3/coins/categories";
 
-const getAllToken = async (req, res) => {
-  let { category, page = 1, size = 100, sortDirection, sortBy } = req.query;
-  const userId = req.userId;
-  page = parseInt(page);
-  size = parseInt(size);
-
-  try {
-    const cacheKey = `allTokenData_${category || "all"}_${page}_${size}`;
-    const cachedData = cache.get(cacheKey);
-
-    if (cachedData && sortDirection === "" && sortBy === "") {
-      console.log("Fetching list of coin data from cache currencies");
-      let data = cachedData.data;
-
-      if (category) {
-        data = data.filter(
-          (item) =>
-            item.name.toLowerCase().includes(category.toLowerCase()) ||
-            item.symbol.toLowerCase().includes(category.toLowerCase())
-        );
-      }
-
-      const dataLength = data.length;
-
-      let userCoins = await UserCoin.findOne({ userId });
-
-      const paginatedData = data
-        .map((item, index) => ({
-          ...item,
-          rank: index + 1,
-          favCoin: userCoins ? userCoins.favCoin.includes(item.id) : false,
-        }))
-        .sort((a, b) => {
-          if (a.favCoin && !b.favCoin) return -1;
-          if (!a.favCoin && b.favCoin) return 1;
-          return a.rank - b.rank;
-        });
-
-      const startIndex = (page - 1) * size;
-      const paginatedDataSubset = paginatedData.slice(
-        startIndex,
-        startIndex + size
-      );
-
-      return res.status(200).json({
-        status: true,
-        currency: paginatedDataSubset,
-        total: dataLength,
-      });
-    }
-
-    console.log("Not fetching from cache currencies");
-
-    const response = await axios.get(apiRWACoins, {
-      headers: {
-        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
-
-    let data = response.data;
-
-    const responseCondo = await axios.get(apiCondoMarketData, {
-      headers: {
-        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
-
-    data = [...response.data, ...responseCondo.data];
-
-    data.sort((a, b) => {
-      if (a.market_cap_rank === null && b.market_cap_rank === null) return 0;
-      if (a.market_cap_rank === null) return 1;
-      if (b.market_cap_rank === null) return -1;
-      return a.market_cap_rank - b.market_cap_rank;
-    });
-
-    if (category) {
-      data = data.filter(
-        (item) =>
-          item.name.toLowerCase().includes(category.toLowerCase()) ||
-          item.symbol.toLowerCase().includes(category.toLowerCase())
-      );
-    }
-
-    const dataLength = data.length;
-
-    cache.set(cacheKey, { status: true, data });
-
-    let userCoins = await UserCoin.findOne({ userId });
-
-    const paginatedData = data
-      .map((item, index) => ({
-        ...item,
-        rank: index + 1,
-        favCoin: userCoins ? userCoins.favCoin.includes(item.id) : false,
-      }))
-      .sort((a, b) => {
-        if (a.favCoin && !b.favCoin) return -1;
-        if (!a.favCoin && b.favCoin) return 1;
-        return a.rank - b.rank;
-      });
-
-    if (sortDirection || sortDirection !== "" || sortBy || sortBy !== "") {
-      if (sortDirection === "asc") {
-        if (sortBy === "name") {
-          paginatedData.sort((a, b) =>
-            a[sortBy].localeCompare(b[sortBy], undefined, {
-              sensitivity: "base",
-            })
-          );
-        } else {
-          paginatedData.sort((a, b) => a[sortBy] - b[sortBy]);
-        }
-      } else if (sortDirection === "desc") {
-        if (sortBy === "name") {
-          paginatedData.sort((a, b) =>
-            b[sortBy].localeCompare(a[sortBy], undefined, {
-              sensitivity: "base",
-            })
-          );
-        } else {
-          paginatedData.sort((a, b) => b[sortBy] - a[sortBy]);
-        }
-      }
-    }
-
-    const startIndex = (page - 1) * size;
-    const paginatedDataSubset = paginatedData.slice(
-      startIndex,
-      startIndex + size
-    );
-
-    return res.status(200).json({
-      status: true,
-      currency: paginatedDataSubset,
-      total: dataLength,
-    });
-  } catch (err) {
-    console.error("Error fetching data:", err.message);
-    return res.status(500).json({
-      status: false,
-      message: "Internal Server Error",
-      error: err.message,
-    });
-  }
-};
 // const getAllToken = async (req, res) => {
+//   let { category, page = 1, size = 100, sortDirection, sortBy } = req.query;
+//   const userId = req.userId;
+//   page = parseInt(page);
+//   size = parseInt(size);
+
 //   try {
-//     let { page = 1, size = 100, filter, sortBy, order } = req.query;
-//     page = parseInt(page);
-//     size = parseInt(size);
-//     sortBy = sortBy ? sortBy : "market_cap_rank";
+//     const cacheKey = `allTokenData_${category || "all"}_${page}_${size}`;
+//     const cachedData = cache.get(cacheKey);
 
-//     if (order) {
-//       order === "ASC" || order === "asc" ? 1 : -1;
+//     if (cachedData && sortDirection === "" && sortBy === "") {
+//       console.log("Fetching list of coin data from cache currencies");
+//       let data = cachedData.data;
+
+//       if (category) {
+//         data = data.filter(
+//           (item) =>
+//             item.name.toLowerCase().includes(category.toLowerCase()) ||
+//             item.symbol.toLowerCase().includes(category.toLowerCase())
+//         );
+//       }
+
+//       const dataLength = data.length;
+
+//       let userCoins = await UserCoin.findOne({ userId });
+
+//       const paginatedData = data
+//         .map((item, index) => ({
+//           ...item,
+//           rank: index + 1,
+//           favCoin: userCoins ? userCoins.favCoin.includes(item.id) : false,
+//         }))
+//         .sort((a, b) => {
+//           if (a.favCoin && !b.favCoin) return -1;
+//           if (!a.favCoin && b.favCoin) return 1;
+//           return a.rank - b.rank;
+//         });
+
+//       const startIndex = (page - 1) * size;
+//       const paginatedDataSubset = paginatedData.slice(
+//         startIndex,
+//         startIndex + size
+//       );
+
+//       return res.status(200).json({
+//         status: true,
+//         currency: paginatedDataSubset,
+//         total: dataLength,
+//       });
 //     }
 
-//     if (filter) {
+//     console.log("Not fetching from cache currencies");
+
+//     const response = await axios.get(apiRWACoins, {
+//       headers: {
+//         "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+//         "Access-Control-Allow-Origin": "*",
+//       },
+//     });
+
+//     let data = response.data;
+
+//     const responseCondo = await axios.get(apiCondoMarketData, {
+//       headers: {
+//         "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+//         "Access-Control-Allow-Origin": "*",
+//       },
+//     });
+
+//     data = [...response.data, ...responseCondo.data];
+
+//     data.sort((a, b) => {
+//       if (a.market_cap_rank === null && b.market_cap_rank === null) return 0;
+//       if (a.market_cap_rank === null) return 1;
+//       if (b.market_cap_rank === null) return -1;
+//       return a.market_cap_rank - b.market_cap_rank;
+//     });
+
+//     if (category) {
+//       data = data.filter(
+//         (item) =>
+//           item.name.toLowerCase().includes(category.toLowerCase()) ||
+//           item.symbol.toLowerCase().includes(category.toLowerCase())
+//       );
 //     }
 
-//     const getTokens = await Token.find()
-//       .sort({ sortBy: 1 })
-//       .skip((page - 1) * size)
-//       .limit(skip);
+//     const dataLength = data.length;
 
-//     const tokenCount = await Token.countDocuments();
+//     cache.set(cacheKey, { status: true, data });
 
-//     return res
-//       .status(200)
-//       .json({ status: true, currency: getTokens, total: tokenCount });
+//     let userCoins = await UserCoin.findOne({ userId });
+
+//     const paginatedData = data
+//       .map((item, index) => ({
+//         ...item,
+//         rank: index + 1,
+//         favCoin: userCoins ? userCoins.favCoin.includes(item.id) : false,
+//       }))
+//       .sort((a, b) => {
+//         if (a.favCoin && !b.favCoin) return -1;
+//         if (!a.favCoin && b.favCoin) return 1;
+//         return a.rank - b.rank;
+//       });
+
+//     if (sortDirection || sortDirection !== "" || sortBy || sortBy !== "") {
+//       if (sortDirection === "asc") {
+//         if (sortBy === "name") {
+//           paginatedData.sort((a, b) =>
+//             a[sortBy].localeCompare(b[sortBy], undefined, {
+//               sensitivity: "base",
+//             })
+//           );
+//         } else {
+//           paginatedData.sort((a, b) => a[sortBy] - b[sortBy]);
+//         }
+//       } else if (sortDirection === "desc") {
+//         if (sortBy === "name") {
+//           paginatedData.sort((a, b) =>
+//             b[sortBy].localeCompare(a[sortBy], undefined, {
+//               sensitivity: "base",
+//             })
+//           );
+//         } else {
+//           paginatedData.sort((a, b) => b[sortBy] - a[sortBy]);
+//         }
+//       }
+//     }
+
+//     const startIndex = (page - 1) * size;
+//     const paginatedDataSubset = paginatedData.slice(
+//       startIndex,
+//       startIndex + size
+//     );
+
+//     return res.status(200).json({
+//       status: true,
+//       currency: paginatedDataSubset,
+//       total: dataLength,
+//     });
 //   } catch (err) {
+//     console.error("Error fetching data:", err.message);
 //     return res.status(500).json({
 //       status: false,
-//       message: "Internal server error",
+//       message: "Internal Server Error",
 //       error: err.message,
 //     });
 //   }
 // };
+const getAllToken = async (req, res) => {
+  try {
+    let { page = 1, size = 100, filter, sortBy, order } = req.query;
+    page = parseInt(page);
+    size = parseInt(size);
+
+    if (sortBy === "" || !sortBy) {
+      sortBy = "market_cap_rank";
+    }
+
+    if (order === "" || !order) {
+      order = -1;
+    }
+
+    if (order) {
+      if (order === "ASC" || order === "asc") order = 1;
+      if (order === "DESC" || order === "desc") order = -1;
+    }
+
+    if (filter) {
+      const getToken = await Token.find({
+        name: { $regex: filter, $options: "i" },
+        symbol: { $regex: filter, $options: "i" },
+      })
+        .skip((page - 1) * size)
+        .limit(size);
+
+      const tokenCount = await Token.countDocuments({
+        name: { $regex: filter, $options: "i" },
+        symbol: { $regex: filter, $options: "i" },
+      });
+
+      return res
+        .status(200)
+        .json({ status: true, currency: getToken, total: tokenCount });
+    }
+
+    console.log("sortBy", sortBy);
+
+    const getTokens = await Token.find()
+      .sort([[sortBy, order]])
+      .skip((page - 1) * size)
+      .limit(size);
+
+    const tokenCount = await Token.countDocuments();
+
+    return res
+      .status(200)
+      .json({ status: true, currency: getTokens, total: tokenCount });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
 
 const getCategories = async (req, res) => {
   const { category, page, size } = req.query;
@@ -272,13 +297,13 @@ const getCoinDetail = async (req, res) => {
   const { coinId } = req.params;
 
   try {
-    const cacheKey = `coinDetail ${coinId}`;
-    const cachedData = cache.get(cacheKey);
+    // const cacheKey = `coinDetail ${coinId}`;
+    // const cachedData = cache.get(cacheKey);
 
-    if (cachedData) {
-      console.log("Fetching coin data from cache");
-      return res.status(200).json(cachedData);
-    }
+    // if (cachedData) {
+    //   console.log("Fetching coin data from cache");
+    //   return res.status(200).json(cachedData);
+    // }
 
     const resp = await axios.get(
       `https://pro-api.coingecko.com/api/v3/coins/${coinId}`,
@@ -298,16 +323,17 @@ const getCoinDetail = async (req, res) => {
 
     const getRating = await TokenRating.findOne({ tokenId: coinId });
 
-    cache.set(cacheKey, {
-      status: true,
-      detail: coinDetail,
-      rating: getRating ? getRating.averageRating : 0,
-    });
+    // cache.set(cacheKey, {
+    //   status: true,
+    //   detail: coinDetail,
+    //   rating: getRating ? getRating.averageRating : 0,
+    // });
 
     return res.status(200).json({
       status: true,
       detail: coinDetail,
       rating: getRating ? getRating.averageRating : 0,
+      totalRating: getRating ? getRating.rating.length : 0,
     });
   } catch (err) {
     return res.status(500).json({
