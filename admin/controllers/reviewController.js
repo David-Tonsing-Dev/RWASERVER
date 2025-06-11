@@ -70,12 +70,34 @@ const getReview = async (req, res) => {
         .status(401)
         .json({ status: false, message: "Unauthorized user" });
 
-    const getAllReview = await Review.find().populate({
-      path: "review.userId",
-      select: "username",
+    const getAllReview = await Review.find()
+      .populate({
+        path: "review.userId",
+        select: "username",
+      })
+      .lean();
+
+    const transformed = getAllReview.map((item) => {
+      const newReviews = item.review.map((r) => {
+        const user = r.userId;
+        return {
+          ...r,
+          userId: user?._id ?? null,
+          username: user?.username ?? null,
+        };
+      });
+
+      return {
+        _id: item._id,
+        tokenId: item.tokenId,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        __v: item.__v,
+        review: newReviews,
+      };
     });
 
-    return res.status(200).json({ status: true, review: getAllReview });
+    return res.status(200).json({ status: true, review: transformed });
   } catch (err) {
     return res.status(500).json({
       status: false,
