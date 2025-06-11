@@ -8,7 +8,7 @@ const {
 } = require("../controllers/reviewController");
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 
-router.get("/", adminAuthMiddleware, getReview);
+router.get("/:tokenId", adminAuthMiddleware, getReview);
 router.post("/add/:tokenId", adminAuthMiddleware, addReview);
 router.delete("/delete/:tokenId", adminAuthMiddleware, deleteReview);
 

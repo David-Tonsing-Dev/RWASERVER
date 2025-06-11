@@ -191,15 +191,29 @@ const getAllToken = async (req, res) => {
 
     if (filter) {
       const getToken = await Token.find({
-        name: { $regex: filter, $options: "i" },
-        symbol: { $regex: filter, $options: "i" },
+        $and: [
+          { enable: true },
+          {
+            $or: [
+              { name: { $regex: filter, $options: "i" } },
+              { symbol: { $regex: filter, $options: "i" } },
+            ],
+          },
+        ],
       })
         .skip((page - 1) * size)
         .limit(size);
 
       const tokenCount = await Token.countDocuments({
-        name: { $regex: filter, $options: "i" },
-        symbol: { $regex: filter, $options: "i" },
+        $and: [
+          { enable: true },
+          {
+            $or: [
+              { name: { $regex: filter, $options: "i" } },
+              { symbol: { $regex: filter, $options: "i" } },
+            ],
+          },
+        ],
       });
 
       return res
@@ -211,7 +225,14 @@ const getAllToken = async (req, res) => {
     //   .sort({ ["market_cap_rank"]: 1 })
     //   .skip((page - 1) * size)
     //   .limit(size);
+    const skip = (page - 1) * size;
     const getTokens = await Token.aggregate([
+      {
+        $match: {
+          enable: { $eq: true },
+        },
+      },
+
       {
         $addFields: {
           sortHelper: {
@@ -223,18 +244,27 @@ const getAllToken = async (req, res) => {
           },
         },
       },
+
       {
         $sort: {
           sortHelper: 1,
           [sortBy]: order,
         },
       },
-      {
-        $project: { sortHelper: 0 },
-      },
-    ]);
 
-    const tokenCount = await Token.countDocuments();
+      {
+        $project: {
+          sortHelper: 0,
+        },
+      },
+
+      // { $skip: skip },
+      // { $limit: size },
+    ])
+      .skip(skip)
+      .limit(size);
+
+    const tokenCount = await Token.countDocuments({ enable: true });
 
     return res
       .status(200)

@@ -63,6 +63,7 @@ const addReview = async (req, res) => {
 
 const getReview = async (req, res) => {
   const role = req.role;
+  const { tokenId } = req.params;
 
   try {
     if (role !== "ADMIN" && role !== "SUPERADMIN")
@@ -70,9 +71,12 @@ const getReview = async (req, res) => {
         .status(401)
         .json({ status: false, message: "Unauthorized user" });
 
-    const getAllReview = await Review.find();
+    const getAllReview = await Review.findOne({ tokenId }).populate({
+      path: "review.userId",
+      select: "username",
+    });
 
-    return res.status(200).json({ status: true, review: getAllReview });
+    return res.status(200).json({ status: true, review: getAllReview.review });
   } catch (err) {
     return res.status(500).json({
       status: false,
