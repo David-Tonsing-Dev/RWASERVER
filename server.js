@@ -16,6 +16,7 @@ const adminUserRouter = require("./admin/routes/userRouters");
 const adminNewsRouter = require("./admin/routes/newsRouters");
 const adminBlogRouter = require("./admin/routes/blogRouters");
 const adminReviewRouter = require("./admin/routes/reviewRouters");
+const adminTokenRouter = require("./admin/routes/tokenRouters");
 
 const schedular = require("./cron/schedular");
 
@@ -58,6 +59,7 @@ app.use("/api/admin/users", adminUserRouter);
 app.use("/api/admin/news", adminNewsRouter);
 app.use("/api/admin/blog", adminBlogRouter);
 app.use("/api/admin/review", adminReviewRouter);
+app.use("/api/admin/token", adminTokenRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   app.listen(PORT, async () => {
