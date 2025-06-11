@@ -181,7 +181,7 @@ const getAllToken = async (req, res) => {
     }
 
     if (order === "" || !order) {
-      order = -1;
+      order = 1;
     }
 
     if (order) {
@@ -207,12 +207,32 @@ const getAllToken = async (req, res) => {
         .json({ status: true, currency: getToken, total: tokenCount });
     }
 
-    console.log("sortBy", sortBy);
-
-    const getTokens = await Token.find()
-      .sort([[sortBy, order]])
-      .skip((page - 1) * size)
-      .limit(size);
+    // const getTokens = await Token.find()
+    //   .sort({ ["market_cap_rank"]: 1 })
+    //   .skip((page - 1) * size)
+    //   .limit(size);
+    const getTokens = await Token.aggregate([
+      {
+        $addFields: {
+          sortHelper: {
+            $cond: {
+              if: { $eq: [`$${sortBy}`, null] },
+              then: 1,
+              else: 0,
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          sortHelper: 1,
+          [sortBy]: order,
+        },
+      },
+      {
+        $project: { sortHelper: 0 },
+      },
+    ]);
 
     const tokenCount = await Token.countDocuments();
 

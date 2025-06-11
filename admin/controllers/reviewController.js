@@ -99,9 +99,13 @@ const deleteReview = async (req, res) => {
         .status(400)
         .json({ status: false, message: "User's review or token not found" });
 
+    console.log("checkReview", checkReview);
+
     const newCheckReview = checkReview.review.filter(
       (item) => item.userId !== userId
     );
+
+    console.log("newCheckReview", newCheckReview);
 
     checkReview.review = newCheckReview;
     await checkReview.save();
