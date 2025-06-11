@@ -332,7 +332,7 @@ const getCoinDetail = async (req, res) => {
       detail: coinDetail,
       rating: getRating ? getRating.averageRating : 0,
       totalRating: getRating ? getRating.rating.length : 0,
-      expertReview: getExpertReview.review,
+      expertReview: getExpertReview ? getExpertReview.review : [],
     });
   } catch (err) {
     return res.status(500).json({

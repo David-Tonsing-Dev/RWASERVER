@@ -87,7 +87,7 @@ const deleteReview = async (req, res) => {
     const userId = req.userId;
     const { tokenId } = req.params;
 
-    const objectUserIdToDelete = new mongoose.Types.ObjectId(userId);
+    const userReviewToDelete = new mongoose.Types.ObjectId(userId);
 
     const checkReview = await Review.findOne({
       tokenId,
@@ -100,7 +100,7 @@ const deleteReview = async (req, res) => {
         .json({ status: false, message: "User's review or token not found" });
 
     const newCheckReview = checkReview.review.filter(
-      (item) => item.userId !== objectUserIdToDelete
+      (item) => item.userId !== userId
     );
 
     checkReview.review = newCheckReview;
