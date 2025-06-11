@@ -327,12 +327,26 @@ const getCoinDetail = async (req, res) => {
       }
     );
 
-    const coinDetail = await resp.data;
+    let coinDetail = await resp.data;
 
     if (!coinDetail)
       return res
         .status(400)
         .json({ status: false, message: "Could not fetch detail!" });
+
+    const getDescAndImg = await Token.findOne({ id: coinId });
+
+    if (getDescAndImg) {
+      if (getDescAndImg.description) {
+        coinDetail.description.en = getDescAndImg.description;
+      }
+
+      if (getDescAndImg.image) {
+        coinDetail.image.thumb = getDescAndImg.image;
+        coinDetail.image.small = getDescAndImg.image;
+        coinDetail.image.large = getDescAndImg.image;
+      }
+    }
 
     const getRating = await TokenRating.findOne({ tokenId: coinId });
 

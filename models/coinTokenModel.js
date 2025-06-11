@@ -21,9 +21,11 @@ const coinGeckoTokenSchema = new mongoose.Schema(
     },
     image: {
       type: String,
+      default: null,
     },
     description: {
       type: String,
+      default: null,
     },
 
     current_price: {

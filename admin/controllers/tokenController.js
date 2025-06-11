@@ -1,13 +1,14 @@
+const cloudinary = require("../../config/cloudinary");
 const Token = require("../../models/coinTokenModel");
 
 const updateToken = async (req, res) => {
   try {
-    const tokenId = req.params;
+    const { tokenId } = req.params;
     const userId = req.userId;
     const role = req.role;
 
     const { description } = req.body;
-    const { image } = req.file;
+    const tokenImage = req.file;
 
     if (!userId)
       return res
@@ -19,25 +20,24 @@ const updateToken = async (req, res) => {
         .status(401)
         .json({ status: false, message: "Only for admin and superadmin" });
 
-    const checkToken = await Token.findOne({ tokenId });
+    const checkToken = await Token.findOne({ id: tokenId });
 
     if (!checkToken)
       return res
         .status(400)
         .json({ status: false, message: "Token do not exist" });
-
-    if (image) {
-      const tokenImage = await cloudinary.uploader.upload("tokenImage", {
+    if (tokenImage) {
+      const tokenImageLink = await cloudinary.uploader.upload(req.file.path, {
         use_filename: true,
         folder: "rwa/coingecko/token",
       });
 
-      if (!tokenImage)
+      if (!tokenImageLink)
         return res
           .status(500)
           .json({ status: false, message: "Error in uploading image" });
 
-      checkToken.image = tokenImage.secure_url;
+      checkToken.image = tokenImageLink.secure_url;
     }
 
     if (description) {
@@ -49,7 +49,7 @@ const updateToken = async (req, res) => {
     return res
       .status(200)
       .json({ status: true, message: "Token updated successfully" });
-  } catch (error) {
+  } catch (err) {
     return res.status(500).json({
       status: false,
       message: "Internal server error",
