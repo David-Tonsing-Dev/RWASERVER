@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ObjectId } = mongoose.Types;
+const { ObjectId } = require("mongodb");
 const Review = require("../models/reviewModel");
 
 const addReview = async (req, res) => {
@@ -137,8 +137,6 @@ const deleteReview = async (req, res) => {
     const userId = req.userId;
     const { tokenId } = req.params;
 
-    const userReviewToDelete = new mongoose.Types.ObjectId(userId);
-
     const checkReview = await Review.findOne({
       tokenId,
       "review.userId": userId,
@@ -149,13 +147,9 @@ const deleteReview = async (req, res) => {
         .status(400)
         .json({ status: false, message: "User's review or token not found" });
 
-    console.log("checkReview", checkReview);
-
     const newCheckReview = checkReview.review.filter(
-      (item) => item.userId !== userId
+      (item) => item.userId.toString() !== userId
     );
-
-    console.log("newCheckReview", newCheckReview);
 
     checkReview.review = newCheckReview;
     await checkReview.save();
