@@ -62,7 +62,7 @@ app.use("/api/admin/review", adminReviewRouter);
 app.use("/api/admin/token", adminTokenRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
-  app.listen(PORT, "192.168.1.43", async () => {
+  app.listen(PORT, async () => {
     console.log(`Listening on port ${PORT}`);
     console.log("Database connection established");
     schedular();
