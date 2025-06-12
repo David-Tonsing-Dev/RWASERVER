@@ -5,11 +5,11 @@ const upload = require("../../multer/multer");
 const {
   updateToken,
   tokenEnableToggle,
+  getAllTokenAdmin,
 } = require("../controllers/tokenController");
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
-const { getAllToken } = require("../../controllers/tokenController");
 
-router.get("/", getAllToken);
+router.get("/", getAllTokenAdmin);
 router.patch(
   "/update/:tokenId",
   adminAuthMiddleware,
