@@ -1,11 +1,15 @@
 const cron = require("node-cron");
-const fetchAndStoreRwaData = require("../helper/fetchAndStoreRwaData");
+const {
+  fetchAndStoreRwaData,
+  fetchCondoToken,
+} = require("../helper/fetchAndStoreRwaData");
 
 const start = async () => {
   try {
-    cron.schedule("*/60 * * * *", async () => {
+    cron.schedule("*/1 * * * *", async () => {
       console.log("Fetching RWA market data...");
       await fetchAndStoreRwaData();
+      await fetchCondoToken();
     });
 
     console.log("CRON job started successfully!");
