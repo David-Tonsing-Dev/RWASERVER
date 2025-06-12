@@ -2,7 +2,10 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../../multer/multer");
 
-const { updateToken } = require("../controllers/tokenController");
+const {
+  updateToken,
+  tokenEnableToggle,
+} = require("../controllers/tokenController");
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 const { getAllToken } = require("../../controllers/tokenController");
 
@@ -13,5 +16,7 @@ router.patch(
   upload.single("tokenImage"),
   updateToken
 );
+
+router.patch("/toggle/:tokenId", adminAuthMiddleware, tokenEnableToggle);
 
 module.exports = router;

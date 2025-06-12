@@ -60,15 +60,47 @@ const updateToken = async (req, res) => {
 
 const tokenEnableToggle = async (req, res) => {
   try {
-  } catch (err) {
-    return res
-      .status(500)
-      .json({
+    const { tokenId } = req.params;
+    const userId = req.userId;
+    const role = req.role;
+
+    if (!tokenId)
+      return res
+        .status(400)
+        .json({ status: false, message: "Token not found" });
+
+    if (!userId)
+      return res
+        .status(400)
+        .json({ status: false, message: "Unauthorized user" });
+
+    if (role !== "ADMIN" && role !== "SUPERADMIN")
+      return res.status(401).json({
         status: false,
-        message: "Internal server error",
-        error: err.message,
+        message: "Only admin and superadmin can alter token",
       });
+
+    const toggleToken = await Token.findOne({ id: tokenId });
+
+    if (!toggleToken)
+      return res
+        .status(400)
+        .json({ status: false, message: "Token not found" });
+
+    toggleToken.enable
+      ? (toggleToken.enable = false)
+      : (toggleToken.enable = true);
+    await toggleToken.save();
+    return res
+      .status(200)
+      .json({ status: true, message: "Token updated successfully" });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: err.message,
+    });
   }
 };
 
-module.exports = { updateToken };
+module.exports = { updateToken, tokenEnableToggle };
