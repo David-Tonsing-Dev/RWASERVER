@@ -136,6 +136,14 @@ const deleteReview = async (req, res) => {
   try {
     const userId = req.userId;
     const { tokenId } = req.params;
+    const role = req.role;
+
+    if (role !== "SUPERADMIN" && role !== "ADMIN") {
+      return res.status(401).json({
+        status: false,
+        message: "Only Admin or Super admin can delete",
+      });
+    }
 
     const checkReview = await Review.findOne({
       tokenId,

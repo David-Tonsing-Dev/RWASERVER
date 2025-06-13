@@ -64,8 +64,17 @@ const addBlogs = async (req, res) => {
       conclusion,
     } = req.body;
 
+    const role = req.role;
+    const userId = req.userId;
+
     // sections = JSON.parse(sections);
     blockQuote = JSON.parse(blockQuote);
+
+    if (role !== "ADMIN" && role !== "SUPERADMIN")
+      return res.status(401).json({
+        status: false,
+        message: "Only Admin or Super admin can add blog",
+      });
 
     if (!slug || !title || !subTitle || !req.file || !category)
       return res
@@ -96,6 +105,7 @@ const addBlogs = async (req, res) => {
     const capitalizeCite = capitalizeAfterSpace(cite);
 
     const addBlog = new Blog({
+      userId,
       slug,
       title,
       subTitle,
@@ -127,10 +137,28 @@ const addBlogs = async (req, res) => {
 
 const updateBlogs = async (req, res) => {
   const { id } = req.params;
+  const role = req.role;
+  const userId = req.userId;
 
   let { author, blockQuote } = req.body;
 
   let updateBlog = { ...req.body };
+
+  if (role !== "SUPERADMIN" && role !== "ADMIN")
+    return res.status(401).json({
+      status: false,
+      message: "Only Admin or Super admin can update blog",
+    });
+
+  if (role !== "SUPERADMIN") {
+    const checkAdmin = await Blog.findOne({ _id: id, userId });
+
+    if (!checkAdmin)
+      return res.status(401).json({
+        status: false,
+        message: "You cannot only update your own blog",
+      });
+  }
 
   if (author) {
     author = JSON.parse(JSON.stringify(author));
@@ -169,9 +197,13 @@ const updateBlogs = async (req, res) => {
     );
   }
 
-  const updateBlogs = await Blog.findOneAndUpdate({ _id: id }, updateBlog, {
-    new: true,
-  });
+  const updateBlogs = await Blog.findOneAndUpdate(
+    { _id: id, userId },
+    updateBlog,
+    {
+      new: true,
+    }
+  );
 
   if (!updateBlogs)
     return res.status(400).json({ status: false, message: "Blog not found" });
@@ -184,7 +216,25 @@ const updateBlogs = async (req, res) => {
 const deleteBlogs = async (req, res) => {
   const { id } = req.params;
 
-  const deleteBlogs = await Blog.findOneAndDelete({ _id: id });
+  const role = req.role;
+  const userId = req.userId;
+
+  if (role !== "ADMIN" && role !== "SUPERADMIN") {
+    return res
+      .status(401)
+      .json({ status: false, message: "Only Admin or Super admin can delete" });
+  }
+
+  if (role !== "SUPERADMIN") {
+    const checkAdmin = await Blog.findOne({ _id: id, userId });
+    if (!checkAdmin)
+      return res.status(401).json({
+        status: false,
+        message: "You can only delete your own blog post",
+      });
+  }
+
+  const deleteBlogs = await Blog.findOneAndDelete({ _id: id, userId });
 
   if (!deleteBlogs)
     return res.status(400).json({ status: false, message: "Blog not found" });

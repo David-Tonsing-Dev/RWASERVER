@@ -15,10 +15,10 @@ const updateToken = async (req, res) => {
         .status(401)
         .json({ status: false, message: "Unauthorized user" });
 
-    if (role !== "ADMIN" && role !== "SUPERADMIN")
+    if (role !== "SUPERADMIN")
       return res
         .status(401)
-        .json({ status: false, message: "Only for admin and superadmin" });
+        .json({ status: false, message: "Only for superadmin" });
 
     const checkToken = await Token.findOne({ id: tokenId });
 
@@ -74,10 +74,10 @@ const tokenEnableToggle = async (req, res) => {
         .status(400)
         .json({ status: false, message: "Unauthorized user" });
 
-    if (role !== "ADMIN" && role !== "SUPERADMIN")
+    if (role !== "SUPERADMIN")
       return res.status(401).json({
         status: false,
-        message: "Only admin and superadmin can alter token",
+        message: "Only superadmin can alter token",
       });
 
     const toggleToken = await Token.findOne({ id: tokenId });

@@ -14,6 +14,15 @@ const addNews = async (req, res) => {
       slug,
     } = req.body;
 
+    const role = req.role;
+    const userId = req.userId;
+
+    if (role !== "ADMIN" && role !== "SUPERADMIN")
+      return res.status(401).json({
+        status: false,
+        message: "Only Admin or Super admin can add news",
+      });
+
     if (!title || !req.file || !content || !slug || !subTitle)
       return res
         .status(400)
@@ -39,6 +48,7 @@ const addNews = async (req, res) => {
     const capitalizeAuthor = capitalizeAfterSpace(author);
 
     const addNew = new News({
+      userId,
       title,
       subTitle,
       thumbnail: uploadImg.secure_url,
@@ -112,8 +122,26 @@ const getNews = async (req, res) => {
 const deleteNews = async (req, res) => {
   try {
     const { id } = req.params;
+    const role = req.role;
+    const userId = req.userId;
 
-    const deleteNews = await News.findOneAndDelete({ _id: id });
+    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+      return res.status(401).json({
+        status: false,
+        message: "Only Admin or Super admin can delete",
+      });
+    }
+
+    if (role !== "SUPERADMIN") {
+      const checkAdmin = await News.findOne({ _id: id, userId });
+      if (!checkAdmin)
+        return res.status(401).json({
+          status: false,
+          message: "You can only delete your own news",
+        });
+    }
+
+    const deleteNews = await News.findOneAndDelete({ _id: id, usreId });
 
     if (!deleteNews)
       return res.status(400).json({ status: false, message: "News not found" });
@@ -134,7 +162,30 @@ const updateNews = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const role = req.role;
+    const userId = req.userid;
+
     let updatedNews = JSON.parse(JSON.stringify(req.body));
+
+    if (role !== "ADMIN" && role !== "SUPERADMIN")
+      return res.status(401).json({
+        status: false,
+        message: "Only Admin or Super admin can update news",
+      });
+
+    if (role !== "SUPERADMIN") {
+      const checkAdmin = await News.findOne({ _id: id, userId });
+      if (!checkAdmin)
+        return res.status(401).json({
+          status: false,
+          message: "You can only update your own news",
+        });
+    }
+
+    if (!title || !req.file || !content || !slug || !subTitle)
+      return res
+        .status(400)
+        .json({ status: false, message: "All field are required" });
 
     if (updatedNews.author) {
       const capitalizeAuthor = capitalizeAfterSpace(updatedNews.author);
@@ -159,10 +210,14 @@ const updateNews = async (req, res) => {
       );
     }
 
-    const updateNews = await News.findOneAndUpdate({ _id: id }, updatedNews, {
-      new: true,
-      runValidators: true,
-    });
+    const updateNews = await News.findOneAndUpdate(
+      { _id: id, userId },
+      updatedNews,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!updateNews)
       return res.status(400).json({ status: false, message: "News not found" });
