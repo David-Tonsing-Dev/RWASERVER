@@ -30,7 +30,7 @@ const allowedOrigins = [
   "https://test-guide.netlify.app",
   "http://192.168.31.16:3000",
   "https://powdex.io",
-  " https://rwahedgefund.netlify.app/",
+  "https://rwahedgefund.netlify.app",
 ];
 
 const corsOptions = {
