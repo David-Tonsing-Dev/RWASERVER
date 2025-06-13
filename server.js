@@ -64,7 +64,7 @@ app.use("/api/admin/blog", adminBlogRouter);
 app.use("/api/admin/review", adminReviewRouter);
 app.use("/api/admin/token", adminTokenRouter);
 app.use("/api/admin/airdrop", adminAirdropRouter);
-app.use("/api/admin/condoTreasuryTokens", condoTokens);
+// app.use("/api/condoTreasuryTokens", condoTokens);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   app.listen(PORT, async () => {
