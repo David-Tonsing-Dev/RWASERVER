@@ -11,6 +11,7 @@ const userTokenRouter = require("./routes/userTokenRouters");
 const rwaRouter = require("./routes/rwaTokenRouters");
 const rwaMobileRouter = require("./routes/rwaMobileRouters");
 const lectureRouter = require("./routes/lectureRouters");
+const condoTokens = require("./routes/condoTreasuryTokenRouters");
 
 const adminUserRouter = require("./admin/routes/userRouters");
 const adminNewsRouter = require("./admin/routes/newsRouters");
@@ -29,6 +30,7 @@ const allowedOrigins = [
   "https://test-guide.netlify.app",
   "http://192.168.31.16:3000",
   "https://powdex.io",
+  " https://rwahedgefund.netlify.app/",
 ];
 
 const corsOptions = {
@@ -62,6 +64,7 @@ app.use("/api/admin/blog", adminBlogRouter);
 app.use("/api/admin/review", adminReviewRouter);
 app.use("/api/admin/token", adminTokenRouter);
 app.use("/api/admin/airdrop", adminAirdropRouter);
+app.use("/api/admin/condoTreasuryTokens", condoTokens);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   app.listen(PORT, async () => {

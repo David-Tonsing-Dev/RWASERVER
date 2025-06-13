@@ -1,0 +1,37 @@
+const mongoose = require("mongoose");
+
+const condoTreasuryTokenSchema = new mongoose.Schema(
+  {
+    tokenName: {
+      type: String,
+      required: true,
+    },
+    tokenImg: {
+      type: String,
+      default: null,
+    },
+    symbol: {
+      type: String,
+      required: true,
+    },
+    chain: {
+      type: String,
+    },
+    tokenBalance: {
+      type: String,
+      required: true,
+      default: 0,
+    },
+    tokenAddress: {
+      type: String,
+    },
+    balanceUsd: {
+      type: String,
+      required: true,
+      default: 0,
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("CondoTreasuryToken", condoTreasuryTokenSchema);
