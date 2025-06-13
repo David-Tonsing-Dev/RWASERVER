@@ -6,7 +6,7 @@ const {
 
 const start = async () => {
   try {
-    cron.schedule("*/1 * * * *", async () => {
+    cron.schedule("*/5 * * * *", async () => {
       console.log("Fetching RWA market data...");
       await fetchAndStoreRwaData();
       await fetchCondoToken();
