@@ -163,7 +163,9 @@ const updateNews = async (req, res) => {
     const { id } = req.params;
 
     const role = req.role;
-    const userId = req.userid;
+    const userId = req.userId;
+
+    console.log("role", role, "id", id);
 
     let updatedNews = JSON.parse(JSON.stringify(req.body));
 
@@ -182,10 +184,10 @@ const updateNews = async (req, res) => {
         });
     }
 
-    if (!title || !req.file || !content || !slug || !subTitle)
-      return res
-        .status(400)
-        .json({ status: false, message: "All field are required" });
+    // if (!title || !req.file || !content || !slug || !subTitle)
+    //   return res
+    //     .status(400)
+    //     .json({ status: false, message: "All field are required" });
 
     if (updatedNews.author) {
       const capitalizeAuthor = capitalizeAfterSpace(updatedNews.author);
