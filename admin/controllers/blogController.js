@@ -197,13 +197,9 @@ const updateBlogs = async (req, res) => {
     );
   }
 
-  const updateBlogs = await Blog.findOneAndUpdate(
-    { _id: id, userId },
-    updateBlog,
-    {
-      new: true,
-    }
-  );
+  const updateBlogs = await Blog.findOneAndUpdate({ _id: id }, updateBlog, {
+    new: true,
+  });
 
   if (!updateBlogs)
     return res.status(400).json({ status: false, message: "Blog not found" });
@@ -234,7 +230,7 @@ const deleteBlogs = async (req, res) => {
       });
   }
 
-  const deleteBlogs = await Blog.findOneAndDelete({ _id: id, userId });
+  const deleteBlogs = await Blog.findOneAndDelete({ _id: id });
 
   if (!deleteBlogs)
     return res.status(400).json({ status: false, message: "Blog not found" });

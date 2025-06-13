@@ -141,7 +141,7 @@ const deleteNews = async (req, res) => {
         });
     }
 
-    const deleteNews = await News.findOneAndDelete({ _id: id, usreId });
+    const deleteNews = await News.findOneAndDelete({ _id: id });
 
     if (!deleteNews)
       return res.status(400).json({ status: false, message: "News not found" });
@@ -210,14 +210,10 @@ const updateNews = async (req, res) => {
       );
     }
 
-    const updateNews = await News.findOneAndUpdate(
-      { _id: id, userId },
-      updatedNews,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const updateNews = await News.findOneAndUpdate({ _id: id }, updatedNews, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updateNews)
       return res.status(400).json({ status: false, message: "News not found" });
