@@ -16,6 +16,7 @@ router.post(
   upload.single("image"),
   createAirdrop
 );
+
 router.put(
   "/update/:id",
   adminAuthMiddleware,

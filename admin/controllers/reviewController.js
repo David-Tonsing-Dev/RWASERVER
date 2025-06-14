@@ -6,7 +6,7 @@ const addReview = async (req, res) => {
   try {
     const userId = req.userId;
     const role = req.role;
-    console.log("req", req.role, role);
+    // console.log("req", req.role, role);
     const { tokenId } = req.params;
     const { review, rating } = req.body;
 
@@ -57,6 +57,124 @@ const addReview = async (req, res) => {
       status: false,
       message: "Internal server error",
       error: err.message,
+    });
+  }
+};
+
+// const updateReview = async (req, res) => {
+//   try {
+//     // const userId = req.UserId;
+//     const role = req.role;
+//     const { tokenId } = req.params;
+//     const { review, rating, userId } = req.body;
+
+//     if (role !== "ADMIN" && role !== "SUPERADMIN") {
+//       return res.status(401).json({
+//         status: false,
+//         message: "Only Admin or Super admin can add review",
+//       });
+//     }
+
+//     const checkTokenReview = await Review.findOne({ tokenId: tokenId });
+//     if (!checkTokenReview) {
+//       return res.status(404).json({
+//         status: false,
+//         message: "Token not found",
+//       });
+//     }
+
+//     if (!userId) {
+//       return res.status(400).json({
+//         status: false,
+//         message: "Unauthorized user",
+//       });
+//     }
+
+//     let targetId;
+
+//     if (role === "ADMIN") {
+//       // Admin can update only their own review
+//       targetId = requesterId;
+//     } else if (role === "SUPERADMIN") {
+//       // Superadmin can update any review (provided userId is specified or defaults to their own)
+//       targetId = targetUserId || requesterId;
+//     }
+
+//     // Find the review to update
+//     const reviewEntry = tokenReview.review.find((r) => r.userId === targetId);
+
+//     await checkTokenReview.save();
+
+//     return res.status(200).json({
+//       status: true,
+//       message: "Review updated successfully",
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       status: false,
+//       message: "Internal server error",
+//     });
+//   }
+// };
+
+const updateReview = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const role = req.role;
+    const { tokenId } = req.params;
+    const { review, rating, userId: targetUserId } = req.body;
+
+    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+      return res.status(401).json({
+        status: false,
+        message: "Only Admin or Super admin can update review",
+      });
+    }
+    if (!userId)
+      return res
+        .status(401)
+        .json({ status: false, message: "Unauthorized user" });
+
+    const tokenReview = await Review.findOne({ tokenId });
+
+    if (!tokenReview) {
+      return res.status(404).json({
+        status: false,
+        message: "Token not found",
+      });
+    }
+
+    let targetId;
+
+    if (role === "ADMIN") {
+      targetId = userId;
+    } else if (role === "SUPERADMIN") {
+      targetId = targetUserId;
+    }
+    const reviewEntry = tokenReview.review.find(
+      (r) => r.userId.toString() === targetId.toString()
+    );
+
+    if (!reviewEntry) {
+      return res.status(404).json({
+        status: false,
+        message: "Review by this user not found",
+      });
+    }
+
+    reviewEntry.value = review;
+    reviewEntry.rating = rating;
+
+    await tokenReview.save();
+
+    return res.status(200).json({
+      status: true,
+      message: "Review updated successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
     });
   }
 };
@@ -178,4 +296,4 @@ const deleteReview = async (req, res) => {
   }
 };
 
-module.exports = { addReview, deleteReview, getReview };
+module.exports = { addReview, deleteReview, getReview, updateReview };

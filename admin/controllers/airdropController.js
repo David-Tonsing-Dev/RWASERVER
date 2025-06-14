@@ -3,10 +3,21 @@ const cloudinary = require("../../config/cloudinary");
 
 const getAllAirdrops = async (req, res) => {
   try {
-    const airdrops = await Airdrop.find();
+    let { page, size, filter } = req.query;
+
+    page = parseInt(page);
+    size = parseInt(size);
+
+    const airdrops = await Airdrop.find()
+      .skip((page - 1) * size)
+      .limit(size);
+
+    const totalAirdrop = await Airdrop.countDocuments();
+
     res.status(200).json({
       message: "Airdrops fetched successfully",
       data: airdrops,
+      total: totalAirdrop,
       status: "true",
     });
   } catch (err) {
@@ -163,9 +174,7 @@ const deleteAirdrop = async (req, res) => {
       status: "true",
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to delete airdrop", status: "false" });
+    res.status(500).json({ error: "Internal server error", status: "false" });
   }
 };
 
