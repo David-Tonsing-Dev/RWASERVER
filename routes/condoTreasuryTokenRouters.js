@@ -1,7 +1,9 @@
-// const express = require("express");
-// const { fetchTreasuryToken } = require("../helper/fetchTreasuryToken");
-// const router = express.Router();
+const express = require("express");
+const {
+  getAllTreasuryToken,
+} = require("../controllers/treasuryToken.Controller");
+const router = express.Router();
 
-// router.get("/get/allTokens", fetchTreasuryToken);
+router.get("/get/allTokens", getAllTreasuryToken);
 
-// module.exports = router;
+module.exports = router;

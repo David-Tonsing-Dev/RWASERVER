@@ -3,11 +3,13 @@ const {
   fetchAndStoreRwaData,
   fetchCondoToken,
 } = require("../helper/fetchAndStoreRwaData");
+const { fetchTreasuryToken } = require("../helper/fetchTreasuryToken");
 
 const start = async () => {
   try {
-    cron.schedule("*/5 * * * *", async () => {
+    cron.schedule("*/1 * * * *", async () => {
       console.log("Fetching RWA market data...");
+      await fetchTreasuryToken();
       await fetchAndStoreRwaData();
       await fetchCondoToken();
     });

@@ -18,7 +18,7 @@ const condoTreasuryTokenSchema = new mongoose.Schema(
       type: String,
     },
     tokenBalance: {
-      type: String,
+      type: Number,
       required: true,
       default: 0,
     },
@@ -26,7 +26,7 @@ const condoTreasuryTokenSchema = new mongoose.Schema(
       type: String,
     },
     balanceUsd: {
-      type: String,
+      type: Number,
       required: true,
       default: 0,
     },
