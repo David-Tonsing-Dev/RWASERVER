@@ -4,7 +4,7 @@ const podcastDetailsSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "AdminUser",
     },
     profileImg: {
       type: String,

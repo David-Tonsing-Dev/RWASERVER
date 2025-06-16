@@ -26,8 +26,14 @@ const getPodcastDetails = async (req, res) => {
       });
     }
     const podcast = await PodcastDetails.find()
+      .populate({
+        path: "userId",
+        select: "username",
+      })
       .skip((page - 1) * size)
-      .limit(size);
+      .limit(size)
+      .lean();
+
     const total = await PodcastDetails.countDocuments();
 
     res.status(200).json({
@@ -37,6 +43,7 @@ const getPodcastDetails = async (req, res) => {
       status: "true",
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Internal server error", status: "false" });
   }
 };
@@ -52,6 +59,12 @@ const addPodcast = async (req, res) => {
         status: false,
         message: "Only Admin or Super admin can add podcast",
       });
+
+    if (!videoTitle || !description || !youtubeLink || !req.file) {
+      return res
+        .status(400)
+        .json({ status: false, message: "All fields are required" });
+    }
 
     const uploadImg = await cloudinary.uploader.upload(req.file.path, {
       use_filename: true,
