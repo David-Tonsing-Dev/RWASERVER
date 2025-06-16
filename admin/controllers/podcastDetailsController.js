@@ -18,7 +18,7 @@ const getPodcastDetails = async (req, res) => {
         videoTitle: { $regex: filter, $options: "i" },
       });
 
-      res.status(200).json({
+      return res.status(200).json({
         message: "Podcast fetched successfully",
         data: podcast,
         total: total,
@@ -36,15 +36,16 @@ const getPodcastDetails = async (req, res) => {
 
     const total = await PodcastDetails.countDocuments();
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Podcast fetched successfully",
       data: podcast,
       total,
       status: "true",
     });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", status: "false" });
+    return res
+      .status(500)
+      .json({ message: "Internal server error", status: "false" });
   }
 };
 
@@ -86,13 +87,14 @@ const addPodcast = async (req, res) => {
     });
     await newPodcast.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Podcast created successfully",
       status: "true",
     });
   } catch (err) {
-    console.log(err, "error");
-    res.status(500).json({ message: "Internal server error", status: "false" });
+    return res
+      .status(500)
+      .json({ message: "Internal server error", status: "false" });
   }
 };
 
@@ -146,8 +148,9 @@ const updatePodcast = async (req, res) => {
       .status(200)
       .json({ status: true, message: "Podcast updated successfully" });
   } catch (err) {
-    console.log(err, "update");
-    res.status(500).json({ message: "Internal server error", status: "false" });
+    return res
+      .status(500)
+      .json({ message: "Internal server error", status: "false" });
   }
 };
 
@@ -228,8 +231,9 @@ const deletePostcast = async (req, res) => {
       .status(200)
       .json({ status: true, message: "Podcast deleted successfully" });
   } catch (error) {
-    console.log(error, "delete");
-    res.status(500).json({ message: "Internal server error", status: false });
+    return res
+      .status(500)
+      .json({ message: "Internal server error", status: false });
   }
 };
 

@@ -14,14 +14,14 @@ const getAllAirdrops = async (req, res) => {
 
     const totalAirdrop = await Airdrop.countDocuments();
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Airdrops fetched successfully",
       data: airdrops,
       total: totalAirdrop,
       status: "true",
     });
   } catch (err) {
-    res
+    return res
       .status(500)
       .json({ error: "Failed to fetch airdrops", status: "false" });
   }
@@ -78,12 +78,12 @@ const createAirdrop = async (req, res) => {
     });
     await newAirdrop.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Airdrop created successfully",
       status: "true",
     });
   } catch (err) {
-    res
+    return res
       .status(500)
       .json({ error: "Failed to create airdrop", status: "false" });
   }
@@ -140,12 +140,12 @@ const updateAirdrop = async (req, res) => {
         .json({ message: "Airdrop not found", status: "false" });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Airdrop updated successfully",
       status: "true",
     });
   } catch (err) {
-    res
+    return res
       .status(500)
       .json({ error: "Failed to update airdrop", status: "false" });
   }
@@ -169,12 +169,14 @@ const deleteAirdrop = async (req, res) => {
         .json({ message: "Airdrop not found", status: "false" });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Airdrop deleted successfully",
       status: "true",
     });
   } catch (err) {
-    res.status(500).json({ error: "Internal server error", status: "false" });
+    return res
+      .status(500)
+      .json({ error: "Internal server error", status: "false" });
   }
 };
 

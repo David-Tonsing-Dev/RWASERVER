@@ -52,7 +52,6 @@ const addReview = async (req, res) => {
       .status(200)
       .json({ status: true, message: "Review added successfully" });
   } catch (err) {
-    console.log("err", err.message);
     return res.status(500).json({
       status: false,
       message: "Internal server error",
