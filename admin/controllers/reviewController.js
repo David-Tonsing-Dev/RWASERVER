@@ -61,68 +61,12 @@ const addReview = async (req, res) => {
   }
 };
 
-// const updateReview = async (req, res) => {
-//   try {
-//     // const userId = req.UserId;
-//     const role = req.role;
-//     const { tokenId } = req.params;
-//     const { review, rating, userId } = req.body;
-
-//     if (role !== "ADMIN" && role !== "SUPERADMIN") {
-//       return res.status(401).json({
-//         status: false,
-//         message: "Only Admin or Super admin can add review",
-//       });
-//     }
-
-//     const checkTokenReview = await Review.findOne({ tokenId: tokenId });
-//     if (!checkTokenReview) {
-//       return res.status(404).json({
-//         status: false,
-//         message: "Token not found",
-//       });
-//     }
-
-//     if (!userId) {
-//       return res.status(400).json({
-//         status: false,
-//         message: "Unauthorized user",
-//       });
-//     }
-
-//     let targetId;
-
-//     if (role === "ADMIN") {
-//       // Admin can update only their own review
-//       targetId = requesterId;
-//     } else if (role === "SUPERADMIN") {
-//       // Superadmin can update any review (provided userId is specified or defaults to their own)
-//       targetId = targetUserId || requesterId;
-//     }
-
-//     // Find the review to update
-//     const reviewEntry = tokenReview.review.find((r) => r.userId === targetId);
-
-//     await checkTokenReview.save();
-
-//     return res.status(200).json({
-//       status: true,
-//       message: "Review updated successfully",
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       message: "Internal server error",
-//     });
-//   }
-// };
-
 const updateReview = async (req, res) => {
   try {
-    const userId = req.userId;
+    const id = req.userId;
     const role = req.role;
     const { tokenId } = req.params;
-    const { review, rating, userId: targetUserId } = req.body;
+    const { review, rating, userId } = req.body;
 
     if (role !== "ADMIN" && role !== "SUPERADMIN") {
       return res.status(401).json({
@@ -132,8 +76,8 @@ const updateReview = async (req, res) => {
     }
     if (!userId)
       return res
-        .status(401)
-        .json({ status: false, message: "Unauthorized user" });
+        .status(400)
+        .json({ status: false, message: "Reviewer id is required" });
 
     const tokenReview = await Review.findOne({ tokenId });
 
@@ -144,15 +88,17 @@ const updateReview = async (req, res) => {
       });
     }
 
-    let targetId;
-
     if (role === "ADMIN") {
-      targetId = userId;
-    } else if (role === "SUPERADMIN") {
-      targetId = targetUserId;
+      if (id !== userId) {
+        return res.status(401).json({
+          status: false,
+          message: "You cannot change someone else review",
+        });
+      }
     }
+
     const reviewEntry = tokenReview.review.find(
-      (r) => r.userId.toString() === targetId.toString()
+      (r) => r.userId.toString() === userId.toString()
     );
 
     if (!reviewEntry) {
@@ -252,15 +198,30 @@ const getReviewById = async (req, res) => {
 
 const deleteReview = async (req, res) => {
   try {
-    const userId = req.userId;
+    const id = req.userId;
     const { tokenId } = req.params;
     const role = req.role;
+    const { userId } = req.body;
 
     if (role !== "SUPERADMIN" && role !== "ADMIN") {
       return res.status(401).json({
         status: false,
         message: "Only Admin or Super admin can delete",
       });
+    }
+
+    if (!userId)
+      return res
+        .status(400)
+        .json({ status: false, message: "Reviewer id is required" });
+
+    if (role === "ADMIN") {
+      if (id !== userId) {
+        return res.status(401).json({
+          status: false,
+          message: "You cannot delete someone else review",
+        });
+      }
     }
 
     const checkReview = await Review.findOne({
