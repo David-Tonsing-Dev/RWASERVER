@@ -10,7 +10,7 @@ const addReview = async (req, res) => {
     const { tokenId } = req.params;
     const { review, rating } = req.body;
 
-    if (role !== "ADMIN" && role !== "SUPERADMIN")
+    if (role !== "ADMIN" && role !== "SUPERADMIN" && role !== "REVIEWER")
       return res.status(401).json({
         status: false,
         message: "Only Admin or Super admin can add review",
@@ -199,9 +199,8 @@ const getReviewById = async (req, res) => {
 const deleteReview = async (req, res) => {
   try {
     const id = req.userId;
-    const { tokenId } = req.params;
+    const { tokenId, userId } = req.params;
     const role = req.role;
-    const { userId } = req.body;
 
     if (role !== "SUPERADMIN" && role !== "ADMIN") {
       return res.status(401).json({

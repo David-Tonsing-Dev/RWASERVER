@@ -12,6 +12,6 @@ const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 router.get("/", adminAuthMiddleware, getReview);
 router.post("/add/:tokenId", adminAuthMiddleware, addReview);
 router.put("/update/:tokenId", adminAuthMiddleware, updateReview);
-router.delete("/delete/:tokenId", adminAuthMiddleware, deleteReview);
+router.delete("/delete/:tokenId/:userId", adminAuthMiddleware, deleteReview);
 
 module.exports = router;
