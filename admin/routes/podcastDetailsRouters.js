@@ -9,7 +9,7 @@ const upload = require("../../multer/multer");
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 const router = express.Router();
 
-router.get("/get/allPodcasts", adminAuthMiddleware, getPodcastDetails);
+router.get("/get/allPodcasts", getPodcastDetails);
 router.post(
   "/add",
   adminAuthMiddleware,
