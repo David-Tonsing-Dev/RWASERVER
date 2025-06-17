@@ -98,9 +98,13 @@ const adminSignIn = async (req, res) => {
         .status(400)
         .json({ status: false, message: "All field are required" });
 
-    const query = role ? { email, role: role.toUpperCase() } : { email };
+    // const query = role ? { email, role: role.toUpperCase() } : { email };
+    // let query = { email };
+    // if (role && role.toUpperCase() === "REVIEWER") {
+    //   query.role = "REVIEWER";
+    // }
 
-    const checkEmail = await AdminUser.findOne(query);
+    // const checkEmail = await AdminUser.findOne({ email });
 
     // if (role === "REVIEWER") {
     //   checkEmail = await AdminUser.findOne({
@@ -108,6 +112,18 @@ const adminSignIn = async (req, res) => {
     //     role: role.toUpperCase(),
     //   });
     // }
+
+    let checkEmail;
+    console.log(role);
+    if (role && role.toUpperCase() === "REVIEWER") {
+      checkEmail = await AdminUser.findOne({ email, role: "REVIEWER" });
+    } else {
+      checkEmail = await AdminUser.findOne({
+        email,
+        role: { $in: ["ADMIN", "SUPERADMIN"] },
+      });
+    }
+
     const checkPassword = await bcrypt.compare(password, checkEmail.password);
 
     if (!checkPassword)
@@ -289,7 +305,7 @@ const reviewerSignUpBySuperAdmin = async (req, res) => {
 
     const checkEmail = await AdminUser.findOne({ email });
 
-    // if (checkEmail)
+    // if (checkEmail.role )
     //   return res
     //     .status(400)
     //     .json({ status: false, message: "Email already exist" });
