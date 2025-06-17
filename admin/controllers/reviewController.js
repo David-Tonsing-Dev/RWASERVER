@@ -183,7 +183,7 @@ const getReviewById = async (req, res) => {
   const { tokenId } = req.params;
 
   try {
-    if (role !== "ADMIN" && role !== "SUPERADMIN")
+    if (role !== "ADMIN" && role !== "SUPERADMIN" && role !== "REVIEWER")
       return res
         .status(401)
         .json({ status: false, message: "Unauthorized user" });

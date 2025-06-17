@@ -46,25 +46,68 @@ const adminSignUp = async (req, res) => {
   }
 };
 
+// const adminSignIn = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     if (!email || !password)
+//       return res
+//         .status(400)
+//         .json({ status: false, message: "All field are required" });
+
+//     const checkEmail = await AdminUser.findOne({ email });
+
+//     if (!checkEmail)
+//       return res
+//         .status(401)
+//         .json({ status: false, message: "Invalid email or password" });
+
+//     const checkPassword = await bcrypt.compare(password, checkEmail.password);
+
+//     if (!checkPassword)
+//       return res
+//         .status(401)
+//         .json({ status: false, message: "Invalid email or password" });
+
+//     const token = jwt.sign(
+//       { id: checkEmail._id, role: checkEmail.role },
+//       process.env.JWT_SECRET_KEY_ADMIN
+//     );
+
+//     return res.status(200).json({
+//       status: true,
+//       message: "Admin login successfully!",
+//       email,
+//       token,
+//     });
+//   } catch (err) {
+//     return res.status(500).json({
+//       status: false,
+//       message: "Oops! something went wrong",
+//       error: err.message,
+//     });
+//   }
+// };
+
 const adminSignIn = async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
-    if (!email || !password || !role)
+    if (!email || !password)
       return res
         .status(400)
         .json({ status: false, message: "All field are required" });
 
-    const checkEmail = await AdminUser.findOne({
-      email,
-      role: role.toUpperCase(),
-    });
+    const query = role ? { email, role: role.toUpperCase() } : { email };
 
-    if (!checkEmail || checkEmail.role !== role.toUpperCase())
-      return res
-        .status(401)
-        .json({ status: false, message: "Invalid email or password" });
+    const checkEmail = await AdminUser.findOne(query);
 
+    // if (role === "REVIEWER") {
+    //   checkEmail = await AdminUser.findOne({
+    //     email,
+    //     role: role.toUpperCase(),
+    //   });
+    // }
     const checkPassword = await bcrypt.compare(password, checkEmail.password);
 
     if (!checkPassword)
@@ -73,7 +116,7 @@ const adminSignIn = async (req, res) => {
         .json({ status: false, message: "Invalid email or password" });
 
     const token = jwt.sign(
-      { id: checkEmail._id, role: role },
+      { id: checkEmail._id, role: checkEmail.role },
       process.env.JWT_SECRET_KEY_ADMIN
     );
 
