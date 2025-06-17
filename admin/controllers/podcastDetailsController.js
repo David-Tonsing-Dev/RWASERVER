@@ -12,8 +12,8 @@ const getPodcastDetails = async (req, res) => {
         videoTitle: { $regex: filter, $options: "i" },
       })
         .skip((page - 1) * size)
-        .limit(size);
-
+        .limit(size)
+        .sort({ updatedAt: -1 });
       const total = await PodcastDetails.countDocuments({
         videoTitle: { $regex: filter, $options: "i" },
       });
@@ -32,7 +32,7 @@ const getPodcastDetails = async (req, res) => {
       })
       .skip((page - 1) * size)
       .limit(size)
-      .lean();
+      .sort({ updatedAt: -1 });
 
     const total = await PodcastDetails.countDocuments();
 

@@ -13,7 +13,7 @@ const addReview = async (req, res) => {
     if (role !== "ADMIN" && role !== "SUPERADMIN" && role !== "REVIEWER")
       return res.status(401).json({
         status: false,
-        message: "Only Admin or Super admin can add review",
+        message: "Only Admin , Super admin or Reviewer can add review",
       });
 
     if (!userId)
@@ -67,10 +67,10 @@ const updateReview = async (req, res) => {
     const { tokenId } = req.params;
     const { review, rating, userId } = req.body;
 
-    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+    if (role !== "ADMIN" && role !== "SUPERADMIN" && role !== "REVIEWER") {
       return res.status(401).json({
         status: false,
-        message: "Only Admin or Super admin can update review",
+        message: "Only Admin , Super admin or Reviewer can update review",
       });
     }
     if (!userId)
@@ -87,13 +87,20 @@ const updateReview = async (req, res) => {
       });
     }
 
-    if (role === "ADMIN") {
-      if (id !== userId) {
-        return res.status(401).json({
-          status: false,
-          message: "You cannot change someone else review",
-        });
-      }
+    // if (role === "ADMIN") {
+    //   if (id !== userId) {
+    //     return res.status(401).json({
+    //       status: false,
+    //       message: "You cannot change someone else review",
+    //     });
+    //   }
+    // }
+
+    if (role !== "SUPERADMIN" && id !== userId) {
+      return res.status(401).json({
+        status: false,
+        message: "You can only update your own review",
+      });
     }
 
     const reviewEntry = tokenReview.review.find(
@@ -136,7 +143,7 @@ const getReview = async (req, res) => {
     const getAllReview = await Review.find()
       .populate({
         path: "review.userId",
-        select: "username",
+        select: "username role",
       })
       .lean();
 
@@ -147,6 +154,7 @@ const getReview = async (req, res) => {
           ...r,
           userId: user?._id ?? null,
           username: user?.username ?? null,
+          role: user?.role ?? null,
         };
       });
 

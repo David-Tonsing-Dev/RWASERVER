@@ -10,8 +10,8 @@ const getAllAirdrops = async (req, res) => {
 
     const airdrops = await Airdrop.find()
       .skip((page - 1) * size)
-      .limit(size);
-
+      .limit(size)
+      .sort({ updatedAt: -1 });
     const totalAirdrop = await Airdrop.countDocuments();
 
     return res.status(200).json({
