@@ -243,10 +243,10 @@ const reviewerSignUpBySuperAdmin = async (req, res) => {
 
     const checkEmail = await AdminUser.findOne({ email });
 
-    if (checkEmail)
-      return res
-        .status(400)
-        .json({ status: false, message: "Email already exist" });
+    // if (checkEmail)
+    //   return res
+    //     .status(400)
+    //     .json({ status: false, message: "Email already exist" });
 
     const checkUsername = await AdminUser.findOne({ username });
 
