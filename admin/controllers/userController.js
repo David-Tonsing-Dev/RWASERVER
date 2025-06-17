@@ -48,16 +48,19 @@ const adminSignUp = async (req, res) => {
 
 const adminSignIn = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
-    if (!email || !password)
+    if (!email || !password || !role)
       return res
         .status(400)
         .json({ status: false, message: "All field are required" });
 
-    const checkEmail = await AdminUser.findOne({ email });
+    const checkEmail = await AdminUser.findOne({
+      email,
+      role: role.toUpperCase(),
+    });
 
-    if (!checkEmail)
+    if (!checkEmail || checkEmail.role !== role.toUpperCase())
       return res
         .status(401)
         .json({ status: false, message: "Invalid email or password" });
@@ -70,13 +73,13 @@ const adminSignIn = async (req, res) => {
         .json({ status: false, message: "Invalid email or password" });
 
     const token = jwt.sign(
-      { id: checkEmail._id, role: checkEmail.role },
+      { id: checkEmail._id, role: role },
       process.env.JWT_SECRET_KEY_ADMIN
     );
 
     return res.status(200).json({
       status: true,
-      message: "Admin login successfully!",
+      message: "Login successfully!",
       email,
       token,
     });
