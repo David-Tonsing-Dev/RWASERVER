@@ -23,3 +23,5 @@ const fetchUserNewToken = async () => {
     console.error("Error in syncTokens:", err);
   }
 };
+
+module.exports = fetchUserNewToken;
