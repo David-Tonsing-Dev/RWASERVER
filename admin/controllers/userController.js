@@ -114,7 +114,7 @@ const adminSignIn = async (req, res) => {
     // }
 
     let checkEmail;
-    console.log(role);
+
     if (role && role.toUpperCase() === "REVIEWER") {
       checkEmail = await AdminUser.findOne({ email, role: "REVIEWER" });
     } else {
@@ -305,10 +305,10 @@ const reviewerSignUpBySuperAdmin = async (req, res) => {
 
     const checkEmail = await AdminUser.findOne({ email });
 
-    // if (checkEmail.role )
-    //   return res
-    //     .status(400)
-    //     .json({ status: false, message: "Email already exist" });
+    if (checkEmail && checkEmail.role === "REVIEWER")
+      return res
+        .status(400)
+        .json({ status: false, message: "Email already exist" });
 
     const checkUsername = await AdminUser.findOne({ username });
 

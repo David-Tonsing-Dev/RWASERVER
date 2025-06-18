@@ -175,4 +175,76 @@ const fetchCondoToken = async () => {
   }
 };
 
-module.exports = { fetchAndStoreRwaData, fetchCondoToken };
+const fetchNewToken = async (tokenId) => {
+  try {
+    const response = await axios.get(
+      `https://pro-api.coingecko.com/api/v3/coins/${tokenId}?sparkline=true`,
+
+      {
+        headers: { "x-cg-pro-api-key": process.env.COINGECKO_KEY },
+      }
+    );
+    const coin = response.data;
+    const existingToken = await CoingeckoToken.findOneAndUpdate(
+      {
+        id: coin.id,
+      },
+      {
+        $set: {
+          current_price: coin.market_data?.current_price?.usd ?? null,
+          market_cap: coin.market_data?.market_cap?.usd ?? null,
+          market_cap_rank: coin.market_data?.market_cap_rank ?? null,
+          total_volume: coin.market_data?.total_volume?.usd ?? null,
+          circulating_supply: coin.market_data?.circulating_supply ?? null,
+
+          price_change_percentage_1h_in_currency:
+            coin.market_data?.price_change_percentage_1h_in_currency?.usd ??
+            null,
+          price_change_percentage_24h_in_currency:
+            coin.market_data?.price_change_percentage_24h_in_currency?.usd ??
+            null,
+          price_change_percentage_7d_in_currency:
+            coin.market_data?.price_change_percentage_7d_in_currency?.usd ??
+            null,
+          price_change_percentage_30d_in_currency:
+            coin.market_data?.price_change_percentage_30d_in_currency?.usd ??
+            null,
+          sparkline_in_7d: coin.market_data?.sparkline_7d || null,
+        },
+      }
+    );
+
+    if (!existingToken) {
+      await new CoingeckoToken({
+        id: tokenId ?? null,
+        symbol: checkToken.symbolToken ?? null,
+        name: checkToken.nameToken ?? null,
+        image: checkToken.tokenImage ?? null,
+        description: checkToken.descriptionToken ?? null,
+
+        current_price: coin.market_data?.current_price?.usd ?? null,
+        market_cap: coin.market_data?.market_cap?.usd ?? null,
+        market_cap_rank: coin.market_data?.market_cap_rank ?? null,
+        total_volume: coin.market_data?.total_volume?.usd ?? null,
+        circulating_supply: coin.market_data?.circulating_supply ?? null,
+        price_change_percentage_1h_in_currency:
+          coin.market_data?.price_change_percentage_1h_in_currency?.usd ?? null,
+        price_change_percentage_24h_in_currency:
+          coin.market_data?.price_change_percentage_24h_in_currency?.usd ??
+          null,
+        price_change_percentage_7d_in_currency:
+          coin.market_data?.price_change_percentage_7d_in_currency?.usd ?? null,
+        price_change_percentage_30d_in_currency:
+          coin.market_data?.price_change_percentage_30d_in_currency?.usd ??
+          null,
+        sparkline_in_7d: coin.market_data?.sparkline_7d || null,
+      });
+    }
+
+    console.log("User token updated in the database.");
+  } catch (err) {
+    console.error(`Error`, err.message);
+  }
+};
+
+module.exports = { fetchAndStoreRwaData, fetchCondoToken, fetchNewToken };

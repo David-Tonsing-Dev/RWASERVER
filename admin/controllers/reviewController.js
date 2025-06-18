@@ -154,7 +154,8 @@ const getReview = async (req, res) => {
           ...r,
           userId: user?._id ?? null,
           username: user?.username ?? null,
-          role: user?.role ?? null,
+          // role: user?.role ?? null,
+          isReviewer: user.role === "REVIEWER",
         };
       });
 
