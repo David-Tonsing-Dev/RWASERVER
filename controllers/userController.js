@@ -5,6 +5,7 @@ const mg = require("nodemailer-mailgun-transport");
 const UserModel = require("../models/userModel");
 const UserCoin = require("../models/userCoinModel");
 const { capitalizeAfterSpace } = require("../helper/capitalize");
+const password = require("passport");
 
 const createToken = (id) => {
   const jwtkey = process.env.JWT_SECRET_KEY;
@@ -173,6 +174,13 @@ const signin = async (req, res) => {
   }
 };
 
+const googleSignIn = async (req, res) => {
+  const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
+  res.redirect(`http://localhost:5173/auth-success?token=${token}`);
+};
+
 const getUsers = async (req, res) => {
   try {
     const users = await UserModel.find();
@@ -330,12 +338,10 @@ const addUserFavCoin = async (req, res) => {
 
     userCoin = await userCoin.save();
 
-    return res
-      .status(200)
-      .json({
-        status: true,
-        message: `Token ${add ? "added to" : "removed from"} watchlist!`,
-      });
+    return res.status(200).json({
+      status: true,
+      message: `Token ${add ? "added to" : "removed from"} watchlist!`,
+    });
   } catch (err) {
     return res.status(500).json({
       status: false,
@@ -386,6 +392,7 @@ const deleteUserFavCoin = async (req, res) => {
 module.exports = {
   signup,
   signin,
+  googleSignIn,
   getUsers,
   findUser,
   verifyEmail,
