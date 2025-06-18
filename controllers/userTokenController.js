@@ -140,7 +140,7 @@ const addNewToken = async (req, res) => {
 
     rwaCategory = rwaCategory.split(",");
 
-    const tokenImage = await cloudinary.uploader.upload("tokenImage", {
+    const tokenImage = await cloudinary.uploader.upload(req.file.path, {
       use_filename: true,
       folder: "rwa/user/token",
     });
@@ -151,7 +151,6 @@ const addNewToken = async (req, res) => {
         .json({ status: false, message: "Error in uploading image" });
 
     const newTokenObj = {
-      id,
       userId,
       nameToken,
       symbolToken,
@@ -180,14 +179,15 @@ const addNewToken = async (req, res) => {
       explorerLink: [explorerLink1, explorerLink2, explorerLink3],
       exchangeTradeUrl: [exchangeTradeUrl],
       tokenImage: tokenImage.secure_url,
-      listingTerm: listingTerm === "true" ? true : false,
-      supportTerm,
+      listingTerm: listingTerm ? true : false,
+      supportTerm: supportTerm ? true : false,
     };
 
     if (!listingTerm || !supportTerm)
       return res
         .staus(400)
         .json({ status: false, message: "Accept the term!" });
+
     const addNewToken = await Token.create(newTokenObj);
     await addNewToken.save();
 
