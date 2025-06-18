@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
       enum: ["SUPERADMIN", "ADMIN", "USER", "REVIEWER"],
       default: "USER",
     },
+    profileImg: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

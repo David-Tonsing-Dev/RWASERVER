@@ -11,6 +11,7 @@ const {
   addUserFavCoin,
   deleteUserFavCoin,
   googleSignIn,
+  googleData,
 } = require("../controllers/userController");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 const passport = require("passport");
@@ -29,6 +30,7 @@ router.get(
   passport.authenticate("google", { session: false }),
   googleSignIn
 );
+router.post("/auth/google", googleData);
 router.get("/verify/:token", verifyEmail);
 router.get("/:userId", findUser);
 router.get("/", getUsers);

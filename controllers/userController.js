@@ -181,6 +181,37 @@ const googleSignIn = async (req, res) => {
   res.redirect(`http://localhost:5173/auth-success?token=${token}`);
 };
 
+const googleData = async (req, res) => {
+  try {
+    const { userName, email, profileImg, googleId } = req.body;
+    if (!email || !userName)
+      return res
+        .status(400)
+        .json({ status: false, message: "All fields are required!" });
+
+    const addUser = new UserModel({ userName, email, profileImg, googleId });
+    await addUser.save();
+
+    const verificationToken = jwt.sign(
+      { id: addUser._id, role: addUser.role },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+
+    return res.status(200).json({
+      status: true,
+      message: "Token generated successfully",
+      token: verificationToken,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
 const getUsers = async (req, res) => {
   try {
     const users = await UserModel.find();
@@ -400,4 +431,5 @@ module.exports = {
   resetPassword,
   addUserFavCoin,
   deleteUserFavCoin,
+  googleData,
 };
