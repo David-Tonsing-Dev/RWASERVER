@@ -65,6 +65,7 @@ const newTokenSchema = mongoose.Schema(
   {
     id: {
       type: String,
+      default: null,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,

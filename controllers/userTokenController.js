@@ -128,7 +128,9 @@ const addNewToken = async (req, res) => {
       !rwaCategory ||
       !website ||
       !submitter ||
-      !req.file
+      !req.file ||
+      !listingTerm ||
+      !supportTerm
     )
       return res
         .status(400)
@@ -149,6 +151,7 @@ const addNewToken = async (req, res) => {
         .json({ status: false, message: "Error in uploading image" });
 
     const newTokenObj = {
+      id,
       userId,
       nameToken,
       symbolToken,

@@ -4,6 +4,7 @@ const {
   fetchCondoToken,
 } = require("../helper/fetchAndStoreRwaData");
 const { fetchTreasuryToken } = require("../helper/fetchTreasuryToken");
+const fetchUserNewToken = require("../helper/fetchUserNewToken");
 
 const start = async () => {
   try {
@@ -12,6 +13,7 @@ const start = async () => {
       await fetchTreasuryToken();
       await fetchAndStoreRwaData();
       await fetchCondoToken();
+      await fetchUserNewToken();
     });
 
     console.log("CRON job started successfully!");

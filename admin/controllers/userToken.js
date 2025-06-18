@@ -42,6 +42,8 @@ const userTokenVerified = async (req, res) => {
         message: "Token not found",
       });
     }
+    checkToken.id = tokenId;
+    await checkToken.save();
 
     const checkTokenExists = await CoingeckoToken.findOne({ id });
 
