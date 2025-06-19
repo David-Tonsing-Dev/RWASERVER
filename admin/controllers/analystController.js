@@ -3,6 +3,14 @@ const User = require("../../models/userModel");
 
 const getRoleCounts = async (req, res) => {
   try {
+    const role = req.role;
+
+    if (role !== "SUPERADMIN")
+      return res.status(401).json({
+        status: false,
+        message: "Access restricted to super admin only",
+      });
+
     const adminStats = await AdminUser.aggregate([
       {
         $match: { role: { $in: ["ADMIN", "REVIEWER"] } },
@@ -43,11 +51,17 @@ const getRoleCounts = async (req, res) => {
 
 const getRoleUserLists = async (req, res) => {
   try {
+    const role = req.role;
     let { page = 1, size = 10, filter = "" } = req.query;
-
     page = parseInt(page);
     size = parseInt(size);
     const skip = (page - 1) * size;
+
+    if (role !== "SUPERADMIN")
+      return res.status(401).json({
+        status: false,
+        message: "Access restricted to super admin only",
+      });
 
     const searchQuery =
       filter.trim() !== ""
