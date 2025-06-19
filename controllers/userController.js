@@ -198,7 +198,10 @@ const googleData = async (req, res) => {
     }
 
     const verificationToken = jwt.sign(
-      { id: addUser._id, role: addUser.role },
+      {
+        id: addUser ? addUser._id : user._id,
+        role: addUser ? addUser.role : user.role,
+      },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
