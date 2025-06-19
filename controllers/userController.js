@@ -191,8 +191,9 @@ const googleData = async (req, res) => {
 
     let user = await UserModel.findOne({ email });
 
+    let addUser;
     if (!user) {
-      const addUser = new UserModel({ userName, email, profileImg, googleId });
+      addUser = new UserModel({ userName, email, profileImg, googleId });
       await addUser.save();
     }
 
