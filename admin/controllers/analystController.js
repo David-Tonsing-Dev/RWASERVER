@@ -167,7 +167,7 @@ const getUsersLists = async (req, res) => {
         ? {
             $or: [
               { email: { $regex: filter, $options: "i" } },
-              { username: { $regex: filter, $options: "i" } },
+              { userName: { $regex: filter, $options: "i" } },
             ],
           }
         : {};
