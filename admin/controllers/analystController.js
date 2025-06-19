@@ -5,10 +5,10 @@ const getRoleCounts = async (req, res) => {
   try {
     const role = req.role;
 
-    if (role !== "SUPERADMIN")
+    if (role !== "ADMIN" && role !== "SUPERADMIN")
       return res.status(401).json({
         status: false,
-        message: "Access restricted to super admin only",
+        message: "Only Admin or Super admin can access",
       });
 
     const adminStats = await AdminUser.aggregate([
@@ -25,20 +25,18 @@ const getRoleCounts = async (req, res) => {
 
     const userCount = await User.countDocuments();
 
-    const counts = {
-      totalUsers: userCount,
-    };
-
-    for (const stat of adminStats) {
-      const role = stat._id;
-      const capitalized = role.charAt(0).toUpperCase() + role.slice(1);
-      counts[`total${capitalized}s`] = stat.total;
-    }
+    const getTotals = [
+      ...adminStats.map((stat) => ({
+        type: stat._id.charAt(0).toUpperCase() + stat._id.slice(1),
+        total: stat.total,
+      })),
+      { type: "User", total: userCount },
+    ];
 
     return res.status(200).json({
       success: true,
       message: "Role counts fetched successfully",
-      counts,
+      counts: getTotals,
     });
   } catch (error) {
     return res.status(500).json({
@@ -49,7 +47,7 @@ const getRoleCounts = async (req, res) => {
   }
 };
 
-const getRoleUserLists = async (req, res) => {
+const getAdminLists = async (req, res) => {
   try {
     const role = req.role;
     let { page = 1, size = 10, filter = "" } = req.query;
@@ -57,10 +55,10 @@ const getRoleUserLists = async (req, res) => {
     size = parseInt(size);
     const skip = (page - 1) * size;
 
-    if (role !== "SUPERADMIN")
+    if (role !== "ADMIN" && role !== "SUPERADMIN")
       return res.status(401).json({
         status: false,
-        message: "Access restricted to super admin only",
+        message: "Only Admin or Super admin can access",
       });
 
     const searchQuery =
@@ -73,28 +71,105 @@ const getRoleUserLists = async (req, res) => {
           }
         : {};
 
-    const [admins, reviewers, users] = await Promise.all([
-      AdminUser.find({ role: "ADMIN", ...searchQuery })
-        .skip(skip)
-        .limit(size)
-        .sort({ createdAt: -1 }),
-
-      AdminUser.find({ role: "REVIEWER", ...searchQuery })
-        .skip(skip)
-        .limit(size)
-        .sort({ createdAt: -1 }),
-
-      User.find(searchQuery).skip(skip).limit(size).sort({ createdAt: -1 }),
-    ]);
+    const getAdmins = await AdminUser.find({ role: "ADMIN", ...searchQuery })
+      .select("username email")
+      .skip(skip)
+      .limit(size)
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       message: "Role-based users fetched successfully",
       status: true,
-      data: {
-        admins,
-        reviewers,
-        users,
-      },
+      admins: getAdmins,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      status: false,
+      error: error.message,
+    });
+  }
+};
+const getReviewerLists = async (req, res) => {
+  try {
+    const role = req.role;
+    let { page = 1, size = 10, filter = "" } = req.query;
+    page = parseInt(page);
+    size = parseInt(size);
+    const skip = (page - 1) * size;
+
+    if (role !== "ADMIN" && role !== "SUPERADMIN")
+      return res.status(401).json({
+        status: false,
+        message: "Only Admin or Super admin can access",
+      });
+
+    const searchQuery =
+      filter.trim() !== ""
+        ? {
+            $or: [
+              { email: { $regex: filter, $options: "i" } },
+              { username: { $regex: filter, $options: "i" } },
+            ],
+          }
+        : {};
+
+    const getReviewers = await AdminUser.find({
+      role: "REVIEWER",
+      ...searchQuery,
+    })
+      .select("username email")
+      .skip(skip)
+      .limit(size)
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      message: "Reviewers fetched successfully",
+      status: true,
+      reviewers: getReviewers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      status: false,
+      error: error.message,
+    });
+  }
+};
+const getUsersLists = async (req, res) => {
+  try {
+    const role = req.role;
+    let { page = 1, size = 10, filter = "" } = req.query;
+    page = parseInt(page);
+    size = parseInt(size);
+    const skip = (page - 1) * size;
+
+    if (role !== "ADMIN" && role !== "SUPERADMIN")
+      return res.status(401).json({
+        status: false,
+        message: "Only Admin or Super admin can access",
+      });
+
+    const searchQuery =
+      filter.trim() !== ""
+        ? {
+            $or: [
+              { email: { $regex: filter, $options: "i" } },
+              { username: { $regex: filter, $options: "i" } },
+            ],
+          }
+        : {};
+
+    const getUsers = await User.find(searchQuery)
+      .select("userName email profileImg")
+      .skip(skip)
+      .limit(size)
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      message: "Users fetched successfully",
+      status: true,
+      users: getUsers,
     });
   } catch (error) {
     return res.status(500).json({
@@ -105,4 +180,9 @@ const getRoleUserLists = async (req, res) => {
   }
 };
 
-module.exports = { getRoleCounts, getRoleUserLists };
+module.exports = {
+  getRoleCounts,
+  getAdminLists,
+  getReviewerLists,
+  getUsersLists,
+};
