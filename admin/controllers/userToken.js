@@ -27,13 +27,12 @@ const userTokenVerified = async (req, res) => {
     const { id } = req.params;
     const { isVerify, tokenId } = req.body;
 
-    if (role !== "ADMIN" && role !== "SUPERADMIN") {
+    if (role !== "SUPERADMIN") {
       return res.status(401).json({
         status: "false",
         message: "Unauthorized user",
       });
     }
-
     const checkToken = await Token.findOne({ _id: id });
 
     if (!checkToken) {
@@ -42,6 +41,34 @@ const userTokenVerified = async (req, res) => {
         message: "Token not found",
       });
     }
+    const response = await axios.get(
+      `https://pro-api.coingecko.com/api/v3/coins/${tokenId}?sparkline=true`,
+      {
+        headers: { "x-cg-pro-api-key": process.env.COINGECKO_KEY },
+        validateStatus: () => true,
+      }
+    );
+
+    if (
+      response.status === 404 ||
+      !response.data ||
+      response.data.error === "coin not found"
+    ) {
+      return res.status(404).json({
+        status: false,
+        message:
+          "Token not found on CoinGecko. Please verify the token ID and try again.",
+      });
+    }
+
+    const checkTokenIdExists = await CoingeckoToken.findOne({ id: tokenId });
+    if (checkTokenIdExists) {
+      return res.status(404).json({
+        status: false,
+        message: "Token already exists",
+      });
+    }
+
     checkToken.id = tokenId;
     await checkToken.save();
 
@@ -63,7 +90,6 @@ const userTokenVerified = async (req, res) => {
       message: "Token verification status updated successfully",
     });
   } catch (error) {
-    console.log(error, "message error");
     return res.status(500).json({
       status: false,
       message: "Internal server error",

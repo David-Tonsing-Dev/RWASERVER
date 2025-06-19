@@ -45,6 +45,11 @@ const fetchAndStoreRwaData = async () => {
           sparkline_in_7d,
         } = coin;
 
+        // let i = 1;
+        // if (page === 2) {
+        //   console.log("id---", id, name, symbol);
+        // }
+
         const existingToken = await CoingeckoToken.findOneAndUpdate(
           { id },
           {
@@ -67,6 +72,8 @@ const fetchAndStoreRwaData = async () => {
             },
           }
         );
+
+        // console.log("-==-=-=-=-=-=1");
 
         if (!existingToken) {
           await CoingeckoToken.create({
@@ -91,6 +98,7 @@ const fetchAndStoreRwaData = async () => {
           });
           //   await CoingeckoToken.save();
         }
+        // console.log("-==-=-=-=-=-=2");
       }
       console.log(`Page ${page} processed successfully.`);
       page++;
@@ -187,6 +195,7 @@ const fetchNewToken = async (tokenId) => {
     );
     const coin = response.data;
     const checkToken = await Token.findOne({ id: tokenId });
+
     const existingToken = await CoingeckoToken.findOneAndUpdate(
       {
         id: coin.id,
@@ -217,7 +226,7 @@ const fetchNewToken = async (tokenId) => {
     );
 
     if (!existingToken) {
-      await new CoingeckoToken({
+      const addNewToken = new CoingeckoToken({
         id: checkToken.id ?? null,
         symbol: checkToken.symbolToken ?? null,
         name: checkToken.nameToken ?? null,
@@ -241,6 +250,7 @@ const fetchNewToken = async (tokenId) => {
           null,
         sparkline_in_7d: coin.market_data?.sparkline_7d || null,
       });
+      await addNewToken.save();
     }
 
     console.log("User token updated in the database.");

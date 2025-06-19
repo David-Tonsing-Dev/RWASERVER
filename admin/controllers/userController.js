@@ -124,6 +124,11 @@ const adminSignIn = async (req, res) => {
       });
     }
 
+    if (!checkEmail)
+      return res
+        .status(401)
+        .json({ status: false, message: "Invalid email or password" });
+
     const checkPassword = await bcrypt.compare(password, checkEmail.password);
 
     if (!checkPassword)
