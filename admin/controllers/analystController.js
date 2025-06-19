@@ -77,10 +77,16 @@ const getAdminLists = async (req, res) => {
       .limit(size)
       .sort({ createdAt: -1 });
 
+    const count = await AdminUser.countDocuments({
+      role: "ADMIN",
+      ...searchQuery,
+    });
+
     return res.status(200).json({
       message: "Role-based users fetched successfully",
       status: true,
       admins: getAdmins,
+      total: count,
     });
   } catch (error) {
     return res.status(500).json({
@@ -123,10 +129,16 @@ const getReviewerLists = async (req, res) => {
       .limit(size)
       .sort({ createdAt: -1 });
 
+    const count = await AdminUser.countDocuments({
+      role: "REVIEWER",
+      ...searchQuery,
+    });
+
     return res.status(200).json({
       message: "Reviewers fetched successfully",
       status: true,
       reviewers: getReviewers,
+      total: count,
     });
   } catch (error) {
     return res.status(500).json({
@@ -166,10 +178,13 @@ const getUsersLists = async (req, res) => {
       .limit(size)
       .sort({ createdAt: -1 });
 
+    const count = await User.countDocuments(searchQuery);
+
     return res.status(200).json({
       message: "Users fetched successfully",
       status: true,
       users: getUsers,
+      total: count,
     });
   } catch (error) {
     return res.status(500).json({
