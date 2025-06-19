@@ -45,12 +45,10 @@ const userTokenVerified = async (req, res) => {
     checkToken.id = tokenId;
     await checkToken.save();
 
-    const checkTokenExists = await CoingeckoToken.findOne({ id });
-
-    if (!checkTokenExists) {
+    if (checkToken.adminVerified === true) {
       return res.status(400).json({
         status: "false",
-        message: "Token already exists",
+        message: "Token is already verified",
       });
     }
 

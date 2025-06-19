@@ -13,7 +13,7 @@ const coinGeckoTokenSchema = new mongoose.Schema(
     symbol: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
     },
     name: {
       type: String,

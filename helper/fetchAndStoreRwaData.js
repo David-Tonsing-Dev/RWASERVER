@@ -1,5 +1,6 @@
 const axios = require("axios");
 const CoingeckoToken = require("../models/coinTokenModel");
+const Token = require("../models/newTokenModel");
 
 const fetchAndStoreRwaData = async () => {
   const perPage = 100;
@@ -45,7 +46,7 @@ const fetchAndStoreRwaData = async () => {
         } = coin;
 
         const existingToken = await CoingeckoToken.findOneAndUpdate(
-          { symbol },
+          { id },
           {
             $set: {
               current_price: current_price ?? null,
@@ -185,6 +186,7 @@ const fetchNewToken = async (tokenId) => {
       }
     );
     const coin = response.data;
+    const checkToken = await Token.findOne({ id: tokenId });
     const existingToken = await CoingeckoToken.findOneAndUpdate(
       {
         id: coin.id,
@@ -216,7 +218,7 @@ const fetchNewToken = async (tokenId) => {
 
     if (!existingToken) {
       await new CoingeckoToken({
-        id: tokenId ?? null,
+        id: checkToken.id ?? null,
         symbol: checkToken.symbolToken ?? null,
         name: checkToken.nameToken ?? null,
         image: checkToken.tokenImage ?? null,
