@@ -6,12 +6,52 @@ const { fetchNewToken } = require("../../helper/fetchAndStoreRwaData");
 
 const getNewToken = async (req, res) => {
   try {
-    const getToken = await Token.find();
+    let { page = 1, size = 10, filter } = req.query;
+
+    page = parseInt(page);
+    size = parseInt(size);
+    if (filter === "" || !filter) {
+      const getToken = await Token.find()
+        .skip((page - 1) * size)
+        .limit(size)
+        .sort({ createdAt: -1 });
+
+      const total = await Token.countDocuments();
+
+      return res
+        .status(200)
+        .json({
+          status: true,
+          message: "Token fetched successfully",
+          tokens: getToken,
+          total,
+        });
+    }
+
+    const getToken = await Token.find({
+      $or: [
+        { id: { $regex: filter, $options: "i" } },
+        { nameToken: { $regex: filter, $options: "i" } },
+        { symbolToken: { $regex: filter, $options: "i" } },
+      ],
+    })
+      .skip((page - 1) * size)
+      .limit(size)
+      .sort({ createdAt: -1 });
+
+    const total = await Token.countDocuments({
+      $or: [
+        { id: { $regex: filter, $options: "i" } },
+        { nameToken: { $regex: filter, $options: "i" } },
+        { symbolToken: { $regex: filter, $options: "i" } },
+      ],
+    });
 
     return res.status(200).json({
       status: true,
       message: "Token fetched successfully",
       tokens: getToken,
+      total,
     });
   } catch (error) {
     return res.status(500).json({

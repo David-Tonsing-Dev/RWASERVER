@@ -193,7 +193,7 @@ const addNewToken = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: true, message: "Request submit successfully!" });
+      .json({ status: true, message: "Request submited successfully!" });
   } catch (err) {
     return res.status(500).json({
       status: false,

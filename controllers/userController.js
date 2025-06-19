@@ -189,8 +189,12 @@ const googleData = async (req, res) => {
         .status(400)
         .json({ status: false, message: "All fields are required!" });
 
-    const addUser = new UserModel({ userName, email, profileImg, googleId });
-    await addUser.save();
+    let user = await UserModel.findOne({ email });
+
+    if (!user) {
+      const addUser = new UserModel({ userName, email, profileImg, googleId });
+      await addUser.save();
+    }
 
     const verificationToken = jwt.sign(
       { id: addUser._id, role: addUser.role },
