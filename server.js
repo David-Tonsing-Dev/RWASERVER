@@ -72,7 +72,7 @@ app.use("/api/admin/airdrop", adminAirdropRouter);
 app.use("/api/admin/podcast", podcastDetailsRouters);
 app.use("/api/admin/userToken", userTokenRouters);
 app.use("/api/admin/analyst", analystRouters);
-// app.use("/api/admin/analystic", googleAnalyticsDataRouters);
+app.use("/api/admin/analystic", googleAnalyticsDataRouters);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   app.listen(PORT, async () => {

@@ -40,7 +40,6 @@ const getAllGAData = async (req, res) => {
 
     const [overview, trends, geo, devices, events, traffic] =
       results.map(formatResult);
-    console.log(overview, "overview");
 
     return res.status(200).json({
       status: true,
