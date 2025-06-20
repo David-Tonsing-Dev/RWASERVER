@@ -653,7 +653,7 @@ const getNewsDetail = async (req, res) => {
   }
 };
 
-const getBlogDetail = async ({ req, res }) => {
+const getBlogDetail = async (req, res) => {
   try {
     const { slug } = req.params;
 
@@ -666,6 +666,7 @@ const getBlogDetail = async ({ req, res }) => {
 
     return res.status(200).json({ status: true, blog: getBlog });
   } catch (err) {
+    console.log(err, "error");
     res.status(500).json({
       status: false,
       message: "Something went wrong!",
