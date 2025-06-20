@@ -8,10 +8,10 @@ const {
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 const router = express.Router();
 
-router.get("/roles/counts", adminAuthMiddleware, getRoleCounts);
+router.get("/get/userCount", adminAuthMiddleware, getRoleCounts);
 
-router.get("/roles/admin", adminAuthMiddleware, getAdminLists);
-router.get("/roles/reviewer", adminAuthMiddleware, getReviewerLists);
-router.get("/roles/user", adminAuthMiddleware, getUsersLists);
+router.get("/get/allAdmin", adminAuthMiddleware, getAdminLists);
+router.get("/get/allReviewer", adminAuthMiddleware, getReviewerLists);
+router.get("/get/allUser", adminAuthMiddleware, getUsersLists);
 
 module.exports = router;

@@ -98,7 +98,7 @@ const getNews = async (req, res) => {
     })
       .skip((page - 1) * size)
       .limit(size)
-      .sort({ updatedAt: -1 });
+      .sort({ createdAt: -1 });
 
     const totalFilter = await News.countDocuments({
       $or: [

@@ -653,7 +653,7 @@ const getNewsDetail = async (req, res) => {
   }
 };
 
-const getBlogDetail = async () => {
+const getBlogDetail = async ({ req, res }) => {
   try {
     const { slug } = req.params;
 
