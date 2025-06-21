@@ -3,16 +3,53 @@ const cloudinary = require("../../config/cloudinary");
 
 const getAllAirdrops = async (req, res) => {
   try {
-    let { page, size, filter } = req.query;
+    let { page, size, filter, sortBy, order } = req.query;
 
     page = parseInt(page);
     size = parseInt(size);
 
-    const airdrops = await Airdrop.find()
+    sortBy = sortBy || "createdAt";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
+
+    const sortOptions = { [sortBy]: order };
+
+    if (filter === "" || !filter) {
+      const airdrops = await Airdrop.find()
+        .skip((page - 1) * size)
+        .limit(size)
+        .sort(sortOptions);
+
+      const totalAirdrop = await Airdrop.countDocuments();
+
+      return res.status(200).json({
+        message: "Airdrops fetched successfully",
+        data: airdrops,
+        total: totalAirdrop,
+        status: "true",
+      });
+    }
+
+    const airdrops = await Airdrop.find({
+      $or: [
+        { tokenName: { $regex: filter, $options: "i" } },
+        { tokenTicker: { $regex: filter, $options: "i" } },
+      ],
+    })
       .skip((page - 1) * size)
       .limit(size)
-      .sort({ updatedAt: -1 });
-    const totalAirdrop = await Airdrop.countDocuments();
+      .sort(sortOptions);
+
+    const totalAirdrop = await Airdrop.countDocuments({
+      $or: [
+        { tokenName: { $regex: filter, $options: "i" } },
+        { tokenTicker: { $regex: filter, $options: "i" } },
+      ],
+    });
 
     return res.status(200).json({
       message: "Airdrops fetched successfully",

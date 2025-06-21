@@ -3,41 +3,65 @@ const cloudinary = require("../../config/cloudinary");
 
 const getPodcastDetails = async (req, res) => {
   try {
-    let { page = 1, size = 10, filter } = req.query;
+    let { page = 1, size = 10, filter, sortBy, order } = req.query;
 
     page = parseInt(page);
     size = parseInt(size);
-    if (filter) {
-      const podcast = await PodcastDetails.find({
-        videoTitle: { $regex: filter, $options: "i" },
-      })
-        .skip((page - 1) * size)
-        .limit(size)
-        .sort({ updatedAt: -1 });
-      const total = await PodcastDetails.countDocuments({
-        videoTitle: { $regex: filter, $options: "i" },
-      });
 
-      return res.status(200).json({
-        message: "Podcast fetched successfully",
-        data: podcast,
-        total: total,
-        status: "true",
-      });
-    }
-    const podcast = await PodcastDetails.find()
+    sortBy = sortBy || "createdAt";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
+    const sortOptions = { [sortBy]: order };
+
+    // if (filter) {
+    //   const podcast = await PodcastDetails.find({
+    //     videoTitle: { $regex: filter, $options: "i" },
+    //   })
+    //     .skip((page - 1) * size)
+    //     .limit(size)
+    //     .sort(sortOptions);
+    //   const total = await PodcastDetails.countDocuments({
+    //     videoTitle: { $regex: filter, $options: "i" },
+    //   });
+
+    //   return res.status(200).json({
+    //     message: "Podcast fetched successfully",
+    //     data: podcast,
+    //     total: total,
+    //     status: "true",
+    //   });
+    // }
+    // const podcast = await PodcastDetails.find()
+    //   .populate({
+    //     path: "userId",
+    //     select: "username",
+    //   })
+    //   .skip((page - 1) * size)
+    //   .limit(size)
+    //   .sort(sortOptions);
+
+    // const total = await PodcastDetails.countDocuments();
+    const query = filter.trim()
+      ? { videoTitle: { $regex: filter, $options: "i" } }
+      : {};
+
+    const podcast = await PodcastDetails.find(query)
       .populate({
         path: "userId",
         select: "username",
       })
       .skip((page - 1) * size)
       .limit(size)
-      .sort({ updatedAt: -1 });
+      .sort(sortOptions);
 
-    const total = await PodcastDetails.countDocuments();
+    const total = await PodcastDetails.countDocuments(query);
 
     return res.status(200).json({
-      message: "Podcast fetched successfully",
+      message: "Podcast fetched successfully.",
       data: podcast,
       total,
       status: "true",

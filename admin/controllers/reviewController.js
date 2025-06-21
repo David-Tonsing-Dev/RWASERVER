@@ -132,20 +132,39 @@ const updateReview = async (req, res) => {
 };
 
 const getReview = async (req, res) => {
-  const role = req.role;
-
   try {
+    const role = req.role;
+    let { page = 1, size = 10, filter, sortBy, order } = req.query;
+
+    page = parseInt(page);
+    size = parseInt(size);
+
+    sortBy = sortBy || "createdAt";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
+    const sortOptions = { [sortBy]: order };
+
     if (role !== "ADMIN" && role !== "SUPERADMIN" && role !== "REVIEWER")
       return res
         .status(401)
         .json({ status: false, message: "Unauthorized user" });
 
-    const getAllReview = await Review.find()
+    const query = filter.trim()
+      ? { tokenId: { $regex: filter, $options: "i" } }
+      : {};
+
+    const getAllReview = await Review.find(query)
       .populate({
         path: "review.userId",
         select: "username role",
       })
-      .lean();
+      .skip((page - 1) * size)
+      .limit(size)
+      .sort(sortOptions);
 
     const transformed = getAllReview.map((item) => {
       const newReviews = item.review.map((r) => {
@@ -169,7 +188,11 @@ const getReview = async (req, res) => {
       };
     });
 
-    return res.status(200).json({ status: true, review: transformed });
+    return res.status(200).json({
+      status: true,
+      message: "Reviews fetched successfully",
+      review: transformed,
+    });
   } catch (err) {
     return res.status(500).json({
       status: false,

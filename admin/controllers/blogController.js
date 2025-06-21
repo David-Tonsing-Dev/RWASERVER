@@ -4,19 +4,34 @@ const cloudinary = require("../../config/cloudinary");
 
 const getBlogs = async (req, res) => {
   try {
-    let { page = 1, size = 10, filter } = req.query;
+    let { page = 1, size = 10, filter, sortBy, order } = req.query;
     page = parseInt(page);
     size = parseInt(size);
+
+    sortBy = sortBy || "createdAt";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
+
+    const sortOptions = { [sortBy]: order };
 
     if (filter === "" || !filter) {
       const getBlogs = await Blog.find()
         .skip((page - 1) * size)
         .limit(size)
-        .sort({ publishDate: -1 });
+        .sort(sortOptions);
 
       const total = await Blog.countDocuments();
 
-      return res.status(200).json({ status: true, blogs: getBlogs, total });
+      return res.status(200).json({
+        status: true,
+        message: "Blogs retrieved successfully.",
+        blogs: getBlogs,
+        total,
+      });
     }
 
     const getBlogs = await Blog.find({
@@ -29,7 +44,7 @@ const getBlogs = async (req, res) => {
     })
       .skip((page - 1) * size)
       .limit(size)
-      .sort({ publishDate: -1 });
+      .sort(sortOptions);
 
     const total = await Blog.countDocuments({
       $or: [
@@ -40,7 +55,12 @@ const getBlogs = async (req, res) => {
       ],
     });
 
-    return res.status(200).json({ status: true, blogs: getBlogs, total });
+    return res.status(200).json({
+      status: true,
+      message: "Blogs retrieved successfully.",
+      blogs: getBlogs,
+      total,
+    });
   } catch (err) {
     return res.status(500).json({
       status: false,

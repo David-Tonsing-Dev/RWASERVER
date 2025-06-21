@@ -72,21 +72,32 @@ const addNews = async (req, res) => {
 
 const getNews = async (req, res) => {
   try {
-    let { page = 1, size = 10, filter } = req.query;
+    let { page = 1, size = 10, filter, sortBy, order } = req.query;
     page = parseInt(page);
     size = parseInt(size);
+    sortBy = sortBy || "createdAt";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
+    const sortOptions = { [sortBy]: order };
 
     if (filter === "" || !filter) {
       const getNews = await News.find()
         .skip((page - 1) * size)
         .limit(size)
-        .sort({ updatedAt: -1 });
+        .sort(sortOptions);
 
       const totalNews = await News.countDocuments();
 
-      return res
-        .status(200)
-        .json({ status: true, news: getNews, total: totalNews });
+      return res.status(200).json({
+        status: true,
+        message: "News retrieved successfully.",
+        news: getNews,
+        total: totalNews,
+      });
     }
 
     const getNews = await News.find({
@@ -98,18 +109,22 @@ const getNews = async (req, res) => {
     })
       .skip((page - 1) * size)
       .limit(size)
-      .sort({ createdAt: -1 });
+      .sort(sortOptions);
 
     const totalFilter = await News.countDocuments({
       $or: [
         { title: { $regex: filter, $options: "i" } },
         { content: { $regex: filter, $options: "i" } },
+        { author: { $regex: filter, $options: "i" } },
       ],
     });
 
-    return res
-      .status(200)
-      .json({ status: true, news: getNews, total: totalFilter });
+    return res.status(200).json({
+      status: true,
+      message: "News retrieved successfully.",
+      news: getNews,
+      total: totalFilter,
+    });
   } catch (err) {
     return res.status(500).json({
       status: false,

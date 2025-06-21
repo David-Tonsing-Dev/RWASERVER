@@ -50,11 +50,18 @@ const getRoleCounts = async (req, res) => {
 const getAdminLists = async (req, res) => {
   try {
     const role = req.role;
-    let { page = 1, size = 10, filter = "" } = req.query;
+    let { page = 1, size = 10, filter = "", sortBy, order } = req.query;
+
     page = parseInt(page);
     size = parseInt(size);
     const skip = (page - 1) * size;
-
+    sortBy = sortBy || "username";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
     if (role !== "ADMIN" && role !== "SUPERADMIN")
       return res.status(401).json({
         status: false,
@@ -71,11 +78,13 @@ const getAdminLists = async (req, res) => {
           }
         : {};
 
+    const sortOptions = { [sortBy]: order };
+
     const getAdmins = await AdminUser.find({ role: "ADMIN", ...searchQuery })
       .select("username email")
       .skip(skip)
       .limit(size)
-      .sort({ createdAt: -1 });
+      .sort(sortOptions);
 
     const count = await AdminUser.countDocuments({
       role: "ADMIN",
@@ -99,9 +108,17 @@ const getAdminLists = async (req, res) => {
 const getReviewerLists = async (req, res) => {
   try {
     const role = req.role;
-    let { page = 1, size = 10, filter = "" } = req.query;
+    let { page = 1, size = 10, filter = "", sortBy, order } = req.query;
+
     page = parseInt(page);
     size = parseInt(size);
+    sortBy = sortBy || "username";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
     const skip = (page - 1) * size;
 
     if (role !== "ADMIN" && role !== "SUPERADMIN")
@@ -120,6 +137,8 @@ const getReviewerLists = async (req, res) => {
           }
         : {};
 
+    const sortOptions = { [sortBy]: order };
+
     const getReviewers = await AdminUser.find({
       role: "REVIEWER",
       ...searchQuery,
@@ -127,7 +146,7 @@ const getReviewerLists = async (req, res) => {
       .select("username email")
       .skip(skip)
       .limit(size)
-      .sort({ createdAt: -1 });
+      .sort(sortOptions);
 
     const count = await AdminUser.countDocuments({
       role: "REVIEWER",
@@ -151,9 +170,18 @@ const getReviewerLists = async (req, res) => {
 const getUsersLists = async (req, res) => {
   try {
     const role = req.role;
-    let { page = 1, size = 10, filter = "" } = req.query;
+    let { page = 1, size = 10, filter = "", sortBy, order } = req.query;
+
     page = parseInt(page);
     size = parseInt(size);
+    sortBy = sortBy || "userName";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
+
     const skip = (page - 1) * size;
 
     if (role !== "ADMIN" && role !== "SUPERADMIN")
@@ -171,12 +199,13 @@ const getUsersLists = async (req, res) => {
             ],
           }
         : {};
+    const sortOptions = { [sortBy]: order };
 
     const getUsers = await User.find(searchQuery)
       .select("userName email profileImg")
       .skip(skip)
       .limit(size)
-      .sort({ createdAt: -1 });
+      .sort(sortOptions);
 
     const count = await User.countDocuments(searchQuery);
 
