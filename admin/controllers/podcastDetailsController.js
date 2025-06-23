@@ -45,7 +45,7 @@ const getPodcastDetails = async (req, res) => {
     //   .sort(sortOptions);
 
     // const total = await PodcastDetails.countDocuments();
-    const query = filter.trim()
+    const query = filter?.trim()
       ? { videoTitle: { $regex: filter, $options: "i" } }
       : {};
 

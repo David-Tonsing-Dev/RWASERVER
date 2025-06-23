@@ -195,22 +195,22 @@ const fetchTreasuryToken = async () => {
   });
 
   // Dev Condo
-  const devBalance = await getBalance(
-    providerBase,
-    devCondoContract,
-    devCondoABI,
-    devAddress
-  );
-  await upsertToken({
-    tokenName: "Dev Wallet Condo",
-    symbol: "Dev",
-    tokenImg:
-      "https://res.cloudinary.com/dbtsrjssc/image/upload/v1749903699/https___www.raspada-blog.co.uk_storage_wink_images_Gc6M9khVyDOBxjyvlW1E1UbLmROmZei0P76riW6n_1_xesoqb.jpg",
-    chain: "",
-    tokenBalance: devBalance,
-    tokenAddress: "",
-    balanceUsd: devBalance * condoDetails.current_price,
-  });
+  // const devBalance = await getBalance(
+  //   providerBase,
+  //   devCondoContract,
+  //   devCondoABI,
+  //   devAddress
+  // );
+  // await upsertToken({
+  //   tokenName: "Dev Wallet Condo",
+  //   symbol: "Dev",
+  //   tokenImg:
+  //     "https://res.cloudinary.com/dbtsrjssc/image/upload/v1749903699/https___www.raspada-blog.co.uk_storage_wink_images_Gc6M9khVyDOBxjyvlW1E1UbLmROmZei0P76riW6n_1_xesoqb.jpg",
+  //   chain: "",
+  //   tokenBalance: devBalance,
+  //   tokenAddress: "",
+  //   balanceUsd: devBalance * condoDetails.current_price,
+  // });
 
   // Polytrade
   const polyBalance = await getBalance(

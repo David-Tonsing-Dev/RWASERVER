@@ -69,7 +69,7 @@ const getAdminLists = async (req, res) => {
       });
 
     const searchQuery =
-      filter.trim() !== ""
+      filter?.trim() !== ""
         ? {
             $or: [
               { email: { $regex: filter, $options: "i" } },

@@ -153,7 +153,7 @@ const getReview = async (req, res) => {
         .status(401)
         .json({ status: false, message: "Unauthorized user" });
 
-    const query = filter.trim()
+    const query = filter?.trim()
       ? { tokenId: { $regex: filter, $options: "i" } }
       : {};
 
