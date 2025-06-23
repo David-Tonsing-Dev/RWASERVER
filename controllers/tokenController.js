@@ -524,15 +524,24 @@ const getTrends = async (req, res) => {
 
 const getBlog = async (req, res) => {
   try {
-    let { page = 1, size = 10, filter } = req.query;
+    let { page = 1, size = 10, filter, sortBy, order } = req.query;
     page = parseInt(page);
     size = parseInt(size);
+    sortBy = sortBy || "createdAt";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
+
+    const sortOptions = { [sortBy]: order };
 
     if (!filter || filter === "") {
       const getBlog = await Blog.find()
         .skip((page - 1) * size)
         .limit(size)
-        .sort({ publishDate: -1 });
+        .sort(sortOptions);
 
       if (!getBlog || getBlog.length <= 0)
         return res
@@ -554,7 +563,7 @@ const getBlog = async (req, res) => {
     })
       .skip((page - 1) * size)
       .limit(size)
-      .sort({ publishDate: -1 });
+      .sort(sortOptions);
 
     if (!getBlog || getBlog.length <= 0)
       return res.status(200).json({ status: false, message: "No blog found" });
@@ -580,15 +589,23 @@ const getBlog = async (req, res) => {
 
 const getNews = async (req, res) => {
   try {
-    let { page = 1, size = 10, filter } = req.query;
+    let { page = 1, size = 10, filter, sortBy, order } = req.query;
     page = parseInt(page);
     size = parseInt(size);
+    sortBy = sortBy || "createdAt";
+    order =
+      order?.toLowerCase() === "asc"
+        ? 1
+        : order?.toLowerCase() === "desc"
+        ? -1
+        : -1;
+    const sortOptions = { [sortBy]: order };
 
     if (!filter || filter === "") {
       const getNews = await News.find()
         .skip((page - 1) * size)
         .limit(size)
-        .sort({ publishDate: -1 });
+        .sort(sortOptions);
 
       if (!getNews || getNews.length <= 0)
         return res
@@ -609,7 +626,7 @@ const getNews = async (req, res) => {
     })
       .skip((page - 1) * size)
       .limit(size)
-      .sort({ publishDate: -1 });
+      .sort(sortOptions);
 
     if (!getNews || getNews.length <= 0)
       return res.status(200).json({ status: false, message: "No news found" });
