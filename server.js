@@ -23,6 +23,7 @@ const podcastDetailsRouters = require("./admin/routes/podcastDetailsRouters");
 const userTokenRouters = require("./admin/routes/userTokenRouters");
 const analystRouters = require("./admin/routes/analystRouters");
 const googleAnalyticsDataRouters = require("./admin/routes/googleAnalyticsDataRouters");
+const profile = require("./admin/routes/userProfileRouters");
 
 const schedular = require("./cron/schedular");
 
@@ -73,6 +74,7 @@ app.use("/api/admin/podcast", podcastDetailsRouters);
 app.use("/api/admin/userToken", userTokenRouters);
 app.use("/api/admin/analyst", analystRouters);
 app.use("/api/admin/analystic", googleAnalyticsDataRouters);
+app.use("/api/admin/profile", profile);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   app.listen(PORT, async () => {
