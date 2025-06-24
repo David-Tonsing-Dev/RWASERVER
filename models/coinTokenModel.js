@@ -56,6 +56,9 @@ const coinGeckoTokenSchema = new mongoose.Schema(
     price_change_percentage_7d_in_currency: {
       type: Number,
     },
+    market_cap_change_percentage_24h: {
+      type: Number,
+    },
     sparkline_in_7d: {
       type: {
         price: [Number],

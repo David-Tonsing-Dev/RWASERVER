@@ -5,6 +5,7 @@ const Token = require("../models/newTokenModel");
 const fetchAndStoreRwaData = async () => {
   const perPage = 100;
   let page = 1;
+  let globalRank = 1;
 
   while (true) {
     try {
@@ -42,6 +43,7 @@ const fetchAndStoreRwaData = async () => {
           price_change_percentage_24h_in_currency,
           price_change_percentage_7d_in_currency,
           price_change_percentage_30d_in_currency,
+          market_cap_change_percentage_24h,
           sparkline_in_7d,
         } = coin;
 
@@ -54,6 +56,7 @@ const fetchAndStoreRwaData = async () => {
           { id },
           {
             $set: {
+              rank: globalRank++,
               current_price: current_price ?? null,
               market_cap: market_cap ?? null,
               market_cap_rank: market_cap_rank ?? null,
@@ -67,16 +70,16 @@ const fetchAndStoreRwaData = async () => {
                 price_change_percentage_7d_in_currency ?? null,
               price_change_percentage_30d_in_currency:
                 price_change_percentage_30d_in_currency ?? null,
-
+              market_cap_change_percentage_24h:
+                market_cap_change_percentage_24h ?? null,
               sparkline_in_7d: sparkline_in_7d || null,
             },
           }
         );
 
-        // console.log("-==-=-=-=-=-=1");
-
         if (!existingToken) {
           await CoingeckoToken.create({
+            rank: globalRank++,
             id,
             symbol,
             name,
@@ -94,11 +97,12 @@ const fetchAndStoreRwaData = async () => {
               price_change_percentage_7d_in_currency ?? null,
             price_change_percentage_30d_in_currency:
               price_change_percentage_30d_in_currency ?? null,
+            market_cap_change_percentage_24h:
+              market_cap_change_percentage_24h ?? null,
             sparkline_in_7d: sparkline_in_7d || null,
           });
           //   await CoingeckoToken.save();
         }
-        // console.log("-==-=-=-=-=-=2");
       }
       console.log(`Page ${page} processed successfully.`);
       page++;

@@ -471,44 +471,53 @@ const getCoinGraphData = async (req, res) => {
 
 const getTrends = async (req, res) => {
   try {
-    const resp = await axios.get(
-      "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&order=market_cap_desc&per_page=10&page=1",
-      {
-        headers: {
-          "x-cg-pro-api-key": process.env.COINGECKO_KEY,
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+    // const resp = await axios.get(
+    //   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&order=market_cap_desc&per_page=10&page=1",
+    //   {
+    //     headers: {
+    //       "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+    //       "Access-Control-Allow-Origin": "*",
+    //     },
+    //   }
+    // );
 
-    const respCondo = await axios.get(
-      "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=condo",
-      {
-        headers: {
-          "x-cg-pro-api-key": process.env.COINGECKO_KEY,
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+    // const respCondo = await axios.get(
+    //   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=condo",
+    //   {
+    //     headers: {
+    //       "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+    //       "Access-Control-Allow-Origin": "*",
+    //     },
+    //   }
+    // );
 
-    if (!resp.data || !respCondo)
+    // if (!resp.data || !respCondo)
+    //   return res
+    //     .status(400)
+    //     .json({ status: false, message: "Could not fetch trending coin!" });
+
+    // const allResponseData = [...resp.data, ...respCondo.data];
+    const allResponseData = await Token.find()
+      .select("-sparkline_in_7d")
+      .lean();
+
+    if (allResponseData.length <= 0)
       return res
         .status(400)
-        .json({ status: false, message: "Could not fetch trending coin!" });
-
-    const allResponseData = [...resp.data, ...respCondo.data];
+        .json({ status: false, trend: allResponseData, top: allResponseData });
     allResponseData.forEach((coin) => {
       coin.trending_score = trendingCoin(coin);
     });
 
-    const sortedCoins = allResponseData.sort(
-      (a, b) => b.trending_score - a.trending_score
-    );
-    const topTrendingCoins = sortedCoins.slice(0, 10);
+    const sortedCoins = allResponseData
+      .filter((coin) => coin.trending_score != null)
+      .sort((a, b) => b.trending_score - a.trending_score);
 
-    const sortedTopCoins = allResponseData.sort(
-      (a, b) => a.market_cap_rank - b.market_cap_rank
-    );
+    const topTrendingCoins = sortedCoins.slice(0, 100);
+
+    const sortedTopCoins = allResponseData
+      .filter((coin) => coin.market_cap_rank != null)
+      .sort((a, b) => a.market_cap_rank - b.market_cap_rank);
 
     return res
       .status(200)

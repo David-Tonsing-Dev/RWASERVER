@@ -1,36 +1,4 @@
-const disclaimerTerm = `<div className="about-pg"><h3>Disclaimer</h3><div className="about-rwa"><div className="about-about-rwa"><p>All content provided across the Condo website, mobile applications, social media accounts, dashboards, and affiliated platforms “Platform” is for general informational purposes only, and is sourced from both internal research and external third-party providers.</p>
-        <p>
-          While we aim to ensure accuracy and reliability, Condo makes no
-          representations or warranties, express or implied, regarding the
-          accuracy, completeness, timeliness, or suitability of any content or
-          services offered (including portfolio tracking tools, token data,
-          analytics, or educational materials).
-        </p>
-        <p>
-          Nothing on this Platform constitutes financial, investment, legal, or
-          tax advice, nor should it be relied upon as a substitute for
-          professional advice tailored to your personal circumstances. We do not
-          offer or solicit the purchase or sale of any security, asset, or
-          regulated product.
-        </p>
-        <p>
-          Use of the Platform is entirely at your own risk. You are encouraged
-          to conduct your own research, verify information independently, and
-          consult with appropriate advisors before making any decisions related
-          to digital assets or real-world asset tokens.
-        </p>
-        <p>
-          Condo is not liable for any loss or damage arising directly or
-          indirectly from your reliance on any information or use of the
-          Platform’s tools and services.
-        </p>
-        <p>
-          <strong>Condo Foundation</strong> is registered in the{" "}
-          <strong>Republic of Seychelles</strong>.
-        </p>
-      </div>
-    </div>
-  </div>`;
+const disclaimerTerm = `<div className="about-pg"><h3>Disclaimer</h3><div className="about-rwa"><div className="about-about-rwa"><p>All content provided across the Condo website, mobile applications, social media accounts, dashboards, and affiliated platforms “Platform” is for general informational purposes only, and is sourced from both internal research and external third-party providers.</p><p>While we aim to ensure accuracy and reliability, Condo makes no representations or warranties, express or implied, regarding the accuracy, completeness, timeliness, or suitability of any content or services offered (including portfolio tracking tools, token data, analytics, or educational materials).</p><p>Nothing on this Platform constitutes financial, investment, legal, or tax advice, nor should it be relied upon as a substitute for professional advice tailored to your personal circumstances. We do not offer or solicit the purchase or sale of any security, asset, or regulated product.</p><p>Use of the Platform is entirely at your own risk. You are encouraged to conduct your own research, verify information independently, and consult with appropriate advisors before making any decisions related to digital assets or real-world asset tokens.</p><p>Condo is not liable for any loss or damage arising directly or indirectly from your reliance on any information or use of the Platform’s tools and services.</p><p><strong>Condo Foundation</strong> is registered in the{" "}<strong>Republic of Seychelles</strong>.</p></div></div></div>`;
 
 const serviceTerm = `<div className="about-pg">
   <h3>Terms of Service</h3>
