@@ -451,7 +451,7 @@ const adminForgotPassword = async (req, res) => {
       process.env.JWT_SECRET_KEY,
       { expiresIn: "10m" }
     );
-    const resetLink = `${process.env.CLIENT_URL}/reset/adminpassword/${verificationToken}`;
+    const resetLink = `${process.env.CLIENT_URL}/reset-adminpassword/${verificationToken}`;
 
     const nodemailerMailgun = nodemailer.createTransport(mg(auth));
 
