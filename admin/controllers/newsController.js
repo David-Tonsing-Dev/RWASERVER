@@ -86,8 +86,8 @@ const addNews = async (req, res) => {
     const recipientEmails = subscribers.map((sub) => sub.email);
 
     if (recipientEmails.length > 0) {
-      const newsUrl = `${process.env.CLIENT_URL}/newsdetails/${addNews.slug}`;
-      const subject = `Latest News: ${addNews.title}`;
+      const newsUrl = `${process.env.CLIENT_URL}/newsdetails/${addNew.slug}`;
+      const subject = `Latest News: ${addNew.title}`;
 
       const html = `
   <head>
@@ -152,8 +152,8 @@ const addNews = async (req, res) => {
     <div class="container">
       <div class="header">Latest News Notification</div>
       <div class="content">
-        <div class="news-title">${addNews.title}</div>
-        <div class="news-subtitle">${addNews.subTitle || ""}</div>
+        <div class="news-title">${addNew.title}</div>
+        <div class="news-subtitle">${addNew.subTitle || ""}</div>
         <p>We’ve published a new update we think you'll find important.</p>
         <a href="${newsUrl}" class="read-more" target="_blank">Read Full News</a>
         <p style="margin-top: 30px;">Best regards,<br/>Condo Team</p>
