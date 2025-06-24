@@ -1,17 +1,17 @@
 const {
-  disclamerTerm,
+  disclaimerTerm,
   privacyTerm,
   serviceTerm,
 } = require("../../constant/term");
 
 const getDisclamerTerm = async (req, res) => {
   try {
-    if (!disclamerTerm)
+    if (!disclaimerTerm)
       return res
         .status(404)
-        .json({ status: false, message: "Disclamer not found" });
+        .json({ status: false, message: "Disclaimer not found" });
 
-    return res.status(200).json({ status: 200, disclamer: disclamerTerm });
+    return res.status(200).json({ status: 200, disclaimer: disclaimerTerm });
   } catch (err) {
     return res.status(500).json({
       status: false,

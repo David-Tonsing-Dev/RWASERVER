@@ -1,4 +1,4 @@
-const disclamerTerm = `<div className="about-pg"><h3>Disclaimer</h3><div className="about-rwa"><div className="about-about-rwa"><p>All content provided across the Condo website, mobile applications, social media accounts, dashboards, and affiliated platforms “Platform” is for general informational purposes only, and is sourced from both internal research and external third-party providers.</p>
+const disclaimerTerm = `<div className="about-pg"><h3>Disclaimer</h3><div className="about-rwa"><div className="about-about-rwa"><p>All content provided across the Condo website, mobile applications, social media accounts, dashboards, and affiliated platforms “Platform” is for general informational purposes only, and is sourced from both internal research and external third-party providers.</p>
         <p>
           While we aim to ensure accuracy and reliability, Condo makes no
           representations or warranties, express or implied, regarding the
@@ -322,7 +322,7 @@ const privacyTerm = `<div className="about-pg">
 </div>`;
 
 module.exports = {
-  disclamerTerm,
+  disclaimerTerm,
   privacyTerm,
   serviceTerm,
 };
