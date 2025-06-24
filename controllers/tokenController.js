@@ -394,6 +394,7 @@ const getCoinDetail = async (req, res) => {
     return res.status(200).json({
       status: true,
       detail: coinDetail,
+      rank: getDescAndImg.rank,
       rating: getRating ? getRating.averageRating : 0,
       totalRating: getRating ? getRating.rating.length : 0,
       expertReview: getExpertReview ? getExpertReview.review : [],
