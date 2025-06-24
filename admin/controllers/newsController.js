@@ -2,6 +2,9 @@ const News = require("../models/newsModel");
 const { capitalizeAfterSpace } = require("../../helper/capitalize");
 const cloudinary = require("../../config/cloudinary");
 const sendPushNotification = require("../../helper/sendPushNotification");
+const User = require("../../models/userModel");
+const nodemailer = require("nodemailer");
+const mg = require("nodemailer-mailgun-transport");
 
 const addNews = async (req, res) => {
   try {
@@ -71,6 +74,108 @@ const addNews = async (req, res) => {
       id: addNew._id.toString(),
       slug: addNew.slug,
     }).catch((err) => console.error("Error sending notification:", err));
+
+    const nodemailerMailgun = nodemailer.createTransport(mg(auth));
+
+    const subscribers = await User.find({ subscribe: true }).select("email");
+    const recipientEmails = subscribers.map((sub) => sub.email);
+
+    if (recipientEmails.length > 0) {
+      const newsUrl = `${process.env.CLIENT_URL}/newsdetails/${addNews.slug}`;
+      const subject = `Latest News: ${addNews.title}`;
+
+      const html = `
+  <head>
+    <meta charset="UTF-8" />
+    <title>News Update</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        max-width: 600px;
+        margin: 30px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .header {
+        background-color: #0f1132;
+        color: #ffffff;
+        padding: 20px;
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+      }
+      .content {
+        padding: 30px;
+        font-size: 16px;
+        color: #333333;
+      }
+      .news-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #0f1132;
+      }
+      .news-subtitle {
+        font-size: 16px;
+        color: #666666;
+        margin-bottom: 20px;
+      }
+      .read-more {
+        display: inline-block;
+        margin-top: 15px;
+        padding: 10px 20px;
+        background-color: #0f1132;
+        color: #ffffff !important;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #999999;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Latest News Notification</div>
+      <div class="content">
+        <div class="news-title">${addNews.title}</div>
+        <div class="news-subtitle">${addNews.subTitle || ""}</div>
+        <p>We’ve published a new update we think you'll find important.</p>
+        <a href="${newsUrl}" class="read-more" target="_blank">Read Full News</a>
+        <p style="margin-top: 30px;">Best regards,<br/>Condo Team</p>
+      </div>
+      <div class="footer">
+        © 2025 Condo-RWAHedgefund. All rights reserved.
+      </div>
+    </div>
+  </body>
+  `;
+
+      nodemailerMailgun.sendMail(
+        {
+          from: "service@rwacamp.com",
+          to: recipientEmails,
+          subject,
+          html,
+        },
+        (err, info) => {
+          if (err) {
+            console.error("Error sending news email:", err);
+          } else {
+            console.log("News email sent:", JSON.stringify(info));
+          }
+        }
+      );
+    }
   } catch (err) {
     return res.status(500).json({
       status: false,

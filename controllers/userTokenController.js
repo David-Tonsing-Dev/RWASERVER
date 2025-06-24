@@ -76,6 +76,11 @@ const getPortfolioToken = async (req, res) => {
         accumulator + currentValue.returnPercentage,
       0
     );
+    const currentBalance = tokenPortfolioResult.reduce(
+      (accumulator, currentValue) =>
+        accumulator + currentValue.currentPrice * currentValue.quantity,
+      0
+    );
 
     return res.status(200).json({
       status: true,
@@ -83,6 +88,7 @@ const getPortfolioToken = async (req, res) => {
       totalAmount,
       totalReturn,
       totalPercentage,
+      currentBalance,
     });
   } catch (err) {
     return res.status(500).json({
