@@ -64,8 +64,6 @@ const addNews = async (req, res) => {
     });
     await addNew.save();
 
-    res.status(200).json({ status: true, message: "News added" });
-
     sendPushNotification({
       title: "News",
       link: "",
@@ -176,6 +174,8 @@ const addNews = async (req, res) => {
         }
       );
     }
+
+    return res.status(200).json({ status: true, message: "News added" });
   } catch (err) {
     return res.status(500).json({
       status: false,
