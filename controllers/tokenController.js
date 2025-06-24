@@ -532,6 +532,35 @@ const getTrends = async (req, res) => {
   }
 };
 
+const getTopGainer = async (req, res) => {
+  try {
+    const allResponseData = await Token.find()
+      .select("-sparkline_in_7d")
+      .lean();
+
+    if (allResponseData.length <= 0)
+      return res.status(400).json({ status: false });
+
+    const sortedCoins = allResponseData
+      .filter((coin) => coin.price_change_percentage_24h_in_currency != null)
+      .sort(
+        (a, b) =>
+          b.price_change_percentage_24h_in_currency -
+          a.price_change_percentage_24h_in_currency
+      );
+
+    const topGainerCoins = sortedCoins.slice(0, 100);
+
+    return res.status(200).json({ status: true, topGainer: topGainerCoins });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong",
+      error: err.message,
+    });
+  }
+};
+
 const getBlog = async (req, res) => {
   try {
     let { page = 1, size = 10, filter, sortBy, order } = req.query;
@@ -713,4 +742,5 @@ module.exports = {
   getNews,
   getNewsDetail,
   getBlogDetail,
+  getTopGainer,
 };

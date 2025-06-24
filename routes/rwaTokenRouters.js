@@ -12,6 +12,7 @@ const {
   getNews,
   getNewsDetail,
   getBlogDetail,
+  getTopGainer,
 } = require("../controllers/tokenController");
 const { nonAuthMiddleware } = require("../middlewares/authMiddleware");
 
@@ -25,5 +26,6 @@ router.get("/rwa/blog", getBlog);
 router.get("/rwa/blog/:slug", getBlogDetail);
 router.get("/rwa/news", getNews);
 router.get("/rwa/news/:slug", getNewsDetail);
+router.get("/rwa/topGainer", getTopGainer);
 
 module.exports = router;
