@@ -277,7 +277,7 @@ const forgotPassword = async (req, res) => {
     const verificationToken = jwt.sign(
       { email: email },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "1d" }
+      { expiresIn: "10m" }
     );
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${verificationToken}`;
 
@@ -350,7 +350,7 @@ const resetPassword = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       status: false,
-      message: "Something went wrong, try again later!",
+      message: "Reset link has expired. Please request a new one.",
       error: err.message,
     });
   }
