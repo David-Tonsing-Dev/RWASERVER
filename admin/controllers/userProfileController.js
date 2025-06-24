@@ -7,7 +7,7 @@ const userProfile = async (req, res) => {
     const userId = req.userId;
     const { userName, description, link } = req.body;
 
-    const userExists = await Admin.findById({ _id: userId });
+    const userExists = await Admin.findOne({ _id: userId });
     if (!userExists) {
       return res
         .status(404)
@@ -24,17 +24,34 @@ const userProfile = async (req, res) => {
         .status(500)
         .json({ status: false, message: "Error in uploading image" });
 
-    const newProfile = new UserProfile({
-      userId: userId,
-      userName,
-      profileImg: uploadImg.secure_url,
-      description,
-      link,
-    });
+    const userProfileExist = await UserProfile.findOne({ userId: userId });
+
+    let updateProfile;
+    if (userProfileExist) {
+      updateProfile = await UserProfile.findOneAndUpdate(
+        { userId: userId },
+        {
+          $set: {
+            userName,
+            profileImg: uploadImg.secure_url,
+            description,
+            link,
+          },
+        }
+      );
+    } else {
+      updateProfile = new UserProfile({
+        userId: userId,
+        userName,
+        profileImg: uploadImg.secure_url,
+        description,
+        link,
+      });
+    }
 
     userExists.username = userName;
     await userExists.save();
-    await newProfile.save();
+    await updateProfile.save();
 
     return res.status(200).json({
       status: true,
