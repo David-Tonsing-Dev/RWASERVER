@@ -1,5 +1,6 @@
 const admin = require("firebase-admin");
 const User = require("../models/userModel");
+const Guest = require("../models/guestUserModel");
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SETUP);
 
@@ -14,9 +15,17 @@ async function sendPushNotification(data) {
     .select("fcmToken")
     .lean();
 
-  const fcmTokens = getTokens.map((user) => user.fcmToken);
+  const getGuestTokens = await Guest.find({
+    fcmToken: { $exists: true, $ne: null, $ne: "" },
+  })
+    .select("fcmToken")
+    .lean();
 
-  console.log("fcmTokens", fcmTokens);
+  const userFcmTokens = getTokens.map((user) => user.fcmToken);
+  const guestFcmTokens = getGuestTokens.map((user) => user.fcmToken);
+
+  const allFcmTokens = [...userFcmTokens, ...guestFcmTokens];
+
   if (getTokens.length <= 0) {
     return;
   }
@@ -33,7 +42,7 @@ async function sendPushNotification(data) {
       slug: data.slug || "",
       youtubeUrl: data.link || "",
     },
-    tokens: fcmTokens,
+    tokens: allFcmTokens,
   };
 
   try {

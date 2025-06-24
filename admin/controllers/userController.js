@@ -434,9 +434,105 @@ const reviewerSignUpBySuperAdmin = async (req, res) => {
   }
 };
 
+const adminForgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await AdminUser.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "Admin not found",
+      });
+    }
+
+    const verificationToken = jwt.sign(
+      { email: email },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "1d" }
+    );
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${verificationToken}`;
+
+    const nodemailerMailgun = nodemailer.createTransport(mg(auth));
+
+    nodemailerMailgun.sendMail(
+      {
+        from: "service@rwacamp.com",
+        to: [email],
+        subject: "Reset password",
+        html: `<p>Hey there,</p>
+  <p>Click on the button below to reset your password </p>
+  <a href="${resetLink}"><button>Reset Password</button></a>
+  `,
+      },
+      function (err, info) {
+        if (err) {
+          console.log("Error: " + err);
+        } else {
+          console.log("Response: " + JSON.stringify(info));
+        }
+      }
+    );
+
+    return res.status(200).json({
+      status: true,
+      message: "Check your email for reset password link!",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong!",
+      error: err.message,
+    });
+  }
+};
+
+const adminResetPassword = async (req, res) => {
+  const { password, confirmPassword } = req.body;
+  const { token } = req.params;
+
+  try {
+    if (!password || !confirmPassword)
+      return res
+        .status(400)
+        .json({ status: false, message: "All fields required!" });
+
+    if (password !== confirmPassword)
+      return res
+        .status(400)
+        .json({ status: false, message: "Confirm password not match!" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    const salt = await bcrypt.genSalt(10);
+    const newPassword = await bcrypt.hash(password, salt);
+
+    const user = await AdminUser.findOneAndUpdate(
+      { email: decoded.email },
+      { password: newPassword }
+    );
+
+    if (!user) {
+      return res.status(404).json({ status: false, message: "Invalid token!" });
+    }
+
+    return res
+      .status(200)
+      .json({ status: true, message: "Password reset successfully!" });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again later!",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   adminSignIn,
   adminSignUp,
   adminSignUpBySuperAdmin,
   reviewerSignUpBySuperAdmin,
+  adminForgotPassword,
+  adminResetPassword,
 };
