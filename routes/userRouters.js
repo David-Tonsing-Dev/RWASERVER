@@ -12,8 +12,12 @@ const {
   deleteUserFavCoin,
   googleSignIn,
   googleData,
+  fcmToken,
 } = require("../controllers/userController");
-const { authMiddleware } = require("../middlewares/authMiddleware");
+const {
+  authMiddleware,
+  nonAuthMiddleware,
+} = require("../middlewares/authMiddleware");
 const passport = require("passport");
 
 router.post("/signup", signup);
@@ -39,5 +43,6 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 router.get("/fav/coin/:coinId", authMiddleware, addUserFavCoin);
 router.delete("/fav/coin/:coinId", authMiddleware, deleteUserFavCoin);
+router.post("/fcmtoken", nonAuthMiddleware, fcmToken);
 
 module.exports = router;

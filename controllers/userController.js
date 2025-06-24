@@ -6,6 +6,7 @@ const UserModel = require("../models/userModel");
 const UserCoin = require("../models/userCoinModel");
 const { capitalizeAfterSpace } = require("../helper/capitalize");
 const password = require("passport");
+const Guest = require("../models/guestUserModel");
 
 const createToken = (id) => {
   const jwtkey = process.env.JWT_SECRET_KEY;
@@ -265,6 +266,14 @@ const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
     const verificationToken = jwt.sign(
       { email: email },
       process.env.JWT_SECRET_KEY,
@@ -428,6 +437,50 @@ const deleteUserFavCoin = async (req, res) => {
   }
 };
 
+const fcmToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const userId = req.userId;
+
+    if (!token) {
+      return res.status(400).json({
+        status: false,
+        message: "FCM token is required",
+      });
+    }
+    const count = await Guest.countDocuments();
+    if (userId) {
+      const user = await UserModel.findOneAndUpdate(
+        { _id: userId },
+        {
+          $set: {
+            fcmToken: token,
+          },
+        }
+      );
+      return res.status(201).json({
+        status: true,
+        message: "Token updated successfully",
+      });
+    }
+    const addGuestUser = new Guest({
+      userName: `Guest${count + 1}`,
+      fcmToken: token,
+    });
+    await addGuestUser.save();
+    return res.status(200).json({
+      status: true,
+      message: "Guest user created successfully!",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   signup,
   signin,
@@ -440,4 +493,5 @@ module.exports = {
   addUserFavCoin,
   deleteUserFavCoin,
   googleData,
+  fcmToken,
 };

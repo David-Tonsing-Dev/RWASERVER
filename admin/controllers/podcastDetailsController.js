@@ -1,5 +1,6 @@
 const PodcastDetails = require("../models/podcastDetailsModel");
 const cloudinary = require("../../config/cloudinary");
+const sendPushNotification = require("../../helper/sendPushNotification");
 
 const getPodcastDetails = async (req, res) => {
   try {
@@ -111,10 +112,18 @@ const addPodcast = async (req, res) => {
     });
     await newPodcast.save();
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "Podcast created successfully",
       status: "true",
     });
+
+    sendPushNotification({
+      title: "Podcast",
+      link: newPodcast.youtubeLink,
+      body: newPodcast.videoTitle,
+      image: newPodcast.thumbnail,
+      id: newPodcast._id.toString(),
+    }).catch((err) => console.error("Error sending notification:", err));
   } catch (err) {
     return res
       .status(500)
