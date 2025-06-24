@@ -98,21 +98,6 @@ const adminSignIn = async (req, res) => {
         .status(400)
         .json({ status: false, message: "All field are required" });
 
-    // const query = role ? { email, role: role.toUpperCase() } : { email };
-    // let query = { email };
-    // if (role && role.toUpperCase() === "REVIEWER") {
-    //   query.role = "REVIEWER";
-    // }
-
-    // const checkEmail = await AdminUser.findOne({ email });
-
-    // if (role === "REVIEWER") {
-    //   checkEmail = await AdminUser.findOne({
-    //     email,
-    //     role: role.toUpperCase(),
-    //   });
-    // }
-
     let checkEmail;
 
     if (role && role.toUpperCase() === "REVIEWER") {
@@ -146,6 +131,7 @@ const adminSignIn = async (req, res) => {
       message: "Login successfully!",
       email,
       token,
+      name: checkEmail.username,
     });
   } catch (err) {
     return res.status(500).json({
@@ -490,6 +476,7 @@ const adminForgotPassword = async (req, res) => {
 const adminResetPassword = async (req, res) => {
   const { password, confirmPassword } = req.body;
   const { token } = req.params;
+  console.log("Received token:", token);
 
   try {
     if (!password || !confirmPassword)
