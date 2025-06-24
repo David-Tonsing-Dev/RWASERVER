@@ -8,7 +8,7 @@ const {
 } = require("../controllers/termController");
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 
-router.get("/disclamer", getDisclamerTerm);
+router.get("/disclaimer", getDisclamerTerm);
 router.get("/privacy", getPrivacyTerm);
 router.get("/service", getServiceTerm);
 
