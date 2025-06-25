@@ -2,6 +2,7 @@ const axios = require("axios");
 const NodeCache = require("node-cache");
 const cache = new NodeCache({ stdTTL: 600 });
 const UserCoin = require("../models/userCoinModel");
+const allToken = require("../models/coinTokenModel");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=250&category=real-world-assets-rwa&sparkline=true";
@@ -180,25 +181,26 @@ const getFavoriteCoin = async (req, res) => {
         .status(401)
         .json({ status: false, message: "Unauthorized user!" });
 
-    const response = await axios.get(apiRWACoins, {
-      headers: {
-        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
+    // const response = await axios.get(apiRWACoins, {
+    //   headers: {
+    //     "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+    //     "Access-Control-Allow-Origin": "*",
+    //   },
+    // });
 
-    let data = response.data;
+    // let data = response.data;
 
-    const responseCondo = await axios.get(apiCondoMarketData, {
-      headers: {
-        "x-cg-pro-api-key": process.env.COINGECKO_KEY,
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
+    // const responseCondo = await axios.get(apiCondoMarketData, {
+    //   headers: {
+    //     "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+    //     "Access-Control-Allow-Origin": "*",
+    //   },
+    // });
 
-    data = [...response.data, ...responseCondo.data];
+    // data = [...response.data, ...responseCondo.data];
 
-    data.sort((a, b) => {
+    const coingeckoToken = await allToken.find().select("-sparkline_in_7d");
+    coingeckoToken.sort((a, b) => {
       if (a.market_cap_rank === null && b.market_cap_rank === null) return 0;
       if (a.market_cap_rank === null) return 1;
       if (b.market_cap_rank === null) return -1;
@@ -207,7 +209,7 @@ const getFavoriteCoin = async (req, res) => {
 
     let userCoins = await UserCoin.findOne({ userId });
 
-    const filteredUserCoins = data.filter((item) =>
+    const filteredUserCoins = coingeckoToken.filter((item) =>
       userCoins.favCoin.includes(item.id)
     );
 
