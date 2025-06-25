@@ -6,7 +6,6 @@ const addReview = async (req, res) => {
   try {
     const userId = req.userId;
     const role = req.role;
-    // console.log("req", req.role, role);
     const { tokenId } = req.params;
     const { review, rating } = req.body;
 
@@ -168,13 +167,10 @@ const getReview = async (req, res) => {
 
     const transformed = getAllReview.map((item) => {
       const newReviews = item.review.map((r) => {
-        const user = r.userId;
         return {
-          ...r,
-          userId: user?._id ?? null,
-          username: user?.username ?? null,
-          // role: user?.role ?? null,
-          isReviewer: user.role === "REVIEWER",
+          userId: r?.userId._id ?? null,
+          username: r?.userId.username ?? null,
+          isReviewer: r?.userId.role === "REVIEWER",
         };
       });
 
@@ -183,7 +179,6 @@ const getReview = async (req, res) => {
         tokenId: item.tokenId,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
-        __v: item.__v,
         review: newReviews,
       };
     });
