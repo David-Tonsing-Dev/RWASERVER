@@ -7,19 +7,7 @@ const userProfile = async (req, res) => {
     const { userName, description, link } = req.body;
     const image = req.file;
 
-    // let parsedLinks;
-    // if (Array.isArray(link) && typeof link[0] === "string") {
-    //   parsedLinks = JSON.parse(link[0]);
-    // } else if (typeof link === "string") {
-    //   parsedLinks = JSON.parse(link);
-    // } else {
-    //   parsedLinks = link;
-    // }
-
     const parsedLinks = JSON.parse(link);
-    console.log(link, "link");
-    console.log(typeof link, "link typeof");
-    console.log(parsedLinks, "link parse");
 
     const userExists = await Admin.findOne({ _id: userId });
     if (!userExists) {
@@ -53,7 +41,6 @@ const userProfile = async (req, res) => {
       },
       { new: true }
     );
-    console.log(updateProfile);
     return res.status(200).json({
       status: true,
       message: "Profile creating successfully",
@@ -97,4 +84,33 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { userProfile, getUserProfile };
+const getMobileUserProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const userProfile = await Admin.findOne({ _id: id }).select(
+      "-password -role"
+    );
+
+    if (!userProfile) {
+      return res.status(404).json({
+        status: false,
+        message: "Profile not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Profile retrieved successfully",
+      userProfile: userProfile,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { userProfile, getUserProfile, getMobileUserProfile };

@@ -5,6 +5,7 @@ const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 const {
   userProfile,
   getUserProfile,
+  getMobileUserProfile,
 } = require("../controllers/userProfileController");
 
 router.put(
@@ -15,5 +16,6 @@ router.put(
 );
 
 router.get("/", adminAuthMiddleware, getUserProfile);
+router.get("/:id", getMobileUserProfile);
 
 module.exports = router;
