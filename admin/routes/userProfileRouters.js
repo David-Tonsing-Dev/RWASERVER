@@ -14,6 +14,6 @@ router.put(
   userProfile
 );
 
-router.get("/get", adminAuthMiddleware, getUserProfile);
+router.get("/", adminAuthMiddleware, getUserProfile);
 
 module.exports = router;
