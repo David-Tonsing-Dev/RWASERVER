@@ -2,7 +2,10 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../../multer/multer");
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
-const userProfile = require("../controllers/userProfileController");
+const {
+  userProfile,
+  getUserProfile,
+} = require("../controllers/userProfileController");
 
 router.put(
   "/create",
@@ -10,5 +13,7 @@ router.put(
   upload.single("profileImg"),
   userProfile
 );
+
+router.get("/get", adminAuthMiddleware, getUserProfile);
 
 module.exports = router;

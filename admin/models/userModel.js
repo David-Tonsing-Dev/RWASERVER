@@ -17,6 +17,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  profileImg: {
+    type: String,
+    default: null,
+  },
+  description: {
+    type: String,
+  },
+  link: {
+    type: [String],
+  },
   role: {
     type: String,
     enum: ["SUPERADMIN", "ADMIN", "USER", "REVIEWER"],

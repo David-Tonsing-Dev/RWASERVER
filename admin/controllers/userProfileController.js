@@ -1,11 +1,11 @@
 const Admin = require("../models/userModel");
-const UserProfile = require("../models/userProfileModel");
 const cloudinary = require("../../config/cloudinary");
 
 const userProfile = async (req, res) => {
   try {
     const userId = req.userId;
     const { userName, description, link } = req.body;
+    const image = req.file;
 
     const userExists = await Admin.findOne({ _id: userId });
     if (!userExists) {
@@ -14,44 +14,30 @@ const userProfile = async (req, res) => {
         .json({ status: false, message: "Reviewer not found." });
     }
 
-    const uploadImg = await cloudinary.uploader.upload(req.file.path, {
-      use_filename: true,
-      folder: "rwa/userProfile",
-    });
-
-    if (!uploadImg)
-      return res
-        .status(500)
-        .json({ status: false, message: "Error in uploading image" });
-
-    const userProfileExist = await UserProfile.findOne({ userId: userId });
-
-    let updateProfile;
-    if (userProfileExist) {
-      updateProfile = await UserProfile.findOneAndUpdate(
-        { userId: userId },
-        {
-          $set: {
-            userName,
-            profileImg: uploadImg.secure_url,
-            description,
-            link,
-          },
-        }
-      );
-    } else {
-      updateProfile = new UserProfile({
-        userId: userId,
-        userName,
-        profileImg: uploadImg.secure_url,
-        description,
-        link,
+    let uploadImg;
+    if (image) {
+      uploadImg = await cloudinary.uploader.upload(req.file.path, {
+        use_filename: true,
+        folder: "rwa/userProfile",
       });
+
+      if (!uploadImg)
+        return res
+          .status(500)
+          .json({ status: false, message: "Error in uploading image" });
     }
 
-    userExists.username = userName;
-    await userExists.save();
-    await updateProfile.save();
+    const updateProfile = await Admin.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          userName,
+          profileImg: uploadImg?.secure_url,
+          description,
+          link,
+        },
+      }
+    );
 
     return res.status(200).json({
       status: true,
@@ -61,8 +47,38 @@ const userProfile = async (req, res) => {
     return res.status(500).json({
       status: false,
       message: "Internal server error",
+      error: error.message,
     });
   }
 };
 
-module.exports = userProfile;
+const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const userProfile = await Admin.findOne({ _id: userId }).select(
+      "-password -role"
+    );
+
+    if (!userProfile) {
+      return res.status(404).json({
+        status: false,
+        message: "Profile not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Profile retrieved successfully",
+      userProfile: userProfile,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { userProfile, getUserProfile };

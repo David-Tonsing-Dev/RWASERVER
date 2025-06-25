@@ -248,21 +248,27 @@ const addBlogs = async (req, res) => {
   </body>
   `;
 
-      nodemailerMailgun.sendMail(
-        {
+      const sendEmails = recipientEmails.map((email) =>
+        nodemailerMailgun.sendMail({
           from: "service@rwacamp.com",
-          to: recipientEmails,
+          to: email,
           subject,
           html,
-        },
-        (err, info) => {
-          if (err) {
-            console.error("Error sending blog email:", err);
-          } else {
-            console.log("Blog email sent:", JSON.stringify(info));
-          }
-        }
+        })
       );
+
+      const results = await Promise.allSettled(sendEmails);
+
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(
+            `Failed to send to ${recipientEmails[index]}:`,
+            result.reason
+          );
+        } else {
+          console.log(`Email sent to ${recipientEmails[index]}`);
+        }
+      });
     }
 
     return res
