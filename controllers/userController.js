@@ -458,6 +458,8 @@ const fcmToken = async (req, res) => {
           },
         }
       );
+      await Guest.findOneAndDelete({ fcmToken: token });
+
       return res.status(201).json({
         status: true,
         message: "Token updated successfully",
