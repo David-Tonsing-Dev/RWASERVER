@@ -4,7 +4,6 @@ const cloudinary = require("../../config/cloudinary");
 const nodemailer = require("nodemailer");
 const mg = require("nodemailer-mailgun-transport");
 const User = require("../../models/userModel");
-const sendPushNotification = require("../../helper/sendPushNotification");
 
 const auth = {
   auth: {
@@ -153,15 +152,6 @@ const addBlogs = async (req, res) => {
     });
 
     await addBlog.save();
-
-    sendPushNotification({
-      title: "Blogs",
-      link: "",
-      body: addBlog.title,
-      image: addBlog.thumbnail,
-      id: addBlog._id.toString(),
-      slug: addBlog.slug,
-    }).catch((err) => console.error("Error sending notification:", err));
 
     const nodemailerMailgun = nodemailer.createTransport(mg(auth));
 

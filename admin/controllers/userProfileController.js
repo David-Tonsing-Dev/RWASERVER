@@ -7,6 +7,20 @@ const userProfile = async (req, res) => {
     const { userName, description, link } = req.body;
     const image = req.file;
 
+    // let parsedLinks;
+    // if (Array.isArray(link) && typeof link[0] === "string") {
+    //   parsedLinks = JSON.parse(link[0]);
+    // } else if (typeof link === "string") {
+    //   parsedLinks = JSON.parse(link);
+    // } else {
+    //   parsedLinks = link;
+    // }
+
+    const parsedLinks = JSON.parse(link);
+    console.log(link, "link");
+    console.log(typeof link, "link typeof");
+    console.log(parsedLinks, "link parse");
+
     const userExists = await Admin.findOne({ _id: userId });
     if (!userExists) {
       return res
@@ -31,19 +45,21 @@ const userProfile = async (req, res) => {
       { _id: userId },
       {
         $set: {
-          userName,
+          username: userName,
           profileImg: uploadImg?.secure_url,
           description,
-          link,
+          link: parsedLinks,
         },
-      }
+      },
+      { new: true }
     );
-
+    console.log(updateProfile);
     return res.status(200).json({
       status: true,
       message: "Profile creating successfully",
     });
   } catch (error) {
+    console.log(error.message, "error");
     return res.status(500).json({
       status: false,
       message: "Internal server error",
