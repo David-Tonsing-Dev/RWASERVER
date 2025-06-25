@@ -2,7 +2,7 @@ const axios = require("axios");
 const NodeCache = require("node-cache");
 const cache = new NodeCache({ stdTTL: 600 });
 const UserCoin = require("../models/userCoinModel");
-const allToken = require("../models/coinTokenModel");
+const AllToken = require("../models/coinTokenModel");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=250&category=real-world-assets-rwa&sparkline=true";
@@ -199,7 +199,7 @@ const getFavoriteCoin = async (req, res) => {
 
     // data = [...response.data, ...responseCondo.data];
 
-    const coingeckoToken = await allToken.find().select("-sparkline_in_7d");
+    const coingeckoToken = await AllToken.find().select("-sparkline_in_7d");
     coingeckoToken.sort((a, b) => {
       if (a.market_cap_rank === null && b.market_cap_rank === null) return 0;
       if (a.market_cap_rank === null) return 1;
