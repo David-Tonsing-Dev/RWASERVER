@@ -71,7 +71,7 @@ const addNews = async (req, res) => {
     });
     await addNew.save();
 
-    sendPushNotification({
+    await sendPushNotification({
       title: "News",
       link: "",
       body: addNew.title,

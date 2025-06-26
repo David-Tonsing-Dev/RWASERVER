@@ -167,7 +167,6 @@ const getReview = async (req, res) => {
 
     const transformed = getAllReview.map((item) => {
       const newReviews = item.review.map((r) => {
-        console.log("r", r);
         return {
           userId: r?.userId._id ?? null,
           username: r?.userId.username ?? null,
