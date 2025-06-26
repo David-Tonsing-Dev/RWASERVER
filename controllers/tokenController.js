@@ -388,7 +388,7 @@ const getCoinDetail = async (req, res) => {
 
     const getExpertReview = await Review.findOne({ tokenId: coinId }).populate({
       path: "review.userId",
-      select: "username",
+      select: "username profileImg",
     });
 
     return res.status(200).json({
