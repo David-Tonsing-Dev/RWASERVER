@@ -441,7 +441,6 @@ const fcmToken = async (req, res) => {
   try {
     const { token } = req.body;
     const userId = req.userId;
-    console.log(token, "===========================token");
 
     if (!token) {
       return res.status(400).json({
@@ -451,7 +450,6 @@ const fcmToken = async (req, res) => {
     }
     const count = await Guest.countDocuments();
     if (userId) {
-      console.log("adding token===============================");
       const user = await UserModel.findOneAndUpdate(
         { _id: userId },
         {
@@ -462,7 +460,6 @@ const fcmToken = async (req, res) => {
         { new: true }
       );
       const deletedGuest = await Guest.findOneAndDelete({ fcmToken: token });
-      console.log("success=========================");
       return res.status(201).json({
         status: true,
         message: "Token updated successfully",
