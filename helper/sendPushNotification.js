@@ -9,10 +9,15 @@ admin.initializeApp({
 });
 
 async function sendPushNotification(data) {
+  // const getTokens = await User.find({
+  //   fcmToken: { $exists: true, $ne: null, $ne: "" },
+  // })
+  //   .select("fcmToken")
+  //   .lean();
   const getTokens = await User.find({
-    fcmToken: { $exists: true, $ne: null, $ne: "" },
+    fcmTokens: { $exists: true, $not: { $size: 0 } },
   })
-    .select("fcmToken")
+    .select("fcmTokens")
     .lean();
 
   const getGuestTokens = await Guest.find({

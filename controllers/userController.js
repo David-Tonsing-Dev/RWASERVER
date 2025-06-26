@@ -453,8 +453,8 @@ const fcmToken = async (req, res) => {
       const user = await UserModel.findOneAndUpdate(
         { _id: userId },
         {
-          $set: {
-            fcmToken: token,
+          $addToSet: {
+            fcmTokens: token,
           },
         },
         { new: true }
