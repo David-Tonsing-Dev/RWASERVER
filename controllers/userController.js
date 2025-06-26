@@ -454,7 +454,7 @@ const fcmToken = async (req, res) => {
         { _id: userId },
         {
           $addToSet: {
-            fcmTokens: token,
+            fcmToken: token,
           },
         },
         { new: true }
