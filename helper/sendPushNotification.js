@@ -15,9 +15,9 @@ async function sendPushNotification(data) {
   //   .select("fcmToken")
   //   .lean();
   const getTokens = await User.find({
-    fcmTokens: { $exists: true, $not: { $size: 0 } },
+    fcmToken: { $exists: true, $not: { $size: 0 } },
   })
-    .select("fcmTokens")
+    .select("fcmToken")
     .lean();
 
   const getGuestTokens = await Guest.find({
@@ -25,6 +25,11 @@ async function sendPushNotification(data) {
   })
     .select("fcmToken")
     .lean();
+  // const getGuestTokens = await Guest.find({
+  //   fcmToken: { $exists: true,$not: { $size: 0 }},
+  // })
+  //   .select("fcmToken")
+  //   .lean();
 
   const userFcmTokens = getTokens.map((user) => user.fcmToken);
   const guestFcmTokens = getGuestTokens.map((user) => user.fcmToken);

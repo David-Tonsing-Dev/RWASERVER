@@ -466,11 +466,16 @@ const fcmToken = async (req, res) => {
         message: "Token updated successfully",
       });
     }
-    const addGuestUser = new Guest({
-      userName: `Guest${count + 1}`,
-      fcmToken: token,
-    });
-    await addGuestUser.save();
+    const existingGuest = await Guest.findOne({ fcmToken: token });
+
+    if (!existingGuest) {
+      const addGuestUser = new Guest({
+        userName: `Guest${count + 1}`,
+        fcmToken: token,
+      });
+      await addGuestUser.save();
+    }
+
     return res.status(200).json({
       status: true,
       message: "Guest user created successfully!",
