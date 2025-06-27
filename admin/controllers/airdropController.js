@@ -30,7 +30,7 @@ const getAllAirdrops = async (req, res) => {
         message: "Airdrops fetched successfully",
         data: airdrops,
         total: totalAirdrop,
-        status: "true",
+        status: true,
       });
     }
 
@@ -55,12 +55,12 @@ const getAllAirdrops = async (req, res) => {
       message: "Airdrops fetched successfully",
       data: airdrops,
       total: totalAirdrop,
-      status: "true",
+      status: true,
     });
   } catch (err) {
     return res
       .status(500)
-      .json({ error: "Failed to fetch airdrops", status: "false" });
+      .json({ error: "Failed to fetch airdrops", status: false });
   }
 };
 
@@ -117,12 +117,12 @@ const createAirdrop = async (req, res) => {
 
     return res.status(201).json({
       message: "Airdrop created successfully",
-      status: "true",
+      status: true,
     });
   } catch (err) {
     return res
       .status(500)
-      .json({ error: "Failed to create airdrop", status: "false" });
+      .json({ error: "Failed to create airdrop", status: false });
   }
 };
 
@@ -174,7 +174,7 @@ const updateAirdrop = async (req, res) => {
     if (!airdrop) {
       return res
         .status(404)
-        .json({ message: "Airdrop not found", status: "false" });
+        .json({ message: "Airdrop not found", status: false });
     }
 
     return res.status(200).json({
@@ -184,7 +184,7 @@ const updateAirdrop = async (req, res) => {
   } catch (err) {
     return res
       .status(500)
-      .json({ error: "Failed to update airdrop", status: "false" });
+      .json({ error: "Failed to update airdrop", status: false });
   }
 };
 
@@ -203,17 +203,17 @@ const deleteAirdrop = async (req, res) => {
     if (!airdrop) {
       return res
         .status(404)
-        .json({ message: "Airdrop not found", status: "false" });
+        .json({ message: "Airdrop not found", status: false });
     }
 
     return res.status(200).json({
       message: "Airdrop deleted successfully",
-      status: "true",
+      status: true,
     });
   } catch (err) {
     return res
       .status(500)
-      .json({ error: "Internal server error", status: "false" });
+      .json({ error: "Internal server error", status: false });
   }
 };
 

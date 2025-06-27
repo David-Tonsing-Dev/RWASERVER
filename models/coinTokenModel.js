@@ -68,6 +68,12 @@ const coinGeckoTokenSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    category: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+      },
+    ],
   },
   { timestamps: true }
 );

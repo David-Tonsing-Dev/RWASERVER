@@ -25,25 +25,19 @@ async function sendPushNotification(data) {
   })
     .select("fcmToken")
     .lean();
-  // const getGuestTokens = await Guest.find({
-  //   fcmToken: { $exists: true,$not: { $size: 0 }},
-  // })
-  //   .select("fcmToken")
-  //   .lean();
 
-  // const userFcmTokens = getTokens.map((user) => user.fcmToken);
-  const userFcmTokens = [];
-  getTokens.forEach((user) => {
-    if (Array.isArray(user.fcmToken)) {
-      userFcmTokens.push(...user.fcmToken);
-    } else if (typeof user.fcmToken === "string") {
-      userFcmTokens.push(user.fcmToken);
-    }
-  });
+  const userFcmTokens = getTokens.map((user) => user.fcmToken);
+  // const userFcmTokens = [];
+  // getTokens.forEach((user) => {
+  //   if (Array.isArray(user.fcmToken)) {
+  //     userFcmTokens.push(...user.fcmToken);
+  //   } else if (typeof user.fcmToken === "string") {
+  //     userFcmTokens.push(user.fcmToken);
+  //   }
+  // });
+
   const guestFcmTokens = getGuestTokens.map((user) => user.fcmToken);
-
-  const allFcmTokens = [...userFcmTokens, ...guestFcmTokens];
-
+  const allFcmTokens = [...userFcmTokens, ...guestFcmTokens].flat(Infinity);
   if (getTokens.length <= 0) {
     return;
   }

@@ -139,14 +139,12 @@ const getAllTokenAdmin = async (req, res) => {
         ],
       });
 
-      return res
-        .status(200)
-        .json({
-          status: true,
-          message: "Tokens fetched successfully.",
-          currency: getToken,
-          total: tokenCount,
-        });
+      return res.status(200).json({
+        status: true,
+        message: "Tokens fetched successfully.",
+        currency: getToken,
+        total: tokenCount,
+      });
     }
 
     const skip = (page - 1) * size;
@@ -184,14 +182,12 @@ const getAllTokenAdmin = async (req, res) => {
 
     const tokenCount = await Token.countDocuments();
 
-    return res
-      .status(200)
-      .json({
-        status: true,
-        message: "Tokens fetched successfully.",
-        currency: getTokens,
-        total: tokenCount,
-      });
+    return res.status(200).json({
+      status: true,
+      message: "Tokens fetched successfully.",
+      currency: getTokens,
+      total: tokenCount,
+    });
   } catch (err) {
     return res.status(500).json({
       status: false,
