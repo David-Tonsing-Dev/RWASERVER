@@ -109,7 +109,7 @@ const assignTokensToNewCategory = async (req, res) => {
     if (role !== "SUPERADMIN") {
       return res.status(401).json({
         status: false,
-        message: "Only Super admin can add category",
+        message: "Only Super admin is allowed to perform this action.",
       });
     }
 
@@ -157,7 +157,7 @@ const assignCategoriesToToken = async (req, res) => {
     if (role !== "SUPERADMIN") {
       return res.status(401).json({
         status: false,
-        message: "Only Super admin can add category",
+        message: "Only Super admin is allowed to perform this action.",
       });
     }
 
