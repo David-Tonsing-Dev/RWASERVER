@@ -189,6 +189,8 @@ const getAllToken = async (req, res) => {
       if (order === "DESC" || order === "desc") order = -1;
     }
 
+    const sortOptions = { [sortBy]: order };
+
     if (filter) {
       const getToken = await Token.find({
         $and: [
@@ -202,7 +204,9 @@ const getAllToken = async (req, res) => {
         ],
       })
         .skip((page - 1) * size)
-        .limit(size);
+        .limit(size)
+        .populate("category", "categoryName")
+        .lean();
 
       const tokenCount = await Token.countDocuments({
         $and: [
@@ -226,43 +230,50 @@ const getAllToken = async (req, res) => {
     //   .skip((page - 1) * size)
     //   .limit(size);
     const skip = (page - 1) * size;
-    const getTokens = await Token.aggregate([
-      {
-        $match: {
-          enable: { $eq: true },
-        },
-      },
+    // const getTokens = await Token.aggregate([
+    //   {
+    //     $match: {
+    //       enable: { $eq: true },
+    //     },
+    //   },
 
-      {
-        $addFields: {
-          sortHelper: {
-            $cond: {
-              if: { $eq: [`$${sortBy}`, null] },
-              then: 1,
-              else: 0,
-            },
-          },
-        },
-      },
+    //   {
+    //     $addFields: {
+    //       sortHelper: {
+    //         $cond: {
+    //           if: { $eq: [`$${sortBy}`, null] },
+    //           then: 1,
+    //           else: 0,
+    //         },
+    //       },
+    //     },
+    //   },
 
-      {
-        $sort: {
-          sortHelper: 1,
-          [sortBy]: order,
-        },
-      },
+    //   {
+    //     $sort: {
+    //       sortHelper: 1,
+    //       [sortBy]: order,
+    //     },
+    //   },
 
-      {
-        $project: {
-          sortHelper: 0,
-        },
-      },
+    //   {
+    //     $project: {
+    //       sortHelper: 0,
+    //     },
+    //   },
 
-      // { $skip: skip },
-      // { $limit: size },
-    ])
-      .skip(skip)
-      .limit(size);
+    //   // { $skip: skip },
+    //   // { $limit: size },
+    // ])
+    //   .skip(skip)
+    //   .limit(size);
+
+    const getTokens = await Token.find()
+      .sort(sortOptions)
+      .skip((page - 1) * size)
+      .limit(size)
+      .populate("category", "categoryName")
+      .lean();
 
     const tokenCount = await Token.countDocuments({ enable: true });
 

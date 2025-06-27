@@ -137,13 +137,26 @@ const assignTokenToCategories = async (req, res) => {
       });
     }
 
+    // const categoryIds = [];
+    // for (const name of categoryNames) {
+    //   const category = await Category.findOneAndUpdate(
+    //     { categoryName: name },
+    //     { $setOnInsert: { categoryName: name } },
+    //     { upsert: true, new: true, setDefaultsOnInsert: true }
+    //   );
+    //   categoryIds.push(category._id);
+    // }
+
     const categoryIds = [];
+
     for (const name of categoryNames) {
-      const category = await Category.findOneAndUpdate(
-        { categoryName: name },
-        { $setOnInsert: { categoryName: name } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-      );
+      let category = await Category.findOne({ categoryName: name });
+
+      if (!category) {
+        category = new Category({ categoryName: name });
+        await category.save();
+      }
+
       categoryIds.push(category._id);
     }
 
