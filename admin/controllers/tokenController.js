@@ -121,6 +121,7 @@ const getAllTokenAdmin = async (req, res) => {
       if (order === "ASC" || order === "asc") order = 1;
       if (order === "DESC" || order === "desc") order = -1;
     }
+    const sortOptions = { [sortBy]: order };
 
     if (filter) {
       const getToken = await Token.find({
@@ -129,8 +130,11 @@ const getAllTokenAdmin = async (req, res) => {
           { symbol: { $regex: filter, $options: "i" } },
         ],
       })
+        .sort(sortOptions)
         .skip((page - 1) * size)
-        .limit(size);
+        .limit(size)
+        .populate("category", "categoryName")
+        .lean();
 
       const tokenCount = await Token.countDocuments({
         $or: [
@@ -147,39 +151,14 @@ const getAllTokenAdmin = async (req, res) => {
       });
     }
 
-    const skip = (page - 1) * size;
-    const getTokens = await Token.aggregate([
-      {
-        $addFields: {
-          sortHelper: {
-            $cond: {
-              if: { $eq: [`$${sortBy}`, null] },
-              then: 1,
-              else: 0,
-            },
-          },
-        },
-      },
+    // const skip = (page - 1) * size;
 
-      {
-        $sort: {
-          sortHelper: 1,
-          [sortBy]: order,
-        },
-      },
-
-      {
-        $project: {
-          sortHelper: 0,
-        },
-      },
-
-      // { $skip: skip },
-      // { $limit: size },
-    ])
-      .skip(skip)
-      .limit(size);
-
+    const getTokens = await Token.find()
+      .sort(sortOptions)
+      .skip((page - 1) * size)
+      .limit(size)
+      .populate("category", "categoryName")
+      .lean();
     const tokenCount = await Token.countDocuments();
 
     return res.status(200).json({

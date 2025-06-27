@@ -204,6 +204,7 @@ const getAllToken = async (req, res) => {
         ],
       })
         .skip((page - 1) * size)
+        .sort(sortOptions)
         .limit(size)
         .populate("category", "categoryName")
         .lean();
@@ -225,7 +226,7 @@ const getAllToken = async (req, res) => {
         .json({ status: true, currency: getToken, total: tokenCount });
     }
 
-    const skip = (page - 1) * size;
+    // const skip = (page - 1) * size;
 
     const getTokens = await Token.find()
       .sort(sortOptions)
