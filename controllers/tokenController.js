@@ -190,6 +190,9 @@ const getAllToken = async (req, res) => {
     }
 
     const sortOptions = { [sortBy]: order };
+    const query = {
+      [sortBy]: { $ne: null },
+    };
 
     if (filter) {
       const getToken = await Token.find({
@@ -228,7 +231,7 @@ const getAllToken = async (req, res) => {
 
     // const skip = (page - 1) * size;
 
-    const getTokens = await Token.find()
+    const getTokens = await Token.find(query)
       .sort(sortOptions)
       .skip((page - 1) * size)
       .limit(size)

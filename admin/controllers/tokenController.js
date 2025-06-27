@@ -122,7 +122,9 @@ const getAllTokenAdmin = async (req, res) => {
       if (order === "DESC" || order === "desc") order = -1;
     }
     const sortOptions = { [sortBy]: order };
-
+    const query = {
+      [sortBy]: { $ne: null },
+    };
     if (filter) {
       const getToken = await Token.find({
         $or: [
@@ -153,13 +155,13 @@ const getAllTokenAdmin = async (req, res) => {
 
     // const skip = (page - 1) * size;
 
-    const getTokens = await Token.find()
+    const getTokens = await Token.find(query)
       .sort(sortOptions)
       .skip((page - 1) * size)
       .limit(size)
       .populate("category", "categoryName")
       .lean();
-    const tokenCount = await Token.countDocuments();
+    const tokenCount = await Token.countDocuments(query);
 
     return res.status(200).json({
       status: true,
