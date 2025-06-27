@@ -225,48 +225,7 @@ const getAllToken = async (req, res) => {
         .json({ status: true, currency: getToken, total: tokenCount });
     }
 
-    // const getTokens = await Token.find()
-    //   .sort({ ["market_cap_rank"]: 1 })
-    //   .skip((page - 1) * size)
-    //   .limit(size);
     const skip = (page - 1) * size;
-    // const getTokens = await Token.aggregate([
-    //   {
-    //     $match: {
-    //       enable: { $eq: true },
-    //     },
-    //   },
-
-    //   {
-    //     $addFields: {
-    //       sortHelper: {
-    //         $cond: {
-    //           if: { $eq: [`$${sortBy}`, null] },
-    //           then: 1,
-    //           else: 0,
-    //         },
-    //       },
-    //     },
-    //   },
-
-    //   {
-    //     $sort: {
-    //       sortHelper: 1,
-    //       [sortBy]: order,
-    //     },
-    //   },
-
-    //   {
-    //     $project: {
-    //       sortHelper: 0,
-    //     },
-    //   },
-
-    //   // { $skip: skip },
-    //   // { $limit: size },
-    // ])
-    //   .skip(skip)
-    //   .limit(size);
 
     const getTokens = await Token.find()
       .sort(sortOptions)
