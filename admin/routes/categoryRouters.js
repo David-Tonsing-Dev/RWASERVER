@@ -1,19 +1,18 @@
 const express = require("express");
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 const {
-  assignTokenToCategories,
-
-  removeCategoryFromToken,
-  getAllTokensWithCategories,
+  assignTokensToNewCategory,
+  assignCategoriesToToken,
+  getAllCategories,
 } = require("../controllers/categoryController");
 const router = express.Router();
 
-router.post("/create", adminAuthMiddleware, assignTokenToCategories);
-router.get("/get/token", getAllTokensWithCategories);
-router.delete(
-  "/token/:tokenId/category/:categoryId",
+router.post("/assign-tokens", adminAuthMiddleware, assignTokensToNewCategory);
+router.post(
+  "/token/assign-categories",
   adminAuthMiddleware,
-  removeCategoryFromToken
+  assignCategoriesToToken
 );
+router.get("/", getAllCategories);
 
 module.exports = router;

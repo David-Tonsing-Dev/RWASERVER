@@ -1,28 +1,10 @@
 const Category = require("../models/categoryModel");
 const CoingeckoToken = require("../../models/coinTokenModel");
 
-// const getCategory = async (req, res) => {
+// const assignTokenToCategories = async (req, res) => {
 //   try {
-//     const category = await Category.find();
-
-//     return res.status(200).json({
-//       status: true,
-//       categories: category,
-//       message: "Category add successfully.",
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       message: "Internal server error",
-//       error: error.message,
-//     });
-//   }
-// };
-
-// const addCategory = async (req, res) => {
-//   try {
+//     const { categoryNames, tokenId } = req.body;
 //     const role = req.role;
-//     const { categoryName } = req.body;
 
 //     if (role !== "SUPERADMIN")
 //       return res.status(401).json({
@@ -30,83 +12,47 @@ const CoingeckoToken = require("../../models/coinTokenModel");
 //         message: "Only Super admin can add category",
 //       });
 
-//     const newCategory = new Category({
-//       categoryName,
-//     });
-//     await newCategory.save();
-
-//     return res.status(200).json({
-//       status: true,
-//       message: "Category add successfully.",
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       message: "Internal server error",
-//       error: error.message,
-//     });
-//   }
-// };
-
-// const updateCategory = async (req, res) => {
-//   try {
-//     const { categoryName } = req.body;
-//     const role = req.role;
-//     const { id } = req.params;
-
-//     if (role !== "SUPERADMIN")
-//       return res.status(401).json({
+//     if (!tokenId || !categoryNames) {
+//       return res.status(400).json({
 //         status: false,
-//         message: "Only Super admin can add airdrop",
+//         message: "tokenId and categoryName are required.",
 //       });
+//     }
 
-//     const updateCategory = await Category.findOneAndUpdate(
-//       { _id: id },
-//       {
-//         $set: {
-//           categoryName,
-//         },
+//     const categoryIds = [];
+
+//     for (const name of categoryNames) {
+//       let category = await Category.findOne({ categoryName: name });
+
+//       if (!category) {
+//         category = new Category({ categoryName: name });
+//         await category.save();
 //       }
+
+//       categoryIds.push(category._id);
+//     }
+
+//     const updatedToken = await CoingeckoToken.findOneAndUpdate(
+//       { id: tokenId },
+//       {
+//         $addToSet: {
+//           category: { $each: categoryIds },
+//         },
+//       },
+//       { new: true }
 //     );
-//     if (!updateCategory) {
-//       return res
-//         .status(404)
-//         .json({ message: "Category not found", status: false });
-//     }
 
-//     return res.status(200).json({
-//       message: "Category updated successfully",
-//       status: true,
-//     });
-//   } catch (err) {
-//     return res.status(500).json({
-//       message: "Internal server error",
-//       status: false,
-//       error: err.message,
-//     });
-//   }
-// };
-
-// const deleteCategory = async (req, res) => {
-//   try {
-//     const role = req.role;
-//     const { id } = req.params;
-
-//     if (role !== "SUPERADMIN")
-//       return res.status(401).json({
+//     if (!updatedToken) {
+//       return res.status(404).json({
 //         status: false,
-//         message: "Only Super admin can delete.",
+//         message: "Token not found",
 //       });
-
-//     const deleteCategory = await Category.findOneAndDelete({ _id: id });
-//     if (!deleteCategory) {
-//       return res
-//         .status(404)
-//         .json({ message: "Category not found", status: false });
 //     }
+
 //     return res.status(200).json({
 //       status: true,
-//       message: "Category deleted successfully.",
+//       message: "Token assigned to categories successfully",
+//       token: updatedToken,
 //     });
 //   } catch (error) {
 //     return res.status(500).json({
@@ -117,46 +63,125 @@ const CoingeckoToken = require("../../models/coinTokenModel");
 //   }
 // };
 
-// controllers/assignTokenToCategories.js
+// const removeCategoryFromToken = async (req, res) => {
+//   try {
+//     const { tokenId, categoryId } = req.params;
 
-const assignTokenToCategories = async (req, res) => {
+//     const role = req.role;
+
+//     if (role !== "SUPERADMIN")
+//       return res.status(401).json({
+//         status: false,
+//         message: "Only Super admin can delete",
+//       });
+
+//     const updatedToken = await CoingeckoToken.findOneAndUpdate(
+//       { id: tokenId },
+//       { $pull: { category: categoryId } },
+//       { new: true }
+//     );
+
+//     if (!updatedToken) {
+//       return res.status(404).json({
+//         status: false,
+//         message: "Token not found",
+//       });
+//     }
+
+//     return res.status(200).json({
+//       status: true,
+//       message: "Category removed from token successfully",
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       status: false,
+//       message: "Internal server error",
+//       error: error.message,
+//     });
+//   }
+// };
+
+const assignTokensToNewCategory = async (req, res) => {
   try {
-    const { categoryNames, tokenId } = req.body;
+    const { categoryName, tokenIds } = req.body;
     const role = req.role;
 
-    if (role !== "SUPERADMIN")
+    if (role !== "SUPERADMIN") {
       return res.status(401).json({
         status: false,
         message: "Only Super admin can add category",
       });
+    }
 
-    if (!tokenId || !categoryNames) {
+    if (!categoryName || !Array.isArray(tokenIds) || tokenIds.length === 0) {
       return res.status(400).json({
         status: false,
-        message: "tokenId and categoryName are required.",
+        message: "categoryName and tokenIds are required.",
       });
     }
 
-    // const categoryIds = [];
-    // for (const name of categoryNames) {
-    //   const category = await Category.findOneAndUpdate(
-    //     { categoryName: name },
-    //     { $setOnInsert: { categoryName: name } },
-    //     { upsert: true, new: true, setDefaultsOnInsert: true }
-    //   );
-    //   categoryIds.push(category._id);
-    // }
+    let category = await Category.findOne({ categoryName });
+    if (!category) {
+      category = new Category({ categoryName });
+      await category.save();
+    }
+
+    const updatePromises = tokenIds.map((tokenId) =>
+      CoingeckoToken.findOneAndUpdate(
+        { id: tokenId },
+        { $addToSet: { category: category._id } },
+        { new: true }
+      )
+    );
+
+    const updatedTokens = await Promise.allSettled(updatePromises);
+
+    return res.status(200).json({
+      status: true,
+      message: "Category assigned to tokens successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+const assignCategoriesToToken = async (req, res) => {
+  try {
+    const { categoryNames, tokenId } = req.body;
+    const role = req.role;
+
+    if (role !== "SUPERADMIN") {
+      return res.status(401).json({
+        status: false,
+        message: "Only Super admin can add category",
+      });
+    }
+
+    if (
+      !tokenId ||
+      !Array.isArray(categoryNames) ||
+      categoryNames.length === 0
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "tokenId and categoryNames are required.",
+      });
+    }
 
     const categoryIds = [];
 
     for (const name of categoryNames) {
       let category = await Category.findOne({ categoryName: name });
-
       if (!category) {
-        category = new Category({ categoryName: name });
-        await category.save();
+        return res.status(404).json({
+          status: false,
+          message: "Category not found",
+        });
       }
-
       categoryIds.push(category._id);
     }
 
@@ -179,8 +204,7 @@ const assignTokenToCategories = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Token assigned to categories successfully",
-      token: updatedToken,
+      message: "Categories assigned to token successfully",
     });
   } catch (error) {
     return res.status(500).json({
@@ -190,25 +214,59 @@ const assignTokenToCategories = async (req, res) => {
     });
   }
 };
-const getTokenCategories = async (req, res) => {
+
+const getAllCategories = async (req, res) => {
   try {
-    const { tokenId } = req.params;
+    const categories = await Category.find().select("-__v");
 
-    const token = await CoingeckoToken.findOne({ id: tokenId }).populate(
-      "category",
-      "categoryName"
-    );
+    return res.status(200).json({
+      status: true,
+      message: "Categories fetched successfully",
+      categories: categories,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
 
-    if (!token) {
+const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const role = req.role;
+
+    if (role !== "SUPERADMIN") {
+      return res.status(401).json({
+        status: false,
+        message: "Only Super admin can delete",
+      });
+    }
+
+    const tokensUsingCategory = await CoingeckoToken.find({ category: id });
+
+    if (tokensUsingCategory.length > 0) {
+      return res.status(400).json({
+        status: false,
+        message:
+          "Category is assigned to one or more tokens and cannot be deleted",
+      });
+    }
+
+    const deleted = await Category.findByIdAndDelete(id);
+
+    if (!deleted) {
       return res.status(404).json({
         status: false,
-        message: "Token not found",
+        message: "Category not found",
       });
     }
 
     return res.status(200).json({
       status: true,
-      categories: token.category,
+      message: "Category deleted successfully",
     });
   } catch (error) {
     return res.status(500).json({
@@ -219,53 +277,75 @@ const getTokenCategories = async (req, res) => {
   }
 };
 
-const getAllTokensWithCategories = async (req, res) => {
+const deleteCategoryAndUnlinkTokens = async (req, res) => {
   try {
-    const tokens = await CoingeckoToken.find()
-      .populate("category", "categoryName")
-      .lean();
-
-    return res.status(200).json({
-      status: true,
-      tokens,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
-
-const removeCategoryFromToken = async (req, res) => {
-  try {
-    const { tokenId, categoryId } = req.params;
+    const { id } = req.params;
 
     const role = req.role;
 
-    if (role !== "SUPERADMIN")
+    if (role !== "SUPERADMIN") {
       return res.status(401).json({
         status: false,
         message: "Only Super admin can delete",
       });
+    }
 
-    const updatedToken = await CoingeckoToken.findOneAndUpdate(
+    await CoingeckoToken.updateMany(
+      { category: id },
+      { $pull: { category: id } }
+    );
+
+    const deleted = await Category.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        status: false,
+        message: "Category not found",
+      });
+    }
+    return res.status(200).json({
+      status: true,
+      message: "Category deleted and tokens updated",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+const unlinkCategoryFromSpecificToken = async (req, res) => {
+  try {
+    const { categoryId, tokenId } = req.params;
+
+    const role = req.role;
+
+    if (role !== "SUPERADMIN") {
+      return res.status(401).json({
+        status: false,
+        message: "Only Super admin can delete",
+      });
+    }
+
+    const token = await CoingeckoToken.findOneAndUpdate(
       { id: tokenId },
       { $pull: { category: categoryId } },
       { new: true }
     );
 
-    if (!updatedToken) {
+    if (!token) {
       return res.status(404).json({
         status: false,
-        message: "Token not found",
+        message: "Token not found or category not assigned",
       });
     }
 
     return res.status(200).json({
       status: true,
-      message: "Category removed from token successfully",
+      message: "Category unlinked from the token successfully",
+      token,
     });
   } catch (error) {
     return res.status(500).json({
@@ -277,8 +357,7 @@ const removeCategoryFromToken = async (req, res) => {
 };
 
 module.exports = {
-  assignTokenToCategories,
-  getTokenCategories,
-  removeCategoryFromToken,
-  getAllTokensWithCategories,
+  assignTokensToNewCategory,
+  assignCategoriesToToken,
+  getAllCategories,
 };

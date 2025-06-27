@@ -192,6 +192,7 @@ const getAllToken = async (req, res) => {
     const sortOptions = { [sortBy]: order };
     const query = {
       [sortBy]: { $ne: null },
+      enable: true,
     };
 
     if (filter) {
@@ -238,7 +239,7 @@ const getAllToken = async (req, res) => {
       .populate("category", "categoryName")
       .lean();
 
-    const tokenCount = await Token.countDocuments({ enable: true });
+    const tokenCount = await Token.countDocuments(query);
 
     return res
       .status(200)
