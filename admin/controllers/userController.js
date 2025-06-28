@@ -162,14 +162,14 @@ const adminSignUpBySuperAdmin = async (req, res) => {
     if (checkEmail)
       return res
         .status(400)
-        .json({ status: false, message: "Email already exist" });
+        .json({ status: false, message: "Email already exists" });
 
     const checkUsername = await AdminUser.findOne({ username });
 
     if (checkUsername)
       return res
         .status(400)
-        .json({ status: false, message: "Username already exist" });
+        .json({ status: false, message: "Username already exists" });
 
     const addAdmin = new AdminUser({ username, email, password });
 
@@ -299,14 +299,14 @@ const reviewerSignUpBySuperAdmin = async (req, res) => {
     if (checkEmail && checkEmail.role === "REVIEWER")
       return res
         .status(400)
-        .json({ status: false, message: "Email already exist" });
+        .json({ status: false, message: "Email already exists" });
 
     const checkUsername = await AdminUser.findOne({ username });
 
     if (checkUsername)
       return res
         .status(400)
-        .json({ status: false, message: "Username already exist" });
+        .json({ status: false, message: "Username already exists" });
 
     const addAdmin = new AdminUser({
       username,
