@@ -256,16 +256,38 @@ const getAllToken = async (req, res) => {
 const getCategoryTokens = async (req, res) => {
   try {
     const { categoryId } = req.params;
+    let { page = 1, size = 10, sortBy, order } = req.query;
+    page = parseInt(page);
+    size = parseInt(size);
 
-    const allToken = await CoingeckoToken.find({
+    if (sortBy === "" || !sortBy) {
+      sortBy = "market_cap_rank";
+    }
+
+    if (order === "" || !order) {
+      order = 1;
+    }
+
+    if (order) {
+      if (order === "ASC" || order === "asc") order = 1;
+      if (order === "DESC" || order === "desc") order = -1;
+    }
+
+    const sortOptions = { [sortBy]: order };
+
+    const allToken = await Token.find({
       category: categoryId,
-    });
+    })
+      .sort(sortOptions)
+      .skip((page - 1) * size)
+      .limit(size);
 
     return res.status(200).json({ status: true, tokens: allToken });
   } catch (error) {
     return res.status(500).json({
       status: false,
       message: "Internal server error",
+      error: error.message,
     });
   }
 };

@@ -242,7 +242,6 @@ const getAllCategories = async (req, res) => {
 
     const results = await Promise.allSettled(
       categories.map(async (cat) => {
-        // console.log(cat.categoryName, "=============", cat._id);
         const tokens = await CoingeckoToken.find({ category: cat._id })
           .select("price_change_percentage_24h_in_currency image rank")
           .lean();
@@ -251,6 +250,7 @@ const getAllCategories = async (req, res) => {
           (sum, t) => sum + (t.price_change_percentage_24h_in_currency || 0),
           0
         );
+        console.log(tokens.length, "len");
         const avgVolume = tokens.length > 0 ? totalVolume / tokens.length : 0;
         const topTokens = tokens
           .sort((a, b) => (b.rank || 0) - (a.rank || 0))
@@ -279,15 +279,10 @@ const getAllCategories = async (req, res) => {
       console.log("Some categories failed to process:", failedCategories);
     }
 
-    const allOnlyCategory = await CoingeckoToken.find({
-      category: "685e73ee453aca32dfeaaf19",
-    });
-
     return res.status(200).json({
       status: true,
       message: "Categories with token data fetched successfully",
       categories: detailCategories,
-      onlyCategory: allOnlyCategory,
     });
   } catch (error) {
     return res.status(500).json({
