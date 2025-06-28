@@ -253,6 +253,23 @@ const getAllToken = async (req, res) => {
   }
 };
 
+const getCategoryTokens = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    const allToken = await CoingeckoToken.find({
+      category: categoryId,
+    });
+
+    return res.status(200).json({ status: true, tokens: allToken });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 const getCategories = async (req, res) => {
   const { category, page, size } = req.query;
   try {
@@ -718,4 +735,5 @@ module.exports = {
   getNewsDetail,
   getBlogDetail,
   getTopGainer,
+  getCategoryTokens,
 };

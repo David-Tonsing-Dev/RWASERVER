@@ -396,7 +396,7 @@ const deleteCategoryFromSpecificToken = async (req, res) => {
       });
     }
 
-    const token = await CoingeckoToken.findOne({ _id: tokenId });
+    const token = await CoingeckoToken.findOne({ id: tokenId });
     if (!token) {
       return res
         .status(404)
