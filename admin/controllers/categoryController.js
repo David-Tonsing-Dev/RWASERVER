@@ -245,13 +245,11 @@ const getAllCategories = async (req, res) => {
         const tokens = await CoingeckoToken.find({ category: cat._id })
           .select("price_change_percentage_24h_in_currency image rank")
           .lean();
-        console.log(tokens, "tokens");
-        const totalVolume = tokens.reduce(
+        const totalPercentage = tokens.reduce(
           (sum, t) => sum + (t.price_change_percentage_24h_in_currency || 0),
           0
         );
-        console.log(tokens.length, "len");
-        const avgVolume = tokens.length > 0 ? totalVolume / tokens.length : 0;
+        const avg = tokens.length > 0 ? totalPercentage / tokens.length : 0;
         const topTokens = tokens
           .sort((a, b) => (b.rank || 0) - (a.rank || 0))
           .slice(0, 3)
@@ -259,9 +257,7 @@ const getAllCategories = async (req, res) => {
         return {
           _id: cat._id,
           categoryName: cat.categoryName,
-          createdAt: cat.createdAt,
-          updatedAt: cat.updatedAt,
-          avg24hVolume: avgVolume,
+          avg24hPercent: avg,
           topTokenImages: topTokens,
         };
       })
