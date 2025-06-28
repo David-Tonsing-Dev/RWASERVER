@@ -5,7 +5,7 @@ const Token = require("../models/newTokenModel");
 const fetchAndStoreRwaData = async () => {
   const perPage = 100;
   let page = 1;
-  let globalRank = 1;
+  // let globalRank = 1;
 
   while (true) {
     try {
@@ -56,7 +56,7 @@ const fetchAndStoreRwaData = async () => {
           { id },
           {
             $set: {
-              rank: globalRank++,
+              // rank: globalRank++,
               current_price: current_price ?? null,
               market_cap: market_cap ?? null,
               market_cap_rank: market_cap_rank ?? null,
@@ -79,7 +79,7 @@ const fetchAndStoreRwaData = async () => {
 
         if (!existingToken) {
           await CoingeckoToken.create({
-            rank: globalRank++,
+            // rank: globalRank++,
             id,
             symbol,
             name,
@@ -263,4 +263,33 @@ const fetchNewToken = async (tokenId) => {
   }
 };
 
-module.exports = { fetchAndStoreRwaData, fetchCondoToken, fetchNewToken };
+const updateGlobalRanksByMarketCap = async () => {
+  try {
+    const tokens = await CoingeckoToken.find({})
+      .sort({ market_cap: -1 })
+      .select("_id")
+      .exec();
+
+    const bulkOps = tokens.map((token, index) => ({
+      updateOne: {
+        filter: { _id: token._id },
+        update: { $set: { rank: index + 1 } },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await CoingeckoToken.bulkWrite(bulkOps);
+    }
+
+    console.log("Global ranks updated using bulkWrite.");
+  } catch (error) {
+    console.error("Error updating ranks with bulkWrite:", error.message);
+  }
+};
+
+module.exports = {
+  fetchAndStoreRwaData,
+  fetchCondoToken,
+  fetchNewToken,
+  updateGlobalRanksByMarketCap,
+};
