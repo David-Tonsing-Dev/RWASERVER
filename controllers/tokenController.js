@@ -190,10 +190,10 @@ const getAllToken = async (req, res) => {
     }
 
     const sortOptions = { [sortBy]: order };
-    // const query = {
-    //   [sortBy]: { $ne: null },
-    //   enable: true,
-    // };
+    const query = {
+      [sortBy]: { $ne: null },
+      enable: true,
+    };
 
     if (filter) {
       const getToken = await Token.find({
@@ -232,14 +232,14 @@ const getAllToken = async (req, res) => {
 
     // const skip = (page - 1) * size;
 
-    const getTokens = await Token.find()
+    const getTokens = await Token.find(query)
       .sort(sortOptions)
       .skip((page - 1) * size)
       .limit(size)
       .populate("category", "categoryName")
       .lean();
 
-    const tokenCount = await Token.countDocuments();
+    const tokenCount = await Token.countDocuments(query);
 
     return res
       .status(200)
