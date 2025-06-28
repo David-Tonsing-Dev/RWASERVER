@@ -106,7 +106,7 @@ const assignTokensToNewCategory = async (req, res) => {
     const { categoryName, tokenIds } = req.body;
     const role = req.role;
 
-    categoryName = categoryName.toLowerCase();
+    let categoryNameToLowerCase = categoryName.toLowerCase();
 
     if (role !== "SUPERADMIN") {
       return res.status(401).json({
@@ -115,24 +115,29 @@ const assignTokensToNewCategory = async (req, res) => {
       });
     }
 
-    if (!categoryName || !Array.isArray(tokenIds) || tokenIds.length === 0) {
+    if (
+      !categoryNameToLowerCase ||
+      !Array.isArray(tokenIds) ||
+      tokenIds.length === 0
+    ) {
       return res.status(400).json({
         status: false,
         message: "Category name and token ID are required.",
       });
     }
 
-    let category = await Category.findOne({ categoryName });
+    let category = await Category.findOne({
+      categoryName: categoryNameToLowerCase,
+    });
 
-    if (!category) {
-      category = new Category({ categoryName });
-      await category.save();
-    } else {
-      return res.status(400).json({
+    if (category) {
+      return res.status(403).json({
         status: false,
         message: "Category already exists.",
       });
     }
+    category = new Category({ categoryName: categoryNameToLowerCase });
+    await category.save();
 
     const updatePromises = tokenIds.map((tokenId) =>
       CoingeckoToken.findOneAndUpdate(
