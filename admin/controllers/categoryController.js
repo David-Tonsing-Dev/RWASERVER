@@ -245,11 +245,19 @@ const getAllCategories = async (req, res) => {
         const tokens = await CoingeckoToken.find({ category: cat._id })
           .select("price_change_percentage_24h_in_currency image rank")
           .lean();
-        const totalPercentage = tokens.reduce(
-          (sum, t) => sum + (t.price_change_percentage_24h_in_currency || 0),
+
+        const validTokens = tokens.filter(
+          (t) => t.price_change_percentage_24h_in_currency != null
+        );
+
+        const totalPercentage = validTokens.reduce(
+          (sum, t) => sum + t.price_change_percentage_24h_in_currency,
           0
         );
-        const avg = tokens.length > 0 ? totalPercentage / tokens.length : 0;
+
+        const avg =
+          validTokens.length > 0 ? totalPercentage / validTokens.length : 0;
+
         const topTokens = tokens
           .sort((a, b) => (b.rank || 0) - (a.rank || 0))
           .slice(0, 3)
