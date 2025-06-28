@@ -1,6 +1,8 @@
 const Category = require("../models/categoryModel");
 const CoingeckoToken = require("../../models/coinTokenModel");
 
+const mongoose = require("mongoose");
+
 // const assignTokenToCategories = async (req, res) => {
 //   try {
 //     const { categoryNames, tokenId } = req.body;
@@ -240,10 +242,11 @@ const getAllCategories = async (req, res) => {
 
     const results = await Promise.allSettled(
       categories.map(async (cat) => {
+        // console.log(cat.categoryName, "=============", cat._id);
         const tokens = await CoingeckoToken.find({ category: cat._id })
           .select("price_change_percentage_24h_in_currency image rank")
           .lean();
-
+        console.log(tokens, "tokens");
         const totalVolume = tokens.reduce(
           (sum, t) => sum + (t.price_change_percentage_24h_in_currency || 0),
           0
@@ -276,10 +279,15 @@ const getAllCategories = async (req, res) => {
       console.log("Some categories failed to process:", failedCategories);
     }
 
+    const allOnlyCategory = await CoingeckoToken.find({
+      category: "685e73ee453aca32dfeaaf19",
+    });
+
     return res.status(200).json({
       status: true,
       message: "Categories with token data fetched successfully",
       categories: detailCategories,
+      onlyCategory: allOnlyCategory,
     });
   } catch (error) {
     return res.status(500).json({
@@ -354,7 +362,7 @@ const deleteCategoryAndUnlinkTokens = async (req, res) => {
       { $pull: { category: id } }
     );
 
-    const deleted = await Category.findByIdAndDelete(id);
+    const deleted = await Category.findOneAndDelete({ _id: id });
 
     if (!deleted) {
       return res.status(404).json({
@@ -388,7 +396,7 @@ const deleteCategoryFromSpecificToken = async (req, res) => {
       });
     }
 
-    const token = await CoingeckoToken.findOne({ id: tokenId });
+    const token = await CoingeckoToken.findOne({ _id: tokenId });
     if (!token) {
       return res
         .status(404)
