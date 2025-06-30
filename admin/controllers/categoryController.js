@@ -3,112 +3,10 @@ const CoingeckoToken = require("../../models/coinTokenModel");
 
 const mongoose = require("mongoose");
 
-// const assignTokenToCategories = async (req, res) => {
-//   try {
-//     const { categoryNames, tokenId } = req.body;
-//     const role = req.role;
-
-//     if (role !== "SUPERADMIN")
-//       return res.status(401).json({
-//         status: false,
-//         message: "Only Super admin can add category",
-//       });
-
-//     if (!tokenId || !categoryNames) {
-//       return res.status(400).json({
-//         status: false,
-//         message: "tokenId and categoryName are required.",
-//       });
-//     }
-
-//     const categoryIds = [];
-
-//     for (const name of categoryNames) {
-//       let category = await Category.findOne({ categoryName: name });
-
-//       if (!category) {
-//         category = new Category({ categoryName: name });
-//         await category.save();
-//       }
-
-//       categoryIds.push(category._id);
-//     }
-
-//     const updatedToken = await CoingeckoToken.findOneAndUpdate(
-//       { id: tokenId },
-//       {
-//         $addToSet: {
-//           category: { $each: categoryIds },
-//         },
-//       },
-//       { new: true }
-//     );
-
-//     if (!updatedToken) {
-//       return res.status(404).json({
-//         status: false,
-//         message: "Token not found",
-//       });
-//     }
-
-//     return res.status(200).json({
-//       status: true,
-//       message: "Token assigned to categories successfully",
-//       token: updatedToken,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       message: "Internal server error",
-//       error: error.message,
-//     });
-//   }
-// };
-
-// const removeCategoryFromToken = async (req, res) => {
-//   try {
-//     const { tokenId, categoryId } = req.params;
-
-//     const role = req.role;
-
-//     if (role !== "SUPERADMIN")
-//       return res.status(401).json({
-//         status: false,
-//         message: "Only Super admin can delete",
-//       });
-
-//     const updatedToken = await CoingeckoToken.findOneAndUpdate(
-//       { id: tokenId },
-//       { $pull: { category: categoryId } },
-//       { new: true }
-//     );
-
-//     if (!updatedToken) {
-//       return res.status(404).json({
-//         status: false,
-//         message: "Token not found",
-//       });
-//     }
-
-//     return res.status(200).json({
-//       status: true,
-//       message: "Category removed from token successfully",
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       message: "Internal server error",
-//       error: error.message,
-//     });
-//   }
-// };
-
 const assignTokensToNewCategory = async (req, res) => {
   try {
     const { categoryName, tokenIds } = req.body;
     const role = req.role;
-
-    let categoryNameToLowerCase = categoryName.toLowerCase();
 
     if (role !== "SUPERADMIN") {
       return res.status(401).json({
@@ -117,11 +15,7 @@ const assignTokensToNewCategory = async (req, res) => {
       });
     }
 
-    if (
-      !categoryNameToLowerCase ||
-      !Array.isArray(tokenIds) ||
-      tokenIds.length === 0
-    ) {
+    if (!categoryName || !Array.isArray(tokenIds) || tokenIds.length === 0) {
       return res.status(400).json({
         status: false,
         message: "Category name and token ID are required.",
@@ -129,7 +23,7 @@ const assignTokensToNewCategory = async (req, res) => {
     }
 
     let category = await Category.findOne({
-      categoryName: categoryNameToLowerCase,
+      categoryName,
     });
 
     if (category) {
@@ -138,7 +32,7 @@ const assignTokensToNewCategory = async (req, res) => {
         message: "Category already exists.",
       });
     }
-    category = new Category({ categoryName: categoryNameToLowerCase });
+    category = new Category({ categoryName });
     await category.save();
 
     const updatePromises = tokenIds.map((tokenId) =>
