@@ -199,20 +199,9 @@ const getAllToken = async (req, res) => {
     const pipeline = [
       { $match: matchStage },
       {
-        // $addFields: {
-        //   sortNullHelper: {
-        //     $cond: [{ $eq: [`$${sortBy}`, null] }, 1, 0],
-        //   },
-        // },
         $addFields: {
           sortNullHelper: {
-            $cond: [
-              {
-                $or: [{ $eq: [`$${sortBy}`, null] }, { $not: [`$${sortBy}`] }],
-              },
-              1,
-              0,
-            ],
+            $cond: [{ $eq: [`$${sortBy}`, null] }, 1, 0],
           },
         },
       },
