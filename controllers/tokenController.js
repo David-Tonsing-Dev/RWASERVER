@@ -180,7 +180,6 @@ const getAllToken = async (req, res) => {
     if (sortBy === "" || !sortBy) {
       sortBy = "rank";
     }
-
     if (order === "" || !order) {
       order = 1;
     }
@@ -189,7 +188,6 @@ const getAllToken = async (req, res) => {
       if (order === "ASC" || order === "asc") order = 1;
       if (order === "DESC" || order === "desc") order = -1;
     }
-
     const matchStage = { enable: true };
     if (filter) {
       matchStage.$or = [
@@ -201,9 +199,20 @@ const getAllToken = async (req, res) => {
     const pipeline = [
       { $match: matchStage },
       {
+        // $addFields: {
+        //   sortNullHelper: {
+        //     $cond: [{ $eq: [`$${sortBy}`, null] }, 1, 0],
+        //   },
+        // },
         $addFields: {
           sortNullHelper: {
-            $cond: [{ $eq: [`$${sortBy}`, null] }, 1, 0],
+            $cond: [
+              {
+                $or: [{ $eq: [`$${sortBy}`, null] }, { $not: [`$${sortBy}`] }],
+              },
+              1,
+              0,
+            ],
           },
         },
       },

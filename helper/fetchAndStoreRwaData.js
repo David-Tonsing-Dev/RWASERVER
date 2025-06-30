@@ -286,6 +286,7 @@ const fetchNewToken = async (tokenId) => {
 //     console.error("Error updating ranks:", error.message);
 //   }
 // };
+
 const updateGlobalRanksByMarketCap = async () => {
   try {
     const tokens = await CoingeckoToken.aggregate([
@@ -296,8 +297,8 @@ const updateGlobalRanksByMarketCap = async () => {
       },
       {
         $sort: {
-          sortNullHelper: 1, // non-null market cap comes first
-          market_cap: -1, // descending order
+          sortNullHelper: 1,
+          market_cap: -1,
         },
       },
       {
