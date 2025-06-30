@@ -178,7 +178,7 @@ const getAllToken = async (req, res) => {
     filter = filter?.trim();
 
     if (sortBy === "" || !sortBy) {
-      sortBy = "market_cap_rank";
+      sortBy = "rank";
     }
 
     if (order === "" || !order) {
