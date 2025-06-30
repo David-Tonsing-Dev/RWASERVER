@@ -124,6 +124,70 @@ const assignCategoriesToToken = async (req, res) => {
   }
 };
 
+const assignMultipleCategories = async (req, res) => {
+  try {
+    const category = req.body;
+    const role = req.role;
+
+    if (role !== "SUPERADMIN") {
+      return res.status(401).json({
+        status: false,
+        message: "Only Super admin is allowed to perform this action.",
+      });
+    }
+
+    if (!Array.isArray(category) || category.length === 0) {
+      return res.status(400).json({
+        status: false,
+        message: "At least one category-token group is required.",
+      });
+    }
+
+    const bulkOps = [];
+
+    for (const group of category) {
+      const { categoryName, tokenIds } = group;
+
+      if (!categoryName || !Array.isArray(tokenIds) || tokenIds.length === 0) {
+        return res.status(400).json({
+          status: false,
+          message: "Each item must include a categoryName and tokenIds.",
+        });
+      }
+
+      const checkCategory = await Category.findOne({ categoryName });
+      if (!checkCategory) {
+        return res.status(404).json({
+          status: false,
+          message: `Category '${categoryName}' does not exist.`,
+        });
+      }
+
+      tokenIds.forEach((tokenId) => {
+        bulkOps.push({
+          updateOne: {
+            filter: { id: tokenId },
+            update: { $addToSet: { category: checkCategory._id } },
+          },
+        });
+      });
+    }
+
+    const result = await CoingeckoToken.bulkWrite(bulkOps);
+
+    return res.status(200).json({
+      status: true,
+      message: "Categories assigned to tokens successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+
 const getAllCategories = async (req, res) => {
   try {
     const { filter } = req.query;
@@ -322,4 +386,5 @@ module.exports = {
   categoryUpdate,
   deleteCategoryAndUnlinkTokens,
   deleteCategoryFromSpecificToken,
+  assignMultipleCategories,
 };

@@ -7,6 +7,7 @@ const {
   categoryUpdate,
   deleteCategoryAndUnlinkTokens,
   deleteCategoryFromSpecificToken,
+  assignMultipleCategories,
 } = require("../controllers/categoryController");
 const router = express.Router();
 
@@ -16,6 +17,9 @@ router.post(
   adminAuthMiddleware,
   assignCategoriesToToken
 );
+
+router.post("/assign-to-tokens", adminAuthMiddleware, assignMultipleCategories);
+
 router.get("/", getAllCategories);
 
 router.put("/update/:id", adminAuthMiddleware, categoryUpdate);
