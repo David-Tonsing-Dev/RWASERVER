@@ -263,12 +263,49 @@ const fetchNewToken = async (tokenId) => {
   }
 };
 
+// const updateGlobalRanksByMarketCap = async () => {
+//   try {
+//     const tokens = await CoingeckoToken.find({})
+//       .sort({ market_cap: -1 })
+//       .select("_id")
+//       .exec();
+
+//     const bulkOps = tokens.map((token, index) => ({
+//       updateOne: {
+//         filter: { _id: token._id },
+//         update: { $set: { rank: index + 1 } },
+//       },
+//     }));
+
+//     if (bulkOps.length > 0) {
+//       await CoingeckoToken.bulkWrite(bulkOps);
+//     }
+
+//     console.log("Global ranks updated.");
+//   } catch (error) {
+//     console.error("Error updating ranks:", error.message);
+//   }
+// };
 const updateGlobalRanksByMarketCap = async () => {
   try {
-    const tokens = await CoingeckoToken.find({})
-      .sort({ market_cap: -1 })
-      .select("_id")
-      .exec();
+    const tokens = await CoingeckoToken.aggregate([
+      {
+        $addFields: {
+          sortNullHelper: { $cond: [{ $eq: ["$market_cap", null] }, 1, 0] },
+        },
+      },
+      {
+        $sort: {
+          sortNullHelper: 1, // non-null market cap comes first
+          market_cap: -1, // descending order
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
 
     const bulkOps = tokens.map((token, index) => ({
       updateOne: {
