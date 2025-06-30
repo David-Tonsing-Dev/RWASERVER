@@ -108,7 +108,7 @@ const getAllTokenAdmin = async (req, res) => {
     let { page = 1, size = 100, filter, sortBy, order } = req.query;
     page = parseInt(page);
     size = parseInt(size);
-    filter = filter.trim();
+    filter = filter?.trim();
 
     if (sortBy === "" || !sortBy) {
       sortBy = "market_cap_rank";
