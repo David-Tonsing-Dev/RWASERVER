@@ -11,11 +11,11 @@ const start = async () => {
   try {
     cron.schedule("*/1 * * * *", async () => {
       console.log("Fetching RWA market data...");
+      await updateGlobalRanksByMarketCap();
       await fetchTreasuryToken();
       await fetchAndStoreRwaData();
       await fetchCondoToken();
       await fetchUserNewToken();
-      await updateGlobalRanksByMarketCap();
     });
 
     console.log("CRON job started successfully!");

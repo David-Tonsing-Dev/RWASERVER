@@ -175,6 +175,7 @@ const getAllToken = async (req, res) => {
     let { page = 1, size = 100, filter, sortBy, order } = req.query;
     page = parseInt(page);
     size = parseInt(size);
+    filter = filter.trim();
 
     if (sortBy === "" || !sortBy) {
       sortBy = "market_cap_rank";
@@ -189,61 +190,111 @@ const getAllToken = async (req, res) => {
       if (order === "DESC" || order === "desc") order = -1;
     }
 
-    const sortOptions = { [sortBy]: order };
-    const query = {
-      [sortBy]: { $ne: null },
-      enable: true,
-    };
-
+    const matchStage = { enable: true };
     if (filter) {
-      const getToken = await Token.find({
-        $and: [
-          { enable: true },
-          {
-            $or: [
-              { name: { $regex: filter, $options: "i" } },
-              { symbol: { $regex: filter, $options: "i" } },
-            ],
-          },
-        ],
-      })
-        .skip((page - 1) * size)
-        .sort(sortOptions)
-        .limit(size)
-        .populate("category", "categoryName")
-        .lean();
-
-      const tokenCount = await Token.countDocuments({
-        $and: [
-          { enable: true },
-          {
-            $or: [
-              { name: { $regex: filter, $options: "i" } },
-              { symbol: { $regex: filter, $options: "i" } },
-            ],
-          },
-        ],
-      });
-
-      return res
-        .status(200)
-        .json({ status: true, currency: getToken, total: tokenCount });
+      matchStage.$or = [
+        { name: { $regex: filter, $options: "i" } },
+        { symbol: { $regex: filter, $options: "i" } },
+      ];
     }
 
-    // const skip = (page - 1) * size;
+    const pipeline = [
+      { $match: matchStage },
+      {
+        $addFields: {
+          sortNullHelper: {
+            $cond: [{ $eq: [`$${sortBy}`, null] }, 1, 0],
+          },
+        },
+      },
+      {
+        $sort: {
+          sortNullHelper: 1,
+          [sortBy]: order,
+        },
+      },
+      { $skip: (page - 1) * size },
+      { $limit: size },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $project: {
+          sortNullHelper: 0,
+        },
+      },
+    ];
 
-    const getTokens = await Token.find(query)
-      .sort(sortOptions)
-      .skip((page - 1) * size)
-      .limit(size)
-      .populate("category", "categoryName")
-      .lean();
+    const tokens = await Token.aggregate(pipeline);
 
-    const tokenCount = await Token.countDocuments(query);
+    const total = await Token.countDocuments(matchStage);
 
-    return res
-      .status(200)
-      .json({ status: true, currency: getTokens, total: tokenCount });
+    return res.status(200).json({
+      status: true,
+      currency: tokens,
+      total,
+    });
+
+    // const sortOptions = { [sortBy]: order };
+    // const query = {
+    //   [sortBy]: { $ne: null },
+    //   enable: true,
+    // };
+
+    // if (filter) {
+    //   const getToken = await Token.find({
+    //     $and: [
+    //       { enable: true },
+    //       {
+    //         $or: [
+    //           { name: { $regex: filter, $options: "i" } },
+    //           { symbol: { $regex: filter, $options: "i" } },
+    //         ],
+    //       },
+    //     ],
+    //   })
+    //     .skip((page - 1) * size)
+    //     .sort(sortOptions)
+    //     .limit(size)
+    //     .populate("category", "categoryName")
+    //     .lean();
+
+    //   const tokenCount = await Token.countDocuments({
+    //     $and: [
+    //       { enable: true },
+    //       {
+    //         $or: [
+    //           { name: { $regex: filter, $options: "i" } },
+    //           { symbol: { $regex: filter, $options: "i" } },
+    //         ],
+    //       },
+    //     ],
+    //   });
+
+    //   return res
+    //     .status(200)
+    //     .json({ status: true, currency: getToken, total: tokenCount });
+    // }
+
+    //// const skip = (page - 1) * size;
+
+    // const getTokens = await Token.find(query)
+    //   .sort(sortOptions)
+    //   .skip((page - 1) * size)
+    //   .limit(size)
+    //   .populate("category", "categoryName")
+    //   .lean();
+
+    // const tokenCount = await Token.countDocuments(query);
+
+    // return res
+    //   .status(200)
+    //   .json({ status: true, currency: getTokens, total: tokenCount });
   } catch (err) {
     return res.status(500).json({
       status: false,

@@ -281,9 +281,9 @@ const updateGlobalRanksByMarketCap = async () => {
       await CoingeckoToken.bulkWrite(bulkOps);
     }
 
-    console.log("Global ranks updated using bulkWrite.");
+    console.log("Global ranks updated.");
   } catch (error) {
-    console.error("Error updating ranks with bulkWrite:", error.message);
+    console.error("Error updating ranks:", error.message);
   }
 };
 
