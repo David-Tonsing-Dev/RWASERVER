@@ -18,7 +18,7 @@ const assignTokensToNewCategory = async (req, res) => {
     if (!categoryName || !Array.isArray(tokenIds) || tokenIds.length === 0) {
       return res.status(400).json({
         status: false,
-        message: "Category name and token ID are required.",
+        message: "Category name and token are required.",
       });
     }
 
@@ -139,7 +139,7 @@ const assignMultipleCategories = async (req, res) => {
     if (!Array.isArray(category) || category.length === 0) {
       return res.status(400).json({
         status: false,
-        message: "At least one category-token group is required.",
+        message: "At least one category and token is required.",
       });
     }
 
@@ -151,7 +151,7 @@ const assignMultipleCategories = async (req, res) => {
       if (!categoryName || !Array.isArray(tokenIds) || tokenIds.length === 0) {
         return res.status(400).json({
           status: false,
-          message: "Each item must include a categoryName and tokenIds.",
+          message: "Each item must include a categoryName and tokens.",
         });
       }
 
