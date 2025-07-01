@@ -12,6 +12,9 @@ const rwaRouter = require("./routes/rwaTokenRouters");
 const rwaMobileRouter = require("./routes/rwaMobileRouters");
 const lectureRouter = require("./routes/lectureRouters");
 const treasuryTokens = require("./routes/condoTreasuryTokenRouters");
+const forumCategoryRouter = require("./routes/forumCategoryRouters");
+const forumRouter = require("./routes/forumRouters");
+const forumCommentRouter = require("./routes/forumCommentRouters");
 
 const adminUserRouter = require("./admin/routes/userRouters");
 const adminNewsRouter = require("./admin/routes/newsRouters");
@@ -26,6 +29,7 @@ const googleAnalyticsDataRouters = require("./admin/routes/googleAnalyticsDataRo
 const profile = require("./admin/routes/userProfileRouters");
 const termRouter = require("./admin/routes/termRouters");
 const categoryRouter = require("./admin/routes/categoryRouters");
+const forumAdminCategoryRouter = require("./admin/routes/forumCategoryRouters");
 
 const schedular = require("./cron/schedular");
 
@@ -65,6 +69,9 @@ app.use("/api/currencies", rwaRouter);
 app.use("/api/mobile/currencies", rwaMobileRouter);
 app.use("/api/lecture", lectureRouter);
 app.use("/api/treasuryTokens", treasuryTokens);
+app.use("/api/forum-category", forumCategoryRouter);
+app.use("/api/forum", forumRouter);
+app.use("/api/forum/comment", forumCommentRouter);
 
 app.use("/api/admin/users", adminUserRouter);
 app.use("/api/admin/news", adminNewsRouter);
@@ -79,6 +86,7 @@ app.use("/api/admin/analystic", googleAnalyticsDataRouters);
 app.use("/api/admin/profile", profile);
 app.use("/api/admin/term", termRouter);
 app.use("/api/admin/category", categoryRouter);
+app.use("/api/admin/forum-category", forumAdminCategoryRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   app.listen(PORT, async () => {
