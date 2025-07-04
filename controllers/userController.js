@@ -176,7 +176,7 @@ const signin = async (req, res) => {
 };
 
 const googleSignIn = async (req, res) => {
-  const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: "1d",
   });
   res.redirect(`http://localhost:5173/auth-success?token=${token}`);
