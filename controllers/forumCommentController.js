@@ -171,18 +171,41 @@ const getCommentsByForumId = async (req, res) => {
   try {
     const { forumId } = req.params;
     let { page = 1, size = 10 } = req.query;
+    const userId = req.userId;
+
     page = parseInt(page);
     size = parseInt(size);
-
     const skip = (page - 1) * size;
 
     const comments = await Comment.find({ forumId })
       .populate("quotedCommentedId", "text username")
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(size);
+      .limit(size)
+      .lean();
 
     const total = await Comment.countDocuments({ forumId });
+
+    if (userId) {
+      const commentIds = comments.map((c) => c._id);
+
+      const userReactions = await CommentReaction.find({
+        commentId: { $in: commentIds },
+        userId: userId,
+      }).select("commentId");
+
+      const reactedIds = new Set(
+        userReactions.map((r) => r.commentId.toString())
+      );
+
+      comments.forEach((c) => {
+        c.isReact = reactedIds.has(c._id.toString());
+      });
+    } else {
+      comments.forEach((c) => {
+        c.isReact = false;
+      });
+    }
 
     return res.status(200).json({
       status: true,

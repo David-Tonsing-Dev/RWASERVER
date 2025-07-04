@@ -8,12 +8,15 @@ const {
   reactToComment,
   getCommentsByForumId,
 } = require("../controllers/forumCommentController");
-const { authMiddleware } = require("../middlewares/authMiddleware");
+const {
+  authMiddleware,
+  nonAuthMiddleware,
+} = require("../middlewares/authMiddleware");
 
 router.post("/add", authMiddleware, addComment);
 router.put("/:id", authMiddleware, editComment);
 router.delete("/:id", authMiddleware, deleteComment);
 router.post("/react", authMiddleware, reactToComment);
-router.get("/forum/:forumId", getCommentsByForumId);
+router.get("/forum/:forumId", nonAuthMiddleware, getCommentsByForumId);
 
 module.exports = router;
