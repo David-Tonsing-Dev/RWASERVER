@@ -93,7 +93,13 @@ const deleteComment = async (req, res) => {
 
 const reactToComment = async (req, res) => {
   try {
-    const { commentId, userId, emoji } = req.body;
+    const { commentId, emoji } = req.body;
+    const userId = req.userId;
+
+    if (!userId)
+      return res
+        .status(403)
+        .json({ status: false, message: "Sign in to react" });
 
     const existing = await CommentReaction.findOne({ commentId, userId });
 
