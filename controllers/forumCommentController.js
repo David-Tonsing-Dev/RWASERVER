@@ -7,12 +7,17 @@ const addComment = async (req, res) => {
     const { forumId, text, username, quotedCommentId } = req.body;
     const userId = req.userId;
 
+    if (!userId)
+      return res
+        .status(403)
+        .json({ status: false, message: "Sign in to comment" });
+
     const comment = new Comment({
       forumId,
       text,
       username,
       userId,
-      quotedCommentedId: quotedCommentedId || null,
+      quotedCommentedId: quotedCommentId || null,
     });
 
     await comment.save();
@@ -143,7 +148,7 @@ const getCommentsByForumId = async (req, res) => {
     const skip = (page - 1) * size;
 
     const comments = await Comment.find({ forumId })
-      .populate("quotedCommentId", "text username")
+      .populate("quotedCommentedId", "text username")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(size);

@@ -22,7 +22,7 @@ const commentSchema = new mongoose.Schema(
     },
     quotedCommentedId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Comment",
+      ref: "ForumComment",
       default: null,
     },
     isReported: {
