@@ -93,48 +93,71 @@ const deleteComment = async (req, res) => {
 
 const reactToComment = async (req, res) => {
   try {
-    const { commentId, emoji } = req.body;
-
-    const userId = req.userId;
+    const { commentId, userId, emoji } = req.body;
 
     const existing = await CommentReaction.findOne({ commentId, userId });
 
-    if (existing) {
-      const oldEmoji = existing.emoji;
-
-      if (oldEmoji === emoji)
-        return res
-          .status(200)
-          .json({ status: true, message: "Reaction unchange" });
-
-      existing.emoji = emoji;
-      await existing.save();
+    if (!existing) {
+      const newEmoji = emoji || "👍";
+      const reaction = new CommentReaction({
+        commentId,
+        userId,
+        emoji: newEmoji,
+      });
+      await reaction.save();
 
       await Comment.findByIdAndUpdate(commentId, {
-        $ince: {
-          [`reactions.${oldEmoji}`]: -1,
-          [`reactions.${emoji}`]: 1,
-        },
+        $inc: { [`reactions.${newEmoji}`]: 1 },
       });
 
-      return res
-        .status(200)
-        .json({ status: true, message: "Reaction updated" });
+      return res.status(201).json({ message: "Reaction added.", reaction });
     }
 
-    const reaction = new CommentReaction({ commentId, userId, emoji });
-    await reaction.save();
+    if (!emoji) {
+      const removedEmoji = existing.emoji;
+      await CommentReaction.deleteOne({ _id: existing._id });
+
+      await Comment.findByIdAndUpdate(commentId, {
+        $inc: { [`reactions.${removedEmoji}`]: -1 },
+      });
+
+      await Comment.updateOne(
+        { _id: commentId, [`reactions.${removedEmoji}`]: { $lte: 0 } },
+        { $unset: { [`reactions.${removedEmoji}`]: "" } }
+      );
+
+      return res.status(200).json({ message: "Reaction removed." });
+    }
+
+    const oldEmoji = existing.emoji;
+
+    if (oldEmoji === emoji) {
+      return res
+        .status(200)
+        .json({ message: "Reaction unchanged.", reaction: existing });
+    }
+
+    existing.emoji = emoji;
+    await existing.save();
 
     await Comment.findByIdAndUpdate(commentId, {
-      $ince: { [`reactions.${emoji}`]: 1 },
+      $inc: {
+        [`reactions.${oldEmoji}`]: -1,
+        [`reactions.${emoji}`]: 1,
+      },
     });
 
-    return res.status(200).json({ status: true, message: "Reaction added" });
-  } catch (err) {
-    return res.status(500).json({
-      status: false,
-      message: "Something went wrong, try again later",
-    });
+    await Comment.updateOne(
+      { _id: commentId, [`reactions.${oldEmoji}`]: { $lte: 0 } },
+      { $unset: { [`reactions.${oldEmoji}`]: "" } }
+    );
+
+    return res
+      .status(200)
+      .json({ message: "Reaction updated.", reaction: existing });
+  } catch (error) {
+    console.error("React to comment error:", error);
+    res.status(500).json({ message: "Failed to react to comment." });
   }
 };
 
