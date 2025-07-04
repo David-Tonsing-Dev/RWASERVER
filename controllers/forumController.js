@@ -276,42 +276,66 @@ const reactToForum = async (req, res) => {
 
     const existing = await ForumReaction.findOne({ forumId, userId });
 
-    if (existing) {
-      const oldEmoji = existing.emoji;
-
-      if (oldEmoji === emoji)
-        return res
-          .status(200)
-          .json({ status: true, message: "Reaction unchanged" });
-
-      existing.emoji = emoji;
-
-      await existing.save();
+    if (!existing) {
+      const newEmoji = emoji || "👍";
+      const reaction = new ForumReaction({ forumId, userId, emoji: newEmoji });
+      await reaction.save();
 
       await Forum.findByIdAndUpdate(forumId, {
-        $inc: {
-          [`reactions.${oldEmoji}`]: -1,
-          [`reactions.${emoji}`]: 1,
-        },
+        $inc: { [`reactions.${newEmoji}`]: 1 },
       });
 
+      return res
+        .status(201)
+        .json({ status: true, message: "Reaction added.", reaction });
+    }
+
+    if (!emoji) {
+      const removedEmoji = existing.emoji;
+      await ForumReaction.deleteOne({ _id: existing._id });
+
+      await Forum.findByIdAndUpdate(forumId, {
+        $inc: { [`reactions.${removedEmoji}`]: -1 },
+      });
+
+      await Forum.updateOne(
+        { _id: forumId, [`reactions.${removedEmoji}`]: { $lte: 0 } },
+        { $unset: { [`reactions.${removedEmoji}`]: "" } }
+      );
+
+      return res
+        .status(200)
+        .json({ status: true, message: "Reaction removed." });
+    }
+
+    const oldEmoji = existing.emoji;
+
+    if (oldEmoji === emoji) {
       return res.status(200).json({
         status: true,
-        message: "Reaction updated",
+        message: "Reaction unchanged.",
         reaction: existing,
       });
     }
 
-    const reaction = new ForumReaction({ forumId, userId, emoji });
-    await reaction.save();
+    existing.emoji = emoji;
+    await existing.save();
 
     await Forum.findByIdAndUpdate(forumId, {
-      $inc: { [`reactions.${emoji}`]: 1 },
+      $inc: {
+        [`reactions.${oldEmoji}`]: -1,
+        [`reactions.${emoji}`]: 1,
+      },
     });
+
+    await Forum.updateOne(
+      { _id: forumId, [`reactions.${oldEmoji}`]: { $lte: 0 } },
+      { $unset: { [`reactions.${oldEmoji}`]: "" } }
+    );
 
     return res
       .status(201)
-      .json({ status: true, message: "Reaction added", reaction });
+      .json({ status: true, message: "Reaction updated.", reaction: existing });
   } catch (err) {
     return res.status(500).json({
       status: false,
