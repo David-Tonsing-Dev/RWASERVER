@@ -29,7 +29,7 @@ const createForum = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Select category for the forum" });
 
-    const newForum = new Forum({ title, text, categoryId });
+    const newForum = new Forum({ title, text, categoryId, userId });
 
     await newForum.save();
 
@@ -58,7 +58,7 @@ const getAllForums = async (req, res) => {
     if (categoryId) filter.categoryId = categoryId;
 
     const forums = await Forum.find(filter)
-      .populate({ path: "userId", select: "username" })
+      .populate({ path: "userId", select: "userName" })
       .populate({ path: "categoryId", select: "name" })
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -106,7 +106,7 @@ const getForumById = async (req, res) => {
       return res.status(400).json({ message: "Invalid forum Id" });
 
     const forum = await Forum.findById(id)
-      .populate({ path: "userId", select: "username" })
+      .populate({ path: "userId", select: "userName" })
       .populate({ path: "categoryId", select: "name" })
       .lean();
 
@@ -222,7 +222,7 @@ const getForumByUser = async (req, res) => {
     if (categoryId) filter.categoryId = categoryId;
 
     const forums = await Forum.find(filter)
-      .populate({ path: "userId", select: "username" })
+      .populate({ path: "userId", select: "userName" })
       .populate({ path: "categoryId", select: "name" })
       .sort({ createdAt: -1 })
       .skip(skip)
