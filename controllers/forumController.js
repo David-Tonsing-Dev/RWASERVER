@@ -114,8 +114,7 @@ const getForumById = async (req, res) => {
       return res
         .status(404)
         .json({ status: false, message: "Forum not found" });
-
-    if (userId && mongoose.TypesId.ObjectId.isValid(userId)) {
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
       const reaction = await ForumReaction.findOne({
         forumId: id,
         userId,
