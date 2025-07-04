@@ -9,7 +9,7 @@ const {
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 
 router.post("/create", adminAuthMiddleware, addForumCategory);
-router.get("/", adminAuthMiddleware, getForumCategory);
+router.get("/", getForumCategory);
 router.put("/:categoryId", adminAuthMiddleware, updateForumCategory);
 
 module.exports = router;
