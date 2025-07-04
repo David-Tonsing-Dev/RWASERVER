@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
 
-const createForum = async () => {
+const createForum = async (req, res) => {
   try {
     const userId = req.userId;
 
@@ -44,7 +44,7 @@ const createForum = async () => {
   }
 };
 
-const getAllForums = async () => {
+const getAllForums = async (req, res) => {
   try {
     let { page = 1, size = 10, categoryId } = req.query;
     const userId = req.userId;
@@ -97,7 +97,7 @@ const getAllForums = async () => {
   }
 };
 
-const getForumById = async () => {
+const getForumById = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.userId;
@@ -135,7 +135,7 @@ const getForumById = async () => {
   }
 };
 
-const updateForum = async () => {
+const updateForum = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, text, categoryId } = req.body;
@@ -172,7 +172,7 @@ const updateForum = async () => {
   }
 };
 
-const deleteForum = async () => {
+const deleteForum = async (req, res) => {
   try {
     const { id } = req.params;
     const { userId } = req.userId;
@@ -203,7 +203,7 @@ const deleteForum = async () => {
   }
 };
 
-const getForumByUser = async () => {
+const getForumByUser = async (req, res) => {
   try {
     const { userId } = req.params;
     let { categoryId, page = 1, size = 10 } = req.query;
@@ -264,7 +264,7 @@ const getForumByUser = async () => {
   }
 };
 
-const reactToForum = async () => {
+const reactToForum = async (req, res) => {
   try {
     const { forumId, emoji } = req.body;
     const userId = req.userId;
