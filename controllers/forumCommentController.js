@@ -5,7 +5,7 @@ const { io } = require("../socket/socket");
 
 const addComment = async (req, res) => {
   try {
-    const { forumId, text, username, quotedCommentId } = req.body;
+    const { categoryId, forumId, text, username, quotedCommentId } = req.body;
     const userId = req.userId;
 
     if (!userId)
