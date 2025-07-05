@@ -18,6 +18,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("joinForum", (forumId) => {
+    console.log("user joining....");
     socket.join(forumId.forumId);
     console.log("User joined forum", forumId);
   });
