@@ -38,13 +38,10 @@ const createForum = async (req, res) => {
 
     io.to(categoryId).emit("forumAdded", newForum);
 
-    return res
-      .status(200)
-      .json({
-        status: true,
-        message: "New forum created successfully",
-        newForum,
-      });
+    return res.status(200).json({
+      status: true,
+      message: "New forum created successfully",
+    });
   } catch (err) {
     return res.status(500).json({
       status: false,
@@ -293,6 +290,12 @@ const reactToForum = async (req, res) => {
         $inc: { [`reactions.${newEmoji}`]: 1 },
       });
 
+      io.to(categoryId).emit("reactToForum", {
+        forumId,
+        emoji: "👍",
+        action: "Added",
+      });
+
       return res
         .status(201)
         .json({ status: true, message: "Reaction added.", reaction });
@@ -310,6 +313,12 @@ const reactToForum = async (req, res) => {
         { _id: forumId, [`reactions.${removedEmoji}`]: { $lte: 0 } },
         { $unset: { [`reactions.${removedEmoji}`]: "" } }
       );
+
+      io.to(categoryId).emit("reactToForum", {
+        forumId,
+        emoji: "",
+        action: "Remove",
+      });
 
       return res
         .status(200)
@@ -340,6 +349,12 @@ const reactToForum = async (req, res) => {
       { _id: forumId, [`reactions.${oldEmoji}`]: { $lte: 0 } },
       { $unset: { [`reactions.${oldEmoji}`]: "" } }
     );
+
+    io.to(categoryId).emit("reactToForum", {
+      forumId,
+      emoji,
+      action: "Update",
+    });
 
     return res
       .status(201)
