@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
+const { io } = require("../socket/socket");
 
 const createForum = async (req, res) => {
   try {
@@ -32,6 +33,8 @@ const createForum = async (req, res) => {
     const newForum = new Forum({ title, text, categoryId, userId });
 
     await newForum.save();
+
+    io.to(categoryId).emit("forumAdded", newForum);
 
     return res
       .status(200)

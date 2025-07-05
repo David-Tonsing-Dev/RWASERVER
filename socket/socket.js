@@ -12,6 +12,10 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User connected to websocket: ", socket.id);
 
+  socket.on("joinCategory", (categoryId) => {
+    socket.join(categoryId);
+  });
+
   socket.on("disconnect", () => {
     console.log(`User ${socket.id} disconnected`);
   });
