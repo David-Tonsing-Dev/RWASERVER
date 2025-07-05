@@ -34,11 +34,17 @@ const createForum = async (req, res) => {
 
     await newForum.save();
 
+    await newForum.populate({ path: "userId", select: "userName" });
+
     io.to(categoryId).emit("forumAdded", newForum);
 
     return res
       .status(200)
-      .json({ status: true, message: "New forum created successfully" });
+      .json({
+        status: true,
+        message: "New forum created successfully",
+        newForum,
+      });
   } catch (err) {
     return res.status(500).json({
       status: false,
