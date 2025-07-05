@@ -271,7 +271,7 @@ const getForumByUser = async (req, res) => {
 
 const reactToForum = async (req, res) => {
   try {
-    const { forumId, emoji } = req.body;
+    const { categoryId, forumId, emoji } = req.body;
     const userId = req.userId;
 
     if (!userId)
