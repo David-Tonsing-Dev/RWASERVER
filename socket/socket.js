@@ -13,8 +13,8 @@ io.on("connection", (socket) => {
   console.log("User connected to websocket: ", socket.id);
 
   socket.on("joinCategory", (categoryId) => {
-    socket.join(categoryId);
-    console.log("User joined category: ", categoryId);
+    socket.join(categoryId.categoryId);
+    console.log("User joined category: ", categoryId.categoryId);
   });
 
   socket.on("disconnect", () => {
