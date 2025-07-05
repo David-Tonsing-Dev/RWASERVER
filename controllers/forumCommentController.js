@@ -31,6 +31,8 @@ const addComment = async (req, res) => {
         path: "quotedCommentedId",
         select: "text username",
       });
+
+    console.log("comment===============", comment);
     await Forum.findByIdAndUpdate(forumId, { $inc: { commentsCount: 1 } });
 
     io.to(categoryId).emit("commentAdded", {
@@ -44,6 +46,7 @@ const addComment = async (req, res) => {
     });
     return res.status(201).json({ status: true, message: "Comment added" });
   } catch (err) {
+    console.log("ERROR::", err.message);
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later",
