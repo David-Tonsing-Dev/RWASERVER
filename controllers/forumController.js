@@ -292,6 +292,7 @@ const reactToForum = async (req, res) => {
 
       io.to(categoryId).emit("reactToForum", {
         forumId,
+        userId,
         emoji: "👍",
         action: "Added",
       });
@@ -316,6 +317,7 @@ const reactToForum = async (req, res) => {
 
       io.to(categoryId).emit("reactToForum", {
         forumId,
+        userId,
         emoji: "",
         action: "Remove",
       });
@@ -352,6 +354,7 @@ const reactToForum = async (req, res) => {
 
     io.to(categoryId).emit("reactToForum", {
       forumId,
+      userId,
       emoji,
       action: "Update",
     });
