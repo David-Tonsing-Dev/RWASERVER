@@ -14,6 +14,7 @@ io.on("connection", (socket) => {
 
   socket.on("joinCategory", (categoryId) => {
     socket.join(categoryId);
+    console.log("User joined category: ", categoryId);
   });
 
   socket.on("disconnect", () => {
