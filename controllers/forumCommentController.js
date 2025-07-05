@@ -22,10 +22,19 @@ const addComment = async (req, res) => {
     });
 
     await comment.save();
+    await comment.populate({
+      path: "userId",
+      select: "userName",
+    });
     await Forum.findByIdAndUpdate(forumId, { $inc: { commentsCount: 1 } });
 
     io.to(categoryId).emit("commentAdded", {
       forumId,
+      action: "ADD",
+    });
+
+    io.to(forumId).emit("commentAddToForum", {
+      comment,
       action: "ADD",
     });
     return res.status(201).json({ status: true, message: "Comment added" });

@@ -17,6 +17,11 @@ io.on("connection", (socket) => {
     console.log("User joined category: ", categoryId.categoryId);
   });
 
+  socket.on("joinForum", (forumId) => {
+    socket.join(forumId.forumId);
+    console.log("User joined forum", forumId);
+  });
+
   socket.on("disconnect", () => {
     console.log(`User ${socket.id} disconnected`);
   });
