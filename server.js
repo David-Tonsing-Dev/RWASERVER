@@ -3,8 +3,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const app = express();
 const PORT = process.env.PORT || 8000;
+
+const { server, app } = require("./socket/socket");
 
 const userRouter = require("./routes/userRouters");
 const userTokenRouter = require("./routes/userTokenRouters");
@@ -89,7 +90,7 @@ app.use("/api/admin/category", categoryRouter);
 app.use("/api/admin/forum-category", forumAdminCategoryRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
-  app.listen(PORT, async () => {
+  server.listen(PORT, async () => {
     console.log(`Listening on port ${PORT}`);
     console.log("Database connection established");
     schedular();
