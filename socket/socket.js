@@ -12,15 +12,25 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User connected to websocket: ", socket.id);
 
-  socket.on("joinCategory", (categoryId) => {
-    socket.join(categoryId.categoryId);
-    console.log("User joined category: ", categoryId.categoryId);
+  socket.on("joinCategory", ({ categoryId }) => {
+    socket.join(categoryId);
+    console.log("User joined category: ", categoryId);
   });
 
-  socket.on("joinForum", (forumId) => {
+  socket.on("leaveCategory", ({ categoryId }) => {
+    socket.leave(categoryId);
+    console.log("User leave category: ", categoryId);
+  });
+
+  socket.on("joinForum", ({ forumId }) => {
     console.log("user joining....");
-    socket.join(forumId.forumId);
+    socket.join(forumId);
     console.log("User joined forum", forumId);
+  });
+
+  socket.on("leaveForum", ({ forumId }) => {
+    socket.leave(forumId);
+    console.log("User leave forum: ", forumId);
   });
 
   socket.on("disconnect", () => {
