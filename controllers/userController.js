@@ -210,6 +210,7 @@ const googleData = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: "Token generated successfully",
+      id: addUser ? addUser._id : user._id,
       token: verificationToken,
     });
   } catch (error) {
