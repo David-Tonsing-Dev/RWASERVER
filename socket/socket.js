@@ -33,6 +33,10 @@ io.on("connection", (socket) => {
     console.log("User leave forum: ", forumId);
   });
 
+  socket.on("checkRooms", () => {
+    console.log(`Socket ${socket.id} is in rooms:`, Array.from(socket.rooms));
+  });
+
   socket.on("disconnect", () => {
     console.log(`User ${socket.id} disconnected`);
   });
