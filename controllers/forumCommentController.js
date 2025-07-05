@@ -22,15 +22,10 @@ const addComment = async (req, res) => {
     });
 
     await comment.save();
-    await comment
-      .populate({
-        path: "userId",
-        select: "userName",
-      })
-      .populate({
-        path: "quotedCommentedId",
-        select: "text username",
-      });
+    await comment.populate([
+      { path: "userId", select: "userName" },
+      { path: "quotedCommentedId", select: "text username" },
+    ]);
 
     console.log("comment===============", comment);
     await Forum.findByIdAndUpdate(forumId, { $inc: { commentsCount: 1 } });
