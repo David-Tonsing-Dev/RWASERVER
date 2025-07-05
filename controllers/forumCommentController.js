@@ -1,6 +1,7 @@
 const Comment = require("../models/forumCommentModel");
 const CommentReaction = require("../models/forumCommentReactionModel");
 const Forum = require("../models/forumModel");
+const { io } = require("../socket/socket");
 
 const addComment = async (req, res) => {
   try {
@@ -23,6 +24,10 @@ const addComment = async (req, res) => {
     await comment.save();
     await Forum.findByIdAndUpdate(forumId, { $inc: { commentsCount: 1 } });
 
+    io.to(categoryId).emit("commentAdded", {
+      forumId,
+      action: "ADD",
+    });
     return res.status(201).json({ status: true, message: "Comment added" });
   } catch (err) {
     return res.status(500).json({
