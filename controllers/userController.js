@@ -203,8 +203,7 @@ const googleData = async (req, res) => {
         id: addUser ? addUser._id : user._id,
         role: addUser ? addUser.role : user.role,
       },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "1h" }
+      process.env.JWT_SECRET_KEY
     );
 
     return res.status(200).json({
