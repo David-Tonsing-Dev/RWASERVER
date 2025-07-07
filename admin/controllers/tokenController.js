@@ -123,7 +123,7 @@ const getAllTokenAdmin = async (req, res) => {
       if (order === "DESC" || order === "desc") order = -1;
     }
 
-    const matchStage = { enable: true };
+    const matchStage = {};
     if (filter) {
       matchStage.$or = [
         { name: { $regex: filter, $options: "i" } },
