@@ -31,6 +31,7 @@ const profile = require("./admin/routes/userProfileRouters");
 const termRouter = require("./admin/routes/termRouters");
 const categoryRouter = require("./admin/routes/categoryRouters");
 const forumAdminCategoryRouter = require("./admin/routes/forumCategoryRouters");
+const treasuryChartRouter = require("./routes/treasuryChartRouters");
 
 const schedular = require("./cron/schedular");
 
@@ -73,6 +74,7 @@ app.use("/api/treasuryTokens", treasuryTokens);
 app.use("/api/forum-category", forumCategoryRouter);
 app.use("/api/forum", forumRouter);
 app.use("/api/forum/comment", forumCommentRouter);
+app.use("/api/portfolio", treasuryChartRouter);
 
 app.use("/api/admin/users", adminUserRouter);
 app.use("/api/admin/news", adminNewsRouter);
