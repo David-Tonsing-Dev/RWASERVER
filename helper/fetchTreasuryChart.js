@@ -2,7 +2,6 @@ const { ethers } = require("ethers");
 const axios = require("axios");
 const dotenv = require("dotenv");
 const Treasury = require("../models/condoTreasuryTokenModel");
-const IndexCoop = require("../models/indexCoopETH2xModel");
 
 const { indexCoopABI } = require("../constant/abi");
 
@@ -114,22 +113,6 @@ const fetchTreasuryChart = async () => {
   const now = Date.now();
 
   const indexPricesInUsd = mapPricesToUsd([[now, indexPrice]], indexBalance);
-  const transformedPriceHistory = indexPricesInUsd.map(
-    ([timestamp, price]) => ({
-      timestamp,
-      price,
-    })
-  );
-  await IndexCoop.updateOne(
-    { tokenName: "index-coop-ethereum-2x-index" },
-    {
-      $push: { priceHistory: { $each: transformedPriceHistory } },
-      $setOnInsert: { tokenName: "index-coop-ethereum-2x-index" },
-    },
-    { upsert: true }
-  );
-
-  const dataindex = await IndexCoop.find();
 
   const polyDetails = await fetchMarketPrice("polytrade");
   const polyPricesInUsd = mapPricesToUsd(polyDetails, balanceMap["Polytrade"]);
