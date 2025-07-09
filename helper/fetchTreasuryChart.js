@@ -137,6 +137,9 @@ const fetchTreasuryChart = async () => {
   const aurusXDetails = await fetchMarketPrice("aurusx");
   const aurusXPricesInUsd = mapPricesToUsd(aurusXDetails, AurusXBalance);
 
+  const usdcDetails = await fetchMarketPrice("usd-coin");
+  const usdcPricesInUsd = mapPricesToUsd(usdcDetails, balanceMap["USDC"]);
+
   const tokenPriceHistory = {
     condo: condoPricesInUsd,
     ether: ethPricesInUsd,
@@ -145,6 +148,7 @@ const fetchTreasuryChart = async () => {
     syrup: syrupPricesInUsd,
     brickken: brickkenPricesInUsd,
     eth2x: indexPricesInUsd,
+    usdc: usdcPricesInUsd,
   };
 
   // const minLengthThreshold = 5;

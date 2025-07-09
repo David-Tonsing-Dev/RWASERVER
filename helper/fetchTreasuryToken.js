@@ -10,6 +10,7 @@ const {
   indexCoopABI,
   polytradeABI,
   devCondoABI,
+  usdcABI,
 } = require("../constant/abi");
 
 dotenv.config();
@@ -25,6 +26,7 @@ const devAddress = "0xEf3E49a3197417ccDbF5F6A60D89f7Fa4823199d";
 const devCondoContract = "0x30D19Fb77C3Ee5cFa97f73D72c6A1E509fa06AEf";
 const aurusXContractAddress = "0x1a763170B96F23f15576D0fa0b2619d1254c437d";
 const polytradeContractAddress = "0x692AC1e363ae34b6B489148152b12e2785a3d8d6";
+const usdcContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 
 const baseUrl = process.env.ALCHEMY_BASE_URL;
 const ethUrl = process.env.ALCHEMY_ETH_URL;
@@ -95,10 +97,27 @@ async function upsertToken({
   }
 }
 
-const getBalance = async (provider, contractAddress, abi, holder) => {
+// const getBalance = async (
+//   provider,
+//   contractAddress,
+//   abi,
+//   holder,
+//   decimals = 18
+// ) => {
+//   const contract = new ethers.Contract(contractAddress, abi, provider);
+//   const raw = await contract.balanceOf(holder);
+//   return formatEther(raw.toString(), decimals);
+// };
+const getBalance = async (
+  provider,
+  contractAddress,
+  abi,
+  holder,
+  decimals = 18
+) => {
   const contract = new ethers.Contract(contractAddress, abi, provider);
   const raw = await contract.balanceOf(holder);
-  return formatEther(raw.toString());
+  return ethers.utils.formatUnits(raw.toString(), decimals);
 };
 
 const fetchTreasuryToken = async () => {
@@ -240,6 +259,26 @@ const fetchTreasuryToken = async () => {
     tokenBalance: AurusXBalance,
     tokenAddress: "",
     balanceUsd: AurusXBalance * aurusXDetails.current_price,
+  });
+
+  //USDC
+  const usdcBalance = await getBalance(
+    providerBase,
+    usdcContractAddress,
+    usdcABI,
+    addressToCheck,
+    6
+  );
+
+  const usdcDetails = await fetchMarketPrice("usd-coin");
+  await upsertToken({
+    tokenName: usdcDetails.name,
+    tokenImg: usdcDetails.image,
+    symbol: usdcDetails.symbol,
+    chain: usdcDetails.asset_platform_id,
+    tokenBalance: usdcBalance,
+    tokenAddress: "",
+    balanceUsd: usdcBalance * usdcDetails.current_price,
   });
 
   console.log("Token balances fetched and saved to DB.");
