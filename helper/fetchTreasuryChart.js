@@ -2,6 +2,7 @@ const { ethers } = require("ethers");
 const axios = require("axios");
 const dotenv = require("dotenv");
 const Treasury = require("../models/condoTreasuryTokenModel");
+const IndexCoop = require("../models/indexCoopETH2xModel");
 
 const { indexCoopABI } = require("../constant/abi");
 
@@ -63,7 +64,7 @@ const fetchTreasuryChart = async () => {
   const treasuryBalances = await Treasury.find();
 
   let balanceMap = {};
-  treasuryBalances.forEach(({ tokenName, tokenBalance, balanceUsd }) => {
+  treasuryBalances.forEach(({ tokenName, tokenBalance }) => {
     balanceMap[tokenName] = parseFloat(tokenBalance);
   });
 
@@ -85,6 +86,23 @@ const fetchTreasuryChart = async () => {
     balanceMap["Brickken"]
   );
 
+  // const indexDetails = await fetchMarketPrice("index-coop-ethereum-2x-index");
+  // const indexPricesInUsd = mapPricesToUsd(
+  //   indexDetails,
+  //   balanceMap["Index Coop Ethereum 2x Index"]
+  // );
+  // console.log(indexDetails, "indexDetails");
+  // const transformedPriceHistory = indexDetails.map(([timestamp, price]) => ({
+  //   timestamp,
+  //   price,
+  // }));
+
+  // await IndexCoop.updateOne(
+  //   { tokenName: "index-coop-ethereum-2x-index" },
+  //   { $push: { priceHistory: { $each: transformedPriceHistory } } },
+  //   { upsert: true }
+  // );
+
   const indexBalanceStr = await getBalance(
     providerBase,
     indexCoopContract,
@@ -94,7 +112,24 @@ const fetchTreasuryChart = async () => {
   const indexBalance = parseFloat(indexBalanceStr);
   const indexPrice = await fetchIndexCoopPrice();
   const now = Date.now();
+
   const indexPricesInUsd = mapPricesToUsd([[now, indexPrice]], indexBalance);
+  const transformedPriceHistory = indexPricesInUsd.map(
+    ([timestamp, price]) => ({
+      timestamp,
+      price,
+    })
+  );
+  await IndexCoop.updateOne(
+    { tokenName: "index-coop-ethereum-2x-index" },
+    {
+      $push: { priceHistory: { $each: transformedPriceHistory } },
+      $setOnInsert: { tokenName: "index-coop-ethereum-2x-index" },
+    },
+    { upsert: true }
+  );
+
+  const dataindex = await IndexCoop.find();
 
   const polyDetails = await fetchMarketPrice("polytrade");
   const polyPricesInUsd = mapPricesToUsd(polyDetails, balanceMap["Polytrade"]);

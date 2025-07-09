@@ -44,6 +44,7 @@ const allowedOrigins = [
   "http://192.168.31.16:3000",
   "https://powdex.io",
   "https://rwahedgefund.netlify.app",
+  "https://condobase.io",
 ];
 
 const corsOptions = {
