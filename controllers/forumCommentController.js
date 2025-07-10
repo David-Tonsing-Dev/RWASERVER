@@ -161,7 +161,7 @@ const reactToComment = async (req, res) => {
         io.to(forumId).emit("reactToComment", {
           commentId,
           userId,
-          emoji: "",
+          emoji: "👍",
           action: "Remove",
         });
 
@@ -188,7 +188,8 @@ const reactToComment = async (req, res) => {
           commentId,
           userId,
           emoji: "👍",
-          action: "Added",
+          oldEmoji: "👎",
+          action: "Updated",
         });
 
         return res
@@ -258,7 +259,7 @@ const reactToCommentDislike = async (req, res) => {
         io.to(forumId).emit("reactToCommentDislike", {
           commentId,
           userId,
-          emoji: "",
+          emoji: "👎",
           action: "Remove",
         });
 
@@ -285,7 +286,8 @@ const reactToCommentDislike = async (req, res) => {
           commentId,
           userId,
           emoji: "👎",
-          action: "Added",
+          oldEmoji: "👍",
+          action: "Updated",
         });
 
         return res
@@ -294,7 +296,6 @@ const reactToCommentDislike = async (req, res) => {
       }
     }
   } catch (error) {
-    console.error("React to comment error:", error);
     res.status(500).json({ message: "Failed to react to comment." });
   }
 };
