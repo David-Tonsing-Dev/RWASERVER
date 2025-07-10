@@ -132,11 +132,18 @@ const getForumById = async (req, res) => {
       const reaction = await ForumReaction.findOne({
         forumId: id,
         userId,
-      }).select("_id");
+      }).select("_id emoji");
 
-      forum.isReact = !!reaction;
+      if (reaction) {
+        forum.isReact = reaction.emoji === "👍" ?? false;
+        forum.isDislike = reaction.emoji === "👎" ?? false;
+      } else {
+        forum.isReact = false;
+        forum.isDislike = false;
+      }
     } else {
       forum.isReact = false;
+      forum.isDislike = false;
     }
 
     return res.status(200).json({ status: true, forum });

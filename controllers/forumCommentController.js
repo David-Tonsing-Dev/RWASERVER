@@ -2,6 +2,7 @@ const Comment = require("../models/forumCommentModel");
 const CommentReaction = require("../models/forumCommentReactionModel");
 const Forum = require("../models/forumModel");
 const { io } = require("../socket/socket");
+const normalizeEmoji = require("../helper/normalizeEmoji");
 
 const addComment = async (req, res) => {
   try {
@@ -108,8 +109,10 @@ const deleteComment = async (req, res) => {
 
 const reactToComment = async (req, res) => {
   try {
-    const { forumId, commentId, emoji } = req.body;
+    let { forumId, commentId, emoji } = req.body;
     const userId = req.userId;
+
+    emoji = emoji ? normalizeEmoji(emoji) : "";
 
     if (!userId)
       return res
@@ -142,54 +145,154 @@ const reactToComment = async (req, res) => {
     }
 
     if (!emoji) {
-      const removedEmoji = existing.emoji;
-      await CommentReaction.deleteOne({ _id: existing._id });
+      if (existing.emoji === "👍") {
+        const removedEmoji = existing.emoji;
+        await CommentReaction.deleteOne({ _id: existing._id });
 
-      await Comment.findByIdAndUpdate(commentId, {
-        $inc: { [`reactions.${removedEmoji}`]: -1 },
-      });
+        await Comment.findByIdAndUpdate(commentId, {
+          $inc: { [`reactions.${removedEmoji}`]: -1 },
+        });
 
-      await Comment.updateOne(
-        { _id: commentId, [`reactions.${removedEmoji}`]: { $lte: 0 } },
-        { $unset: { [`reactions.${removedEmoji}`]: "" } }
-      );
+        await Comment.updateOne(
+          { _id: commentId, [`reactions.${removedEmoji}`]: { $lte: 0 } },
+          { $unset: { [`reactions.${removedEmoji}`]: "" } }
+        );
 
-      io.to(forumId).emit("reactToComment", {
+        io.to(forumId).emit("reactToComment", {
+          commentId,
+          userId,
+          emoji: "",
+          action: "Remove",
+        });
+
+        return res.status(200).json({ message: "Reaction removed." });
+      } else {
+        const oldEmoji = existing.emoji;
+
+        existing.emoji = "👍";
+        await existing.save();
+
+        await Comment.findByIdAndUpdate(commentId, {
+          $inc: {
+            [`reactions.${oldEmoji}`]: -1,
+            [`reactions.${"👍"}`]: 1,
+          },
+        });
+
+        await Comment.updateOne(
+          { _id: commentId, [`reactions.${oldEmoji}`]: { $lte: 0 } },
+          { $unset: { [`reactions.${oldEmoji}`]: "" } }
+        );
+
+        io.to(forumId).emit("reactToComment", {
+          commentId,
+          userId,
+          emoji: "👍",
+          action: "Added",
+        });
+
+        return res
+          .status(200)
+          .json({ message: "Reaction updated.", reaction: existing });
+      }
+    }
+  } catch (error) {
+    console.error("React to comment error:", error);
+    res.status(500).json({ message: "Failed to react to comment." });
+  }
+};
+
+const reactToCommentDislike = async (req, res) => {
+  try {
+    let { forumId, commentId, emoji } = req.body;
+    const userId = req.userId;
+
+    emoji = normalizeEmoji(emoji);
+
+    if (!userId)
+      return res
+        .status(403)
+        .json({ status: false, message: "Sign in to react" });
+
+    const existing = await CommentReaction.findOne({ commentId, userId });
+
+    if (!existing) {
+      const newEmoji = emoji || "👎";
+      const reaction = new CommentReaction({
         commentId,
         userId,
-        emoji: "",
-        action: "Remove",
+        emoji: newEmoji,
+      });
+      await reaction.save();
+
+      await Comment.findByIdAndUpdate(commentId, {
+        $inc: { [`reactions.${newEmoji}`]: 1 },
       });
 
-      return res.status(200).json({ message: "Reaction removed." });
-    }
+      io.to(forumId).emit("reactToCommentDislike", {
+        commentId,
+        userId,
+        emoji: "👎",
+        action: "Added",
+      });
 
-    const oldEmoji = existing.emoji;
-
-    if (oldEmoji === emoji) {
       return res
-        .status(200)
-        .json({ message: "Reaction unchanged.", reaction: existing });
+        .status(201)
+        .json({ message: "Reaction dislike added.", reaction });
     }
 
-    existing.emoji = emoji;
-    await existing.save();
+    if ("👎" === emoji) {
+      if (existing.emoji === "👎") {
+        const removedEmoji = existing.emoji;
+        await CommentReaction.deleteOne({ _id: existing._id });
 
-    await Comment.findByIdAndUpdate(commentId, {
-      $inc: {
-        [`reactions.${oldEmoji}`]: -1,
-        [`reactions.${emoji}`]: 1,
-      },
-    });
+        await Comment.findByIdAndUpdate(commentId, {
+          $inc: { [`reactions.${removedEmoji}`]: -1 },
+        });
 
-    await Comment.updateOne(
-      { _id: commentId, [`reactions.${oldEmoji}`]: { $lte: 0 } },
-      { $unset: { [`reactions.${oldEmoji}`]: "" } }
-    );
+        await Comment.updateOne(
+          { _id: commentId, [`reactions.${removedEmoji}`]: { $lte: 0 } },
+          { $unset: { [`reactions.${removedEmoji}`]: "" } }
+        );
 
-    return res
-      .status(200)
-      .json({ message: "Reaction updated.", reaction: existing });
+        io.to(forumId).emit("reactToCommentDislike", {
+          commentId,
+          userId,
+          emoji: "",
+          action: "Remove",
+        });
+
+        return res.status(200).json({ message: "Reaction dislike removed." });
+      } else {
+        const oldEmoji = existing.emoji;
+
+        existing.emoji = emoji;
+        await existing.save();
+
+        await Comment.findByIdAndUpdate(commentId, {
+          $inc: {
+            [`reactions.${oldEmoji}`]: -1,
+            [`reactions.${emoji}`]: 1,
+          },
+        });
+
+        await Comment.updateOne(
+          { _id: commentId, [`reactions.${oldEmoji}`]: { $lte: 0 } },
+          { $unset: { [`reactions.${oldEmoji}`]: "" } }
+        );
+
+        io.to(forumId).emit("reactToCommentDislike", {
+          commentId,
+          userId,
+          emoji: "👎",
+          action: "Added",
+        });
+
+        return res
+          .status(200)
+          .json({ message: "Reaction dislike updated.", reaction: existing });
+      }
+    }
   } catch (error) {
     console.error("React to comment error:", error);
     res.status(500).json({ message: "Failed to react to comment." });
@@ -221,18 +324,25 @@ const getCommentsByForumId = async (req, res) => {
       const userReactions = await CommentReaction.find({
         commentId: { $in: commentIds },
         userId: userId,
-      }).select("commentId");
-
-      const reactedIds = new Set(
-        userReactions.map((r) => r.commentId.toString())
-      );
+      }).select("commentId emoji");
 
       comments.forEach((c) => {
-        c.isReact = reactedIds.has(c._id.toString());
+        const userReaction = userReactions.find(
+          (r) => r.commentId.toString() === c._id.toString()
+        );
+
+        if (userReaction) {
+          c.isReact = userReaction.emoji !== "👎";
+          c.isDislike = userReaction.emoji === "👎";
+        } else {
+          c.isReact = false;
+          c.isDislike = false;
+        }
       });
     } else {
       comments.forEach((c) => {
         c.isReact = false;
+        c.isDislike = false;
       });
     }
 
@@ -244,6 +354,7 @@ const getCommentsByForumId = async (req, res) => {
       comments,
     });
   } catch (err) {
+    console.log("ERROR::", err.message);
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later",
@@ -257,4 +368,5 @@ module.exports = {
   deleteComment,
   reactToComment,
   getCommentsByForumId,
+  reactToCommentDislike,
 };
