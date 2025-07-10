@@ -1,8 +1,8 @@
-const axios = require("axios");
 const dotenv = require("dotenv");
 const { ethers } = require("ethers");
 const IndexCoop = require("../models/indexCoopETH2xModel");
 const { indexCoopABI } = require("../constant/abi");
+const axios = require("axios");
 dotenv.config();
 
 const addressToCheck = "0x6404B20B5a8493c426b6efBE52809B206b26d393";
@@ -46,7 +46,7 @@ const storeIndexCoopData = async () => {
     // const timestamp = Date.now();
 
     const now = new Date();
-    now.setMinutes(0, 0, 0);
+    now.setUTCMinutes(0, 0, 0);
     const timestamp = now.getTime();
     const balanceUsd = balance * price;
 
