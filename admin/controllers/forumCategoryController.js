@@ -62,7 +62,7 @@ const getForumCategory = async (req, res) => {
     let filter = {};
     if (category) filter.name = { $regex: category, $options: "i" };
 
-    const categories = await ForumCategory.find(filter);
+    const categories = await ForumCategory.find(filter).sort({ updatedAt: -1 });
 
     return res.status(200).json({ status: true, categories });
   } catch (err) {
