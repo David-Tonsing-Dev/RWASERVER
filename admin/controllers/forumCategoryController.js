@@ -78,12 +78,17 @@ const updateForumCategory = async (req, res) => {
     const { categoryId } = req.params;
     const { name, description } = req.body;
 
+    console.log("name", name, description, categoryId, req.body);
+
     if (!mongoose.Types.ObjectId.isValid(categoryId))
       return res
         .status(400)
         .json({ status: false, message: "Invalid category" });
 
-    const checkCategory = await ForumCategory.findOne({ categoryId });
+    if (!role)
+      return res.status(404).json({ status: false, message: "User not found" });
+
+    const checkCategory = await ForumCategory.findOne({ _id: categoryId });
 
     if (!checkCategory)
       return res
@@ -93,7 +98,17 @@ const updateForumCategory = async (req, res) => {
     if (name) checkCategory.name = name;
     if (description) checkCategory.description = description;
 
+    if (res.file) {
+      const categoryImage = await cloudinary.uploader.upload(req.file.path, {
+        use_filename: true,
+        folder: "rwa/forum/category",
+      });
+      checkCategory.categoryImage = categoryImage.secure_url;
+    }
+
     await checkCategory.save();
+
+    console.log("checkCategory", checkCategory);
     return res
       .status(200)
       .json({ status: true, message: "Category updated successfully" });
@@ -104,17 +119,34 @@ const updateForumCategory = async (req, res) => {
   }
 };
 
-// const deleteForumCategory = async (req, res) => {
-//   try {
-//   } catch (err) {
-//     return res
-//       .status(500)
-//       .json({ status: false, message: "Something went wrong try again later" });
-//   }
-// };
+const deleteForumCategory = async (req, res) => {
+  try {
+    const role = req.role;
+    const { categoryId } = req.params;
+
+    const checkCategory = await ForumCategory.findOneAndDelete({
+      _id: categoryId,
+    });
+
+    if (!checkCategory)
+      return res
+        .status(404)
+        .json({ status: false, message: "Could not find category" });
+
+    return res.status(200).json({
+      status: true,
+      message: `Deleted ${checkCategory.name} category`,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ status: false, message: "Something went wrong try again later" });
+  }
+};
 
 module.exports = {
   addForumCategory,
   getForumCategory,
   updateForumCategory,
+  deleteForumCategory,
 };

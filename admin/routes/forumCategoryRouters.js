@@ -5,6 +5,7 @@ const {
   addForumCategory,
   getForumCategory,
   updateForumCategory,
+  deleteForumCategory,
 } = require("../controllers/forumCategoryController");
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 const upload = require("../../multer/multer");
@@ -16,6 +17,12 @@ router.post(
   addForumCategory
 );
 router.get("/", getForumCategory);
-router.put("/:categoryId", adminAuthMiddleware, updateForumCategory);
+router.put(
+  "/:categoryId",
+  upload.single("categoryImage"),
+  adminAuthMiddleware,
+  updateForumCategory
+);
+router.delete("/:categoryId", deleteForumCategory);
 
 module.exports = router;
