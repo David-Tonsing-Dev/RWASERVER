@@ -8,7 +8,7 @@ const indexCoopStart = async () => {
       await storeIndexCoopData();
     });
 
-    console.log("CRON job started successfully!");
+    console.log("Index Coop CRON job started successfully!");
   } catch (err) {
     console.error("DB error:", err);
   }

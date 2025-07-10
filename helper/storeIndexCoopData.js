@@ -1,12 +1,16 @@
+const axios = require("axios");
+const dotenv = require("dotenv");
 const { ethers } = require("ethers");
-const { IndexCoop } = require("../models/indexCoopETH2xModel");
+const IndexCoop = require("../models/indexCoopETH2xModel");
 const { indexCoopABI } = require("../constant/abi");
+dotenv.config();
 
 const addressToCheck = "0x6404B20B5a8493c426b6efBE52809B206b26d393";
 const indexCoopContract = "0xC884646E6C88d9b172a23051b38B0732Cc3E35a6";
 const providerBase = new ethers.providers.JsonRpcProvider(
   process.env.ALCHEMY_BASE_URL
 );
+const formatEther = ethers.utils.formatEther;
 
 const fetchIndexCoopPrice = async () => {
   try {
@@ -45,6 +49,13 @@ const storeIndexCoopData = async () => {
     now.setMinutes(0, 0, 0);
     const timestamp = now.getTime();
     const balanceUsd = balance * price;
+
+    // await IndexCoop.updateOne(
+    //   { tokenName: "index-coop-ethereum-2x-index" },
+    //   {
+    //     $pull: { priceHistory: { timestamp } }, // remove existing for the hour
+    //   }
+    // );
 
     await IndexCoop.updateOne(
       { tokenName: "index-coop-ethereum-2x-index" },
