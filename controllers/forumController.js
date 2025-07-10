@@ -423,7 +423,7 @@ const reactToForumDislike = async (req, res) => {
           { $unset: { [`reactions.${removedEmoji}`]: "" } }
         );
 
-        io.to(categoryId).emit("reactToForum", {
+        io.to(categoryId).emit("reactToForumDislike", {
           forumId,
           userId,
           emoji: "",
