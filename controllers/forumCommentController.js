@@ -354,7 +354,6 @@ const getCommentsByForumId = async (req, res) => {
       comments,
     });
   } catch (err) {
-    console.log("ERROR::", err.message);
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later",

@@ -335,7 +335,7 @@ const reactToForum = async (req, res) => {
         io.to(categoryId).emit("reactToForum", {
           forumId,
           userId,
-          emoji: "",
+          emoji: "👍",
           action: "Remove",
         });
 
@@ -364,7 +364,8 @@ const reactToForum = async (req, res) => {
           forumId,
           userId,
           emoji: "👍",
-          action: "Added",
+          oldEmoji: "👎",
+          action: "Updated",
         });
 
         return res.status(201).json({
@@ -433,7 +434,7 @@ const reactToForumDislike = async (req, res) => {
         io.to(categoryId).emit("reactToForumDislike", {
           forumId,
           userId,
-          emoji: "",
+          emoji: "👎",
           action: "Remove",
         });
 
@@ -462,7 +463,8 @@ const reactToForumDislike = async (req, res) => {
           forumId,
           userId,
           emoji,
-          action: "Added",
+          oldEmoji: "👍",
+          action: "Updated",
         });
 
         return res.status(201).json({
