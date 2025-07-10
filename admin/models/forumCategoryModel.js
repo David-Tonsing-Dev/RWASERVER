@@ -10,6 +10,10 @@ const forumCategorySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    categoryImage: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

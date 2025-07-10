@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
 const { io } = require("../socket/socket");
+const normalizeEmoji = require("../helper/normalizeEmoji");
 
 const createForum = async (req, res) => {
   try {
@@ -79,18 +80,25 @@ const getAllForums = async (req, res) => {
       const userReactions = await ForumReaction.find({
         forumId: { $in: forumIds },
         userId: userId,
-      }).select("forumId");
-
-      const reactedIds = new Set(
-        userReactions.map((r) => r.forumId.toString())
-      );
+      }).select("forumId emoji");
 
       forums.forEach((c) => {
-        c.isReact = reactedIds.has(c._id.toString());
+        const userReaction = userReactions.find(
+          (r) => r.forumId.toString() === c._id.toString()
+        );
+
+        if (userReaction) {
+          c.isReact = userReaction.emoji !== "👎";
+          c.isDislike = userReaction.emoji === "👎";
+        } else {
+          c.isReact = false;
+          c.isDislike = false;
+        }
       });
     } else {
       forums.forEach((c) => {
         c.isReact = false;
+        c.isDislike = false;
       });
     }
 
@@ -271,8 +279,9 @@ const getForumByUser = async (req, res) => {
 
 const reactToForum = async (req, res) => {
   try {
-    const { categoryId, forumId, emoji } = req.body;
+    let { categoryId, forumId, emoji } = req.body;
     const userId = req.userId;
+    emoji = emoji ? normalizeEmoji(emoji) : "";
 
     if (!userId)
       return res
@@ -303,65 +312,159 @@ const reactToForum = async (req, res) => {
     }
 
     if (!emoji) {
-      const removedEmoji = existing.emoji;
-      await ForumReaction.deleteOne({ _id: existing._id });
+      if (existing.emoji === "👍") {
+        const removedEmoji = existing.emoji;
+        await ForumReaction.deleteOne({ _id: existing._id });
+
+        await Forum.findByIdAndUpdate(forumId, {
+          $inc: { [`reactions.${removedEmoji}`]: -1 },
+        });
+
+        await Forum.updateOne(
+          { _id: forumId, [`reactions.${removedEmoji}`]: { $lte: 0 } },
+          { $unset: { [`reactions.${removedEmoji}`]: "" } }
+        );
+
+        io.to(categoryId).emit("reactToForum", {
+          forumId,
+          userId,
+          emoji: "",
+          action: "Remove",
+        });
+
+        return res
+          .status(200)
+          .json({ status: true, message: "Reaction removed." });
+      } else {
+        const oldEmoji = existing.emoji;
+
+        existing.emoji = "👍";
+        await existing.save();
+
+        await Forum.findByIdAndUpdate(forumId, {
+          $inc: {
+            [`reactions.${oldEmoji}`]: -1,
+            [`reactions.${"👍"}`]: 1,
+          },
+        });
+
+        await Forum.updateOne(
+          { _id: forumId, [`reactions.${oldEmoji}`]: { $lte: 0 } },
+          { $unset: { [`reactions.${oldEmoji}`]: "" } }
+        );
+
+        io.to(categoryId).emit("reactToForum", {
+          forumId,
+          userId,
+          emoji,
+          action: "Update",
+        });
+
+        return res.status(201).json({
+          status: true,
+          message: "Reaction updated.",
+          reaction: existing,
+        });
+      }
+    }
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again later",
+    });
+  }
+};
+
+const reactToForumDislike = async (req, res) => {
+  try {
+    let { categoryId, forumId, emoji } = req.body;
+    const userId = req.userId;
+    emoji = normalizeEmoji(emoji);
+
+    if (!userId)
+      return res
+        .status(400)
+        .json({ status: false, message: "Sign in to react" });
+
+    const existing = await ForumReaction.findOne({ forumId, userId });
+
+    if (!existing) {
+      let newEmoji = emoji || "👎";
+      const reaction = new ForumReaction({ forumId, userId, emoji: newEmoji });
+      await reaction.save();
 
       await Forum.findByIdAndUpdate(forumId, {
-        $inc: { [`reactions.${removedEmoji}`]: -1 },
+        $inc: { [`reactions.${newEmoji}`]: 1 },
       });
 
-      await Forum.updateOne(
-        { _id: forumId, [`reactions.${removedEmoji}`]: { $lte: 0 } },
-        { $unset: { [`reactions.${removedEmoji}`]: "" } }
-      );
-
-      io.to(categoryId).emit("reactToForum", {
+      io.to(categoryId).emit("reactToForumDislike", {
         forumId,
         userId,
-        emoji: "",
-        action: "Remove",
+        emoji: "👎",
+        action: "Added",
       });
 
       return res
-        .status(200)
-        .json({ status: true, message: "Reaction removed." });
+        .status(201)
+        .json({ status: true, message: "Reaction dislike added.", reaction });
     }
 
-    const oldEmoji = existing.emoji;
+    if ("👎" === emoji) {
+      if (existing.emoji === "👎") {
+        const removedEmoji = existing.emoji;
+        await ForumReaction.deleteOne({ _id: existing._id });
 
-    if (oldEmoji === emoji) {
-      return res.status(200).json({
-        status: true,
-        message: "Reaction unchanged.",
-        reaction: existing,
-      });
+        await Forum.findByIdAndUpdate(forumId, {
+          $inc: { [`reactions.${removedEmoji}`]: -1 },
+        });
+
+        await Forum.updateOne(
+          { _id: forumId, [`reactions.${removedEmoji}`]: { $lte: 0 } },
+          { $unset: { [`reactions.${removedEmoji}`]: "" } }
+        );
+
+        io.to(categoryId).emit("reactToForum", {
+          forumId,
+          userId,
+          emoji: "",
+          action: "Remove",
+        });
+
+        return res
+          .status(200)
+          .json({ status: true, message: "Reaction dislike removed." });
+      } else {
+        const oldEmoji = existing.emoji;
+
+        existing.emoji = normalizeEmoji(emoji);
+        await existing.save();
+
+        await Forum.findByIdAndUpdate(forumId, {
+          $inc: {
+            [`reactions.${oldEmoji}`]: -1,
+            [`reactions.${emoji}`]: 1,
+          },
+        });
+
+        await Forum.updateOne(
+          { _id: forumId, [`reactions.${oldEmoji}`]: { $lte: 0 } },
+          { $unset: { [`reactions.${oldEmoji}`]: "" } }
+        );
+
+        io.to(categoryId).emit("reactToForumDislike", {
+          forumId,
+          userId,
+          emoji,
+          action: "Update",
+        });
+
+        return res.status(201).json({
+          status: true,
+          message: "Reaction dislike updated.",
+          reaction: existing,
+        });
+      }
     }
-
-    existing.emoji = emoji;
-    await existing.save();
-
-    await Forum.findByIdAndUpdate(forumId, {
-      $inc: {
-        [`reactions.${oldEmoji}`]: -1,
-        [`reactions.${emoji}`]: 1,
-      },
-    });
-
-    await Forum.updateOne(
-      { _id: forumId, [`reactions.${oldEmoji}`]: { $lte: 0 } },
-      { $unset: { [`reactions.${oldEmoji}`]: "" } }
-    );
-
-    io.to(categoryId).emit("reactToForum", {
-      forumId,
-      userId,
-      emoji,
-      action: "Update",
-    });
-
-    return res
-      .status(201)
-      .json({ status: true, message: "Reaction updated.", reaction: existing });
   } catch (err) {
     return res.status(500).json({
       status: false,
@@ -378,4 +481,5 @@ module.exports = {
   deleteForum,
   getForumByUser,
   reactToForum,
+  reactToForumDislike,
 };

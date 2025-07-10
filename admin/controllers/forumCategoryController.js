@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const ForumCategory = require("../models/forumCategoryModel");
 const { SUPERADMIN } = require("../../constant/role");
+const cloudinary = require("../../config/cloudinary");
 
 const addForumCategory = async (req, res) => {
   try {
@@ -21,7 +22,26 @@ const addForumCategory = async (req, res) => {
         .status(400)
         .json({ status: false, message: `${name} category already exist` });
 
-    const newCategory = new ForumCategory({ name, description });
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ status: false, message: "Image is required" });
+
+    const categoryImage = await cloudinary.uploader.upload(req.file.path, {
+      use_filename: true,
+      folder: "rwa/forum/category",
+    });
+
+    if (!categoryImage)
+      return res
+        .status(500)
+        .json({ status: false, message: "Error in uploading image" });
+
+    const newCategory = new ForumCategory({
+      name,
+      description,
+      categoryImage: categoryImage.secure_url,
+    });
     await newCategory.save();
 
     return res
