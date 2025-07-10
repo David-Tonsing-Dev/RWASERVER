@@ -98,7 +98,7 @@ const updateForumCategory = async (req, res) => {
     if (name) checkCategory.name = name;
     if (description) checkCategory.description = description;
 
-    if (res.file) {
+    if (req.file) {
       const categoryImage = await cloudinary.uploader.upload(req.file.path, {
         use_filename: true,
         folder: "rwa/forum/category",
