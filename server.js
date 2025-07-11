@@ -34,7 +34,6 @@ const forumAdminCategoryRouter = require("./admin/routes/forumCategoryRouters");
 const treasuryChartRouter = require("./routes/treasuryChartRouters");
 
 const schedular = require("./cron/schedular");
-const indexCoopStart = require("./cron/indexCoopSchedular");
 
 const allowedOrigins = [
   "https://rwa.guide",
@@ -98,6 +97,5 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
     console.log(`Listening on port ${PORT}`);
     console.log("Database connection established");
     schedular();
-    indexCoopStart();
   });
 });

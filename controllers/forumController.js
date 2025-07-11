@@ -3,7 +3,7 @@ const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
 const { io } = require("../socket/socket");
 const normalizeEmoji = require("../helper/normalizeEmoji");
-
+const { QuillDeltaToHtmlConverter } = require("quill-delta-to-html");
 const createForum = async (req, res) => {
   try {
     const userId = req.userId;
@@ -32,6 +32,62 @@ const createForum = async (req, res) => {
         .json({ status: false, message: "Select category for the forum" });
 
     const newForum = new Forum({ title, text, categoryId, userId });
+
+    await newForum.save();
+
+    await newForum.populate({ path: "userId", select: "userName" });
+
+    io.to(categoryId).emit("forumAdded", newForum);
+
+    return res.status(200).json({
+      status: true,
+      message: "New forum created successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again later",
+    });
+  }
+};
+
+const createForumForMobile = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const { title, text, categoryId } = req.body;
+
+    if (!userId)
+      return res
+        .status(400)
+        .json({ status: false, message: "Sign in to create new forum" });
+
+    if (!title)
+      return res.status(400).json({
+        status: false,
+        message: "Forum title is required and must be under 150 characters.",
+      });
+
+    if (!text)
+      return res
+        .status(400)
+        .json({ status: false, message: "Forum text is required" });
+
+    if (!categoryId)
+      return res
+        .status(404)
+        .json({ status: false, message: "Select category for the forum" });
+
+    const toConvertText = JSON.parse(text);
+    const converterText = new QuillDeltaToHtmlConverter(toConvertText, {});
+    const convertedText = converterText.convert();
+
+    const newForum = new Forum({
+      title,
+      text: convertedText,
+      categoryId,
+      userId,
+    });
 
     await newForum.save();
 
@@ -179,6 +235,48 @@ const updateForum = async (req, res) => {
 
     if (title) forum.title = title;
     if (text) forum.text = text;
+    if (categoryId) forum.categoryId = categoryId;
+
+    await forum.save();
+
+    return res.status(200).json({ message: "Forum updated successfully" });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again later",
+    });
+  }
+};
+
+const updateForumForMobile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, text, categoryId } = req.body;
+
+    const userId = req.userId;
+
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return res.status(400).json({ status: false, message: "Invalid forum" });
+
+    const forum = await Forum.findById(id);
+
+    if (!forum)
+      return res
+        .status(404)
+        .json({ status: false, message: "Forum not found" });
+
+    if (forum.userId.toString() !== userId)
+      return res
+        .status(403)
+        .json({ status: false, message: "Unauthorized to update this forum" });
+
+    if (title) forum.title = title;
+    if (text) {
+      const toConvertText = JSON.parse(text);
+      const converterText = new QuillDeltaToHtmlConverter(toConvertText, {});
+      const convertedText = converterText.convert();
+      forum.text = convertedText;
+    }
     if (categoryId) forum.categoryId = categoryId;
 
     await forum.save();
@@ -484,9 +582,11 @@ const reactToForumDislike = async (req, res) => {
 
 module.exports = {
   createForum,
+  createForumForMobile,
   getAllForums,
   getForumById,
   updateForum,
+  updateForumForMobile,
   deleteForum,
   getForumByUser,
   reactToForum,

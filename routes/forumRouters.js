@@ -2,9 +2,11 @@ const express = require("express");
 const router = express.Router();
 const {
   createForum,
+  createForumForMobile,
   getAllForums,
   getForumById,
   updateForum,
+  updateForumForMobile,
   deleteForum,
   getForumByUser,
   reactToForum,
@@ -17,8 +19,10 @@ const {
 
 router.get("/", nonAuthMiddleware, getAllForums);
 router.post("/create", authMiddleware, createForum);
+router.post("/mobile/create", authMiddleware, createForumForMobile);
 router.get("/:id", nonAuthMiddleware, getForumById);
 router.put("/:id", nonAuthMiddleware, updateForum);
+router.put("/mobile/:id", nonAuthMiddleware, updateForumForMobile);
 router.delete("/:id", authMiddleware, deleteForum);
 router.get("/user/:userId", nonAuthMiddleware, getForumByUser);
 router.post("/react", authMiddleware, reactToForum);
