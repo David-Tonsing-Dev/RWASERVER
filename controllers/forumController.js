@@ -78,8 +78,7 @@ const createForumForMobile = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Select category for the forum" });
 
-    const toConvertText = JSON.parse(text);
-    const converterText = new QuillDeltaToHtmlConverter(toConvertText, {});
+    const converterText = new QuillDeltaToHtmlConverter(text, {});
     const convertedText = converterText.convert();
 
     const newForum = new Forum({
@@ -272,8 +271,7 @@ const updateForumForMobile = async (req, res) => {
 
     if (title) forum.title = title;
     if (text) {
-      const toConvertText = JSON.parse(text);
-      const converterText = new QuillDeltaToHtmlConverter(toConvertText, {});
+      const converterText = new QuillDeltaToHtmlConverter(text, {});
       const convertedText = converterText.convert();
       forum.text = convertedText;
     }
