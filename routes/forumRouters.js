@@ -4,6 +4,7 @@ const {
   createForum,
   createForumForMobile,
   getAllForums,
+  getHotTopic,
   getForumById,
   updateForum,
   updateForumForMobile,
@@ -18,6 +19,7 @@ const {
 } = require("../middlewares/authMiddleware");
 
 router.get("/", nonAuthMiddleware, getAllForums);
+router.get("/hot-topics", getHotTopic);
 router.post("/create", authMiddleware, createForum);
 router.post("/mobile/create", authMiddleware, createForumForMobile);
 router.get("/:id", nonAuthMiddleware, getForumById);
