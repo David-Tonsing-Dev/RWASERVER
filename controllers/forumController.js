@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
+const { QuillDeltaToHtmlConverter } = require("quill-delta-to-html");
+const { io } = require("../socket/socket");
 const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
-const { io } = require("../socket/socket");
 const normalizeEmoji = require("../helper/normalizeEmoji");
-const { QuillDeltaToHtmlConverter } = require("quill-delta-to-html");
+const hotTopicsService = require("../services/hotTopicsService");
+
 const createForum = async (req, res) => {
   try {
     const userId = req.userId;
@@ -580,25 +582,17 @@ const reactToForumDislike = async (req, res) => {
 
 const getHotTopic = async (req, res) => {
   try {
-    let { page = 1, size = 10, categoryId } = req.query;
+    let { page, size, categoryId } = req.query;
 
-    page = parseInt(page);
-    size = parseInt(size);
+    page = page ? parseInt(page) : 1;
+    size = size ? parseInt(size) : 10;
     const skip = (page - 1) * size;
 
     const filter = {};
 
     if (categoryId) filter.categoryId = categoryId;
 
-    const hotTopics = await Forum.find(filter)
-      .populate({ path: "userId", select: "userName" })
-      .populate({ path: "categoryId", select: "name" })
-      .sort({ commentsCount: -1 })
-      .skip(skip)
-      .limit(size)
-      .lean();
-
-    const total = await Forum.countDocuments(filter);
+    const { hotTopics, total } = await hotTopicsService({ skip, size, filter });
 
     return res.status(200).json({ status: true, total, page, size, hotTopics });
   } catch (err) {

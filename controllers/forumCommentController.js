@@ -39,6 +39,20 @@ const addComment = async (req, res) => {
       comment,
       action: "ADD",
     });
+
+    const { hotTopics, total } = await hotTopicsService({
+      skip: 0,
+      size: 10,
+      filter: {},
+    });
+
+    io.emit("hotTopics", {
+      page: 1,
+      size: 10,
+      hotTopics,
+      total,
+    });
+
     return res.status(201).json({ status: true, message: "Comment added" });
   } catch (err) {
     return res.status(500).json({
