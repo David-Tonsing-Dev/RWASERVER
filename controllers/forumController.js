@@ -4,7 +4,7 @@ const { io } = require("../socket/socket");
 const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
 const normalizeEmoji = require("../helper/normalizeEmoji");
-const hotTopicsService = require("../services/hotForumTopicsService");
+const hotForumTopicsService = require("../services/hotForumTopicsService");
 
 const createForum = async (req, res) => {
   try {
@@ -603,6 +603,7 @@ const getHotTopic = async (req, res) => {
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later",
+      error: err.message,
     });
   }
 };
