@@ -3,6 +3,7 @@ const CommentReaction = require("../models/forumCommentReactionModel");
 const Forum = require("../models/forumModel");
 const { io } = require("../socket/socket");
 const normalizeEmoji = require("../helper/normalizeEmoji");
+const hotForumTopicsService = require("../services/hotForumTopicsService");
 
 const addComment = async (req, res) => {
   try {
@@ -40,13 +41,13 @@ const addComment = async (req, res) => {
       action: "ADD",
     });
 
-    const { hotTopics, total } = await hotTopicsService({
+    const { hotTopics, total } = await hotForumTopicsService({
       skip: 0,
       size: 10,
       filter: {},
     });
 
-    io.emit("hotTopics", {
+    io.emit("hotForumTopics", {
       page: 1,
       size: 10,
       hotTopics,

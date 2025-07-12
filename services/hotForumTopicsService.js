@@ -1,6 +1,6 @@
 const Forum = require("../models/forumModel");
 
-const hotTopicsService = async ({ skip, size, filter }) => {
+const hotForumTopicsService = async ({ skip, size, filter }) => {
   try {
     const hotTopics = await Forum.find(filter)
       .populate({ path: "userId", select: "userName" })
@@ -18,4 +18,4 @@ const hotTopicsService = async ({ skip, size, filter }) => {
   }
 };
 
-module.exports = hotTopicsService;
+module.exports = hotForumTopicsService;

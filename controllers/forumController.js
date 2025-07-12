@@ -4,7 +4,7 @@ const { io } = require("../socket/socket");
 const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
 const normalizeEmoji = require("../helper/normalizeEmoji");
-const hotTopicsService = require("../services/hotTopicsService");
+const hotTopicsService = require("../services/hotForumTopicsService");
 
 const createForum = async (req, res) => {
   try {
@@ -592,7 +592,11 @@ const getHotTopic = async (req, res) => {
 
     if (categoryId) filter.categoryId = categoryId;
 
-    const { hotTopics, total } = await hotTopicsService({ skip, size, filter });
+    const { hotTopics, total } = await hotForumTopicsService({
+      skip,
+      size,
+      filter,
+    });
 
     return res.status(200).json({ status: true, total, page, size, hotTopics });
   } catch (err) {
