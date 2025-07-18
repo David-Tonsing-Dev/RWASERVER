@@ -19,7 +19,8 @@ const serviceTerm = `
     <div className="about-rwa">
       <div className="about-about-rwa">
         <p>
-          RWA Pros LLC ("RWA Pros," "we," "our," "us," or "Company") operates the RWA Pros website located at <b>rwapros.com</b> and any associated sub‑domains (collectively, the "Website"), together with our mobile and desktop applications (the "App") and a suite of data dashboards, portfolio trackers, application‑programming interfaces (APIs), widgets, plug‑ins, research content, educational materials, loyalty‑rewards features, and any other products or services we offer from time to time (individually and collectively, the "Site Services"). The Website, App, Site Services, and any related forums, blogs, social‑media pages, messaging channels, or other platforms operated or maintained by RWA Pros are referred to collectively in these Terms as the "Site".
+          RWA Pros LLC ("RWA Pros," "we," "our," "us," or "Company") operates the RWA Pros website located at <a href="https://rwapros.com" target="_blank" rel="noopener noreferrer"><b>rwapros.com</b></a>
+ and any associated sub‑domains (collectively, the "Website"), together with our mobile and desktop applications (the "App") and a suite of data dashboards, portfolio trackers, application‑programming interfaces (APIs), widgets, plug‑ins, research content, educational materials, loyalty‑rewards features, and any other products or services we offer from time to time (individually and collectively, the "Site Services"). The Website, App, Site Services, and any related forums, blogs, social‑media pages, messaging channels, or other platforms operated or maintained by RWA Pros are referred to collectively in these Terms as the "Site".
         </p>
 
         <p><b>Scope of Platform — Real‑World Assets (RWA):</b> RWA Pros focuses on tokenized real‑world assets, digital assets, and related market data. We do not facilitate transactions in instruments that are categorised as securities under applicable law, unless expressly stated in a separate, regulator‑approved offering document.</p>
@@ -35,7 +36,7 @@ const serviceTerm = `
           </ul>
           If you do not agree to the Agreement, do not access or use the Site.
         </p>
-
+<br/>
         <b>1. Legal Capacity & Eligibility</b>
         <p>
           You represent that you are at least 18 years old and have full legal capacity to enter into the Agreement. If you access the Site on behalf of a company or other legal entity (an "Entity"), you represent that you have authority to bind that Entity, and "you" in these Terms includes both you and the Entity, jointly and severally.
@@ -124,7 +125,8 @@ const serviceTerm = `
         <b>Contact Us</b>
         <p>
           For questions about these Terms, contact us at:<br />
-          <b>Email:</b> admin@rwapros.com<br />
+            Email: <a href="mailto:admin@rwapros.com"><b>admin@rwapros.com</b></a>
+          <br />
           <b>Address:</b> RWA Pros LLC, Republic of Seychelles
         </p>
 
@@ -140,7 +142,8 @@ const privacyTerm = `<div className="about-pg">
   <div className="about-rwa">
     <div className="about-about-rwa">
       <p>
-        This Privacy Policy ("Policy") outlines how RWA Pros LLC ("we," "our," "us") collects, uses, stores, and protects your personal information when you use our website <b>rwapros.com</b>, our mobile or desktop applications (collectively, the "Site"), and any associated services, including analytics dashboards, token listing submissions, portfolio tools, research content, and any other features, content, tools, or promotions provided by RWA Pros (the "Site Services").
+        This Privacy Policy ("Policy") outlines how RWA Pros LLC ("we," "our," "us") collects, uses, stores, and protects your personal information when you use our website <a href="https://rwapros.com" target="_blank" rel="noopener noreferrer"><b>rwapros.com</b></a>
+, our mobile or desktop applications (collectively, the "Site"), and any associated services, including analytics dashboards, token listing submissions, portfolio tools, research content, and any other features, content, tools, or promotions provided by RWA Pros (the "Site Services").
       </p>
       <p>
         By using the Site, you acknowledge that you have read, understood, and agree to the terms of this Policy. If you do not agree, please do not use the Site or provide us with any personal data.
@@ -262,7 +265,7 @@ const privacyTerm = `<div className="about-pg">
       <p>
         If you have questions, concerns, or requests about this Policy, contact our Data Protection Officer at:
         <br />
-        Email: <b>admin@rwapros.com</b>
+        Email: <a href="mailto:admin@rwapros.com"><b>admin@rwapros.com</b></a>
         <br />
         Address: RWA Pros LLC, registered in the Republic of Seychelles
       </p>
