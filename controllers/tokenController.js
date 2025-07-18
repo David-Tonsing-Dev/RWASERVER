@@ -310,7 +310,7 @@ const getCategoryTokens = async (req, res) => {
     size = parseInt(size);
 
     if (sortBy === "" || !sortBy) {
-      sortBy = "market_cap_rank";
+      sortBy = "rank";
     }
 
     if (order === "" || !order) {

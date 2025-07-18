@@ -243,7 +243,6 @@ const getAllCategories = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Categories with token data fetched successfully",
       categories: detailCategories,
     });
   } catch (error) {
