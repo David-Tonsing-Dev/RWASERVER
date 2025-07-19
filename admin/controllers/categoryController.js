@@ -217,7 +217,7 @@ const getAllCategories = async (req, res) => {
           validTokens.length > 0 ? totalPercentage / validTokens.length : 0;
 
         const topTokens = tokens
-          .sort((a, b) => (b.rank || 0) - (a.rank || 0))
+          .sort((a, b) => a.rank - b.rank)
           .slice(0, 3)
           .map((t) => t.image);
         return {
