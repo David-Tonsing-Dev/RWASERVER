@@ -7,7 +7,7 @@ const disclaimerTerm = `<div className="about-pg">
       <p>Nothing on this Platform constitutes financial, investment, legal, or tax advice, nor should it be relied upon as a substitute for professional advice tailored to your personal circumstances. We do not offer or solicit the purchase or sale of any security, asset, or regulated product.</p>
       <p>Use of the Platform is entirely at your own risk. You are encouraged to conduct your own research, verify information independently, and consult with appropriate advisors before making any decisions related to digital assets or real-world asset tokens.</p>
       <p>RWA Pros LLC is not liable for any loss or damage arising directly or indirectly from your reliance on any information or use of the Platform’s tools and services.</p>
-      <p><strong>RWA Pros LLC</strong> is registered in the <strong>Republic of Seychelles</strong>.</p>
+      <p>RWA Pros LLC is registered in the Republic of Seychelles.</p>
     </div>
   </div>
 </div>`;
@@ -129,7 +129,7 @@ const serviceTerm = `
           For questions about these Terms, contact us at:<br />
             Email: <b>admin@rwapros.com</b>
           <br />
-          <b>Address:</b> RWA Pros LLC, Republic of Seychelles
+          Address: RWA Pros LLC, Republic of Seychelles
         </p>
 
         <p>© 2025 RWA Pros LLC. All rights reserved.</p>
@@ -225,7 +225,7 @@ const privacyTerm = `<div className="about-pg">
         <li>In the event of a merger, acquisition, or asset sale, with relevant stakeholders</li>
         <li>Our professional advisors (e.g., legal, tax, or accounting firms) as necessary</li>
       </ul>
-      <p>We do <b>not</b> sell your Personal Data.</p>
+      <p>We do not sell your Personal Data.</p>
 
       <b>8. Data Transfers</b>
       <p>
