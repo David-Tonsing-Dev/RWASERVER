@@ -15,6 +15,7 @@ const {
   getTopGainer,
   getCategoryTokens,
 } = require("../controllers/tokenController");
+const { getFeaturedNews } = require("../admin/controllers/newsController");
 const { nonAuthMiddleware } = require("../middlewares/authMiddleware");
 
 router.get("/", nonAuthMiddleware, getAllToken);
@@ -27,6 +28,7 @@ router.get("/rwa/trend", getTrends);
 router.get("/rwa/blog", getBlog);
 router.get("/rwa/blog/:slug", getBlogDetail);
 router.get("/rwa/news", getNews);
+router.get("/rwa/news/featured", getFeaturedNews);
 router.get("/rwa/news/:slug", getNewsDetail);
 router.get("/rwa/topGainer", getTopGainer);
 

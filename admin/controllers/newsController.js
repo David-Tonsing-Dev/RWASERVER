@@ -375,9 +375,32 @@ const updateNews = async (req, res) => {
   }
 };
 
+const getFeaturedNews = async (req, res) => {
+  try {
+    const featureNews = await News.find({ isFeatured: true })
+      .limit(10)
+      .sort({ createdAt: -1 });
+
+    if (!featureNews)
+      return res.status(400).json({
+        status: false,
+        message: "Something went wrong, try again later",
+      });
+
+    return res.status(200).json({ status: true, newsFeatures: featureNews });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again later",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   addNews,
   getNews,
   deleteNews,
   updateNews,
+  getFeaturedNews,
 };
