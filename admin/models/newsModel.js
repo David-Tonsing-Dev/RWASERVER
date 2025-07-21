@@ -36,7 +36,7 @@ const newsSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    isFeature: {
+    isFeatured: {
       type: Boolean,
       default: false,
     },
