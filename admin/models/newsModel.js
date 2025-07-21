@@ -36,6 +36,10 @@ const newsSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isFeature: {
+      type: String,
+      default: false,
+    },
   },
   { timestamps: true }
 );

@@ -25,7 +25,7 @@ const serviceTerm = `
  and any associated sub‑domains (collectively, the "Website"), together with our mobile and desktop applications (the "App") and a suite of data dashboards, portfolio trackers, application‑programming interfaces (APIs), widgets, plug‑ins, research content, educational materials, loyalty‑rewards features, and any other products or services we offer from time to time (individually and collectively, the "Site Services"). The Website, App, Site Services, and any related forums, blogs, social‑media pages, messaging channels, or other platforms operated or maintained by RWA Pros are referred to collectively in these Terms as the "Site".
         </p>
 
-        <p><b>Scope of Platform — Real‑World Assets (RWA):<br/></b> RWA Pros focuses on tokenized real‑world assets, digital assets, and related market data. We do not facilitate transactions in instruments that are categorised as securities under applicable law, unless expressly stated in a separate, regulator‑approved offering document.</p>
+        <p><b>Scope of Platform — Real‑World Assets (RWA):<br/></b>RWA Pros focuses on tokenized real‑world assets, digital assets, and related market data. We do not facilitate transactions in instruments that are categorised as securities under applicable law, unless expressly stated in a separate, regulator‑approved offering document.</p>
 
         <p>
           By accessing, browsing, or using any part of the Site—or by clicking an "I Agree" button or similar acknowledgment—you ("you," "your," or the "User") accept and agree to be bound by:
