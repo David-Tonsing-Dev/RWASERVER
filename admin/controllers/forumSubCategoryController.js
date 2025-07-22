@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const ForumSubCategory = require("../models/forumSubCategoryModel");
+const Forum = require("../../models/forumModel");
 const { SUPERADMIN } = require("../../constant/role");
 const cloudinary = require("../../config/cloudinary");
 
@@ -62,6 +63,10 @@ const getForumSubCategory = async (req, res) => {
   try {
     const { filter, category } = req.query;
 
+    if (!mongoose.Types.ObjectId.isValid(category)) {
+      return res.status(400).json({ message: "Invalid categoryId" });
+    }
+
     if (!category)
       return res
         .status(400)
@@ -74,7 +79,39 @@ const getForumSubCategory = async (req, res) => {
       updatedAt: -1,
     });
 
-    return res.status(200).json({ status: true, subCategories });
+    const stats = await Forum.aggregate([
+      {
+        $match: {
+          categoryId: mongoose.Types.ObjectId.createFromHexString(category),
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalCommentsCount: { $sum: "$commentsCount" },
+          totalLikes: { $sum: { $ifNull: ["$reactions.👍", 0] } },
+          totalDislikes: { $sum: { $ifNull: ["$reactions.👎", 0] } },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalCommentsCount: 1,
+          totalLikes: 1,
+          totalDislikes: 1,
+        },
+      },
+    ]);
+
+    return res
+      .status(200)
+      .json({
+        status: true,
+        subCategories,
+        totalCommentsCount: stats[0].totalCommentsCount,
+        totalLikes: stats[0].totalLikes,
+        totalDislikes: stats[0].totalDislikes,
+      });
   } catch (err) {
     return res
       .status(500)
