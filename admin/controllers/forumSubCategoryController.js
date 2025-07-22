@@ -60,12 +60,17 @@ const addForumSubCategory = async (req, res) => {
 
 const getForumSubCategory = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { filter, category } = req.query;
 
-    let filter = {};
-    if (category) filter.name = { $regex: category, $options: "i" };
+    if (!category)
+      return res
+        .status(400)
+        .json({ status: false, message: "Category is required" });
+    let filters = {};
+    if (filter) filters.name = { $regex: filter, $options: "i" };
+    if (category) filters.categoryId = category;
 
-    const subCategories = await ForumSubCategory.find(filter).sort({
+    const subCategories = await ForumSubCategory.find(filters).sort({
       updatedAt: -1,
     });
 
