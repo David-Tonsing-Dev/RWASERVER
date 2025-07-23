@@ -6,7 +6,7 @@ const {
 } = require("../controllers/googleAnalyticsDataController");
 const router = express.Router();
 
-router.get("/get/allGAData", getAllGAData);
+router.get("/get/allGAData", adminAuthMiddleware, getAllGAData);
 router.get("/get/mobileAppGAData", getMobileAppAllGAData);
 
 module.exports = router;
