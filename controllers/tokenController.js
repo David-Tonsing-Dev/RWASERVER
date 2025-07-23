@@ -11,6 +11,8 @@ const TokenRating = require("../models/tokenRatingModel");
 const Token = require("../models/coinTokenModel");
 const Review = require("../admin/models/reviewModel");
 const { trendingCoin } = require("../helper/trendingCoin");
+const GoogleAnalyticsData = require("../admin/models/googleAnalyticsDataModel");
+const MobileAppAnalyticsData = require("../models/mobileAppAnalyticsDataModel");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&per_page=250&sparkline=true&price_change_percentage=1h,7d";
@@ -310,7 +312,7 @@ const getCategoryTokens = async (req, res) => {
     size = parseInt(size);
 
     if (sortBy === "" || !sortBy) {
-      sortBy = "market_cap_rank";
+      sortBy = "rank";
     }
 
     if (order === "" || !order) {
@@ -751,6 +753,27 @@ const getNews = async (req, res) => {
   }
 };
 
+// const getNewsDetail = async (req, res) => {
+//   try {
+//     const { slug } = req.params;
+
+//     const newsObj = await News.findOne({ slug });
+
+//     if (!newsObj)
+//       return res
+//         .status(400)
+//         .json({ status: false, message: "News doesn't exist!" });
+
+//     return res.status(200).json({ status: true, news: newsObj });
+//   } catch (err) {
+//     return res.status(500).json({
+//       status: false,
+//       message: "Something went wrong!",
+//       error: err.message,
+//     });
+//   }
+// };
+
 const getNewsDetail = async (req, res) => {
   try {
     const { slug } = req.params;
@@ -758,11 +781,36 @@ const getNewsDetail = async (req, res) => {
     const newsObj = await News.findOne({ slug });
 
     if (!newsObj)
-      return res
-        .status(400)
-        .json({ status: false, message: "News doesn't exist!" });
+      return res.status(400).json({
+        status: false,
+        message: "News doesn't exist!",
+      });
 
-    return res.status(200).json({ status: true, news: newsObj });
+    const pagePath = `/newsdetails/${slug}`;
+    const webanalyticsDoc = await GoogleAnalyticsData.findOne({
+      "pages.pagePath": pagePath,
+    });
+    const mobileAnalyticsDoc = await MobileAppAnalyticsData.findOne({
+      "pages.pagePath": pagePath,
+    });
+
+    const webPageData = webanalyticsDoc?.pages?.find(
+      (p) => p.pagePath === pagePath
+    );
+    const mobilePageData = mobileAnalyticsDoc?.pages?.find(
+      (p) => p.pagePath === pagePath
+    );
+
+    const webScreenPageViews = webPageData?.screenPageViews || 0;
+    const mobileScreenPageViews = mobilePageData?.screenPageViews || 0;
+
+    const totalviews = webScreenPageViews + mobileScreenPageViews;
+
+    return res.status(200).json({
+      status: true,
+      news: newsObj,
+      views: totalviews,
+    });
   } catch (err) {
     return res.status(500).json({
       status: false,
