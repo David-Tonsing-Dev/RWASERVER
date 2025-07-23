@@ -33,9 +33,11 @@ const categoryRouter = require("./admin/routes/categoryRouters");
 const forumAdminCategoryRouter = require("./admin/routes/forumCategoryRouters");
 const forumAdminSubCategoryRouter = require("./admin/routes/forumSubCategoryRouters");
 const treasuryChartRouter = require("./routes/treasuryChartRouters");
+const userAirdropRouter = require("./routes/userAirdropRouters");
 
 const schedular = require("./cron/schedular");
-
+const analysticsData = require("./cron/analystics");
+const mobileAppGA4Data = require("./admin/routes/googleAnalyticsDataRouters");
 const allowedOrigins = [
   "https://rwa.guide",
   "http://localhost:3000",
@@ -79,6 +81,8 @@ app.use("/api/forum-category", forumCategoryRouter);
 app.use("/api/forum", forumRouter);
 app.use("/api/forum/comment", forumCommentRouter);
 app.use("/api/portfolio", treasuryChartRouter);
+app.use("/api/mobileapp/googleAnalytics", mobileAppGA4Data);
+app.use("/api/airdrops", userAirdropRouter);
 
 app.use("/api/admin/users", adminUserRouter);
 app.use("/api/admin/news", adminNewsRouter);
@@ -101,5 +105,6 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
     console.log(`Listening on port ${PORT}`);
     console.log("Database connection established");
     schedular();
+    analysticsData();
   });
 });

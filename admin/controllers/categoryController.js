@@ -220,6 +220,7 @@ const getAllCategories = async (req, res) => {
           .sort((a, b) => a.rank - b.rank)
           .slice(0, 3)
           .map((t) => t.image);
+
         return {
           _id: cat._id,
           categoryName: cat.categoryName,

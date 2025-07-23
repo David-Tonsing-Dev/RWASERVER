@@ -11,6 +11,8 @@ const TokenRating = require("../models/tokenRatingModel");
 const Token = require("../models/coinTokenModel");
 const Review = require("../admin/models/reviewModel");
 const { trendingCoin } = require("../helper/trendingCoin");
+const GoogleAnalyticsData = require("../admin/models/googleAnalyticsDataModel");
+const MobileAppAnalyticsData = require("../models/mobileAppAnalyticsDataModel");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&per_page=250&sparkline=true&price_change_percentage=1h,7d";
@@ -689,6 +691,68 @@ const getBlog = async (req, res) => {
   }
 };
 
+// const getNews = async (req, res) => {
+//   try {
+//     let { page = 1, size = 10, filter, sortBy, order } = req.query;
+//     page = parseInt(page);
+//     size = parseInt(size);
+//     sortBy = sortBy || "createdAt";
+//     order =
+//       order?.toLowerCase() === "asc"
+//         ? 1
+//         : order?.toLowerCase() === "desc"
+//         ? -1
+//         : -1;
+//     const sortOptions = { [sortBy]: order };
+
+//     if (!filter || filter === "") {
+//       const getNews = await News.find()
+//         .skip((page - 1) * size)
+//         .limit(size)
+//         .sort(sortOptions);
+
+//       if (!getNews || getNews.length <= 0)
+//         return res
+//           .status(200)
+//           .json({ status: false, message: "No news found" });
+
+//       const total = await News.countDocuments();
+
+//       return res.status(200).json({ status: true, news: getNews, total });
+//     }
+
+//     const getNews = await News.find({
+//       $or: [
+//         { title: { $regex: filter, $options: "i" } },
+//         { subTitle: { $regex: filter, $options: "i" } },
+//         { author: { $regex: filter, $options: "i" } },
+//       ],
+//     })
+//       .skip((page - 1) * size)
+//       .limit(size)
+//       .sort(sortOptions);
+
+//     if (!getNews || getNews.length <= 0)
+//       return res.status(200).json({ status: false, message: "No news found" });
+
+//     const total = await News.countDocuments({
+//       $or: [
+//         { title: { $regex: filter, $options: "i" } },
+//         { subTitle: { $regex: filter, $options: "i" } },
+//         { author: { $regex: filter, $options: "i" } },
+//       ],
+//     });
+
+//     return res.status(200).json({ status: true, news: getNews, total });
+//   } catch (err) {
+//     return res.status(500).json({
+//       status: false,
+//       message: "Something went wrong!",
+//       error: err.message,
+//     });
+//   }
+// };
+
 const getNews = async (req, res) => {
   try {
     let { page = 1, size = 10, filter, sortBy, order } = req.query;
@@ -703,45 +767,54 @@ const getNews = async (req, res) => {
         : -1;
     const sortOptions = { [sortBy]: order };
 
-    if (!filter || filter === "") {
-      const getNews = await News.find()
-        .skip((page - 1) * size)
-        .limit(size)
-        .sort(sortOptions);
+    const filterQuery = filter
+      ? {
+          $or: [
+            { title: { $regex: filter, $options: "i" } },
+            { subTitle: { $regex: filter, $options: "i" } },
+            { author: { $regex: filter, $options: "i" } },
+          ],
+        }
+      : {};
 
-      if (!getNews || getNews.length <= 0)
-        return res
-          .status(200)
-          .json({ status: false, message: "No news found" });
-
-      const total = await News.countDocuments();
-
-      return res.status(200).json({ status: true, news: getNews, total });
-    }
-
-    const getNews = await News.find({
-      $or: [
-        { title: { $regex: filter, options: "i" } },
-        { subTitle: { $regex: filter, options: "i" } },
-        { author: { $regex: filter, options: "i" } },
-      ],
-    })
+    const getNews = await News.find(filterQuery)
       .skip((page - 1) * size)
       .limit(size)
       .sort(sortOptions);
 
-    if (!getNews || getNews.length <= 0)
+    if (!getNews || getNews.length === 0) {
       return res.status(200).json({ status: false, message: "No news found" });
+    }
 
-    const total = await News.countDocuments({
-      $or: [
-        { title: { $regex: filter, options: "i" } },
-        { subTitle: { $regex: filter, options: "i" } },
-        { author: { $regex: filter, options: "i" } },
-      ],
-    });
+    const total = await News.countDocuments(filterQuery);
 
-    return res.status(200).json({ status: true, news: getNews, total });
+    const enrichedNews = [];
+
+    for (const news of getNews) {
+      const pagePath = `/newsdetails/${news.slug}`;
+
+      const webDoc = await GoogleAnalyticsData.findOne({
+        "pages.pagePath": pagePath,
+      });
+      const mobileDoc = await MobileAppAnalyticsData.findOne({
+        "pages.pagePath": pagePath,
+      });
+
+      const webPageData = webDoc?.pages?.find((p) => p.pagePath === pagePath);
+      const mobilePageData = mobileDoc?.pages?.find(
+        (p) => p.pagePath === pagePath
+      );
+
+      const webViews = parseInt(webPageData?.screenPageViews || 0);
+      const mobileViews = parseInt(mobilePageData?.screenPageViews || 0);
+
+      enrichedNews.push({
+        ...news._doc,
+        views: webViews + mobileViews,
+      });
+    }
+
+    return res.status(200).json({ status: true, news: enrichedNews, total });
   } catch (err) {
     return res.status(500).json({
       status: false,
