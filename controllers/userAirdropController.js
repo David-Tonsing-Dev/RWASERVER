@@ -2,8 +2,7 @@ const Airdrop = require("../admin/models/airdropModel");
 
 const getUserAirdrops = async (req, res) => {
   try {
-    let { page, size, filter, sortBy, order } = req.query;
-
+    let { page = 1, size = 10, filter, sortBy, order } = req.query;
     page = parseInt(page);
     size = parseInt(size);
 
