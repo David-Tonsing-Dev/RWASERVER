@@ -217,7 +217,6 @@ const getAllCategories = async (req, res) => {
           validTokens.length > 0 ? totalPercentage / validTokens.length : 0;
 
         const topTokens = tokens
-          // .filter((t) => t.rank != null)
           .sort((a, b) => a.rank - b.rank)
           .slice(0, 3)
           .map((t) => t.image);
@@ -245,7 +244,6 @@ const getAllCategories = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message: "Categories with token data fetched successfully",
       categories: detailCategories,
     });
   } catch (error) {

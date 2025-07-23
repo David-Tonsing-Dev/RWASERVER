@@ -31,6 +31,7 @@ const profile = require("./admin/routes/userProfileRouters");
 const termRouter = require("./admin/routes/termRouters");
 const categoryRouter = require("./admin/routes/categoryRouters");
 const forumAdminCategoryRouter = require("./admin/routes/forumCategoryRouters");
+const forumAdminSubCategoryRouter = require("./admin/routes/forumSubCategoryRouters");
 const treasuryChartRouter = require("./routes/treasuryChartRouters");
 
 const schedular = require("./cron/schedular");
@@ -95,6 +96,7 @@ app.use("/api/admin/profile", profile);
 app.use("/api/admin/term", termRouter);
 app.use("/api/admin/category", categoryRouter);
 app.use("/api/admin/forum-category", forumAdminCategoryRouter);
+app.use("/api/admin/forum-sub-category", forumAdminSubCategoryRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   server.listen(PORT, async () => {

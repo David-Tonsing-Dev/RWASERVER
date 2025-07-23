@@ -13,7 +13,7 @@ const forumSchema = new mongoose.Schema(
     },
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ForumCategory",
+      ref: "SubForumCategory",
       required: true,
     },
     upvotes: {
