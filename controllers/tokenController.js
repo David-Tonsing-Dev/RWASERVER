@@ -691,6 +691,68 @@ const getBlog = async (req, res) => {
   }
 };
 
+// const getNews = async (req, res) => {
+//   try {
+//     let { page = 1, size = 10, filter, sortBy, order } = req.query;
+//     page = parseInt(page);
+//     size = parseInt(size);
+//     sortBy = sortBy || "createdAt";
+//     order =
+//       order?.toLowerCase() === "asc"
+//         ? 1
+//         : order?.toLowerCase() === "desc"
+//         ? -1
+//         : -1;
+//     const sortOptions = { [sortBy]: order };
+
+//     if (!filter || filter === "") {
+//       const getNews = await News.find()
+//         .skip((page - 1) * size)
+//         .limit(size)
+//         .sort(sortOptions);
+
+//       if (!getNews || getNews.length <= 0)
+//         return res
+//           .status(200)
+//           .json({ status: false, message: "No news found" });
+
+//       const total = await News.countDocuments();
+
+//       return res.status(200).json({ status: true, news: getNews, total });
+//     }
+
+//     const getNews = await News.find({
+//       $or: [
+//         { title: { $regex: filter, $options: "i" } },
+//         { subTitle: { $regex: filter, $options: "i" } },
+//         { author: { $regex: filter, $options: "i" } },
+//       ],
+//     })
+//       .skip((page - 1) * size)
+//       .limit(size)
+//       .sort(sortOptions);
+
+//     if (!getNews || getNews.length <= 0)
+//       return res.status(200).json({ status: false, message: "No news found" });
+
+//     const total = await News.countDocuments({
+//       $or: [
+//         { title: { $regex: filter, $options: "i" } },
+//         { subTitle: { $regex: filter, $options: "i" } },
+//         { author: { $regex: filter, $options: "i" } },
+//       ],
+//     });
+
+//     return res.status(200).json({ status: true, news: getNews, total });
+//   } catch (err) {
+//     return res.status(500).json({
+//       status: false,
+//       message: "Something went wrong!",
+//       error: err.message,
+//     });
+//   }
+// };
+
 const getNews = async (req, res) => {
   try {
     let { page = 1, size = 10, filter, sortBy, order } = req.query;
@@ -705,45 +767,54 @@ const getNews = async (req, res) => {
         : -1;
     const sortOptions = { [sortBy]: order };
 
-    if (!filter || filter === "") {
-      const getNews = await News.find()
-        .skip((page - 1) * size)
-        .limit(size)
-        .sort(sortOptions);
+    const filterQuery = filter
+      ? {
+          $or: [
+            { title: { $regex: filter, $options: "i" } },
+            { subTitle: { $regex: filter, $options: "i" } },
+            { author: { $regex: filter, $options: "i" } },
+          ],
+        }
+      : {};
 
-      if (!getNews || getNews.length <= 0)
-        return res
-          .status(200)
-          .json({ status: false, message: "No news found" });
-
-      const total = await News.countDocuments();
-
-      return res.status(200).json({ status: true, news: getNews, total });
-    }
-
-    const getNews = await News.find({
-      $or: [
-        { title: { $regex: filter, options: "i" } },
-        { subTitle: { $regex: filter, options: "i" } },
-        { author: { $regex: filter, options: "i" } },
-      ],
-    })
+    const getNews = await News.find(filterQuery)
       .skip((page - 1) * size)
       .limit(size)
       .sort(sortOptions);
 
-    if (!getNews || getNews.length <= 0)
+    if (!getNews || getNews.length === 0) {
       return res.status(200).json({ status: false, message: "No news found" });
+    }
 
-    const total = await News.countDocuments({
-      $or: [
-        { title: { $regex: filter, options: "i" } },
-        { subTitle: { $regex: filter, options: "i" } },
-        { author: { $regex: filter, options: "i" } },
-      ],
-    });
+    const total = await News.countDocuments(filterQuery);
 
-    return res.status(200).json({ status: true, news: getNews, total });
+    const enrichedNews = [];
+
+    for (const news of getNews) {
+      const pagePath = `/newsdetails/${news.slug}`;
+
+      const webDoc = await GoogleAnalyticsData.findOne({
+        "pages.pagePath": pagePath,
+      });
+      const mobileDoc = await MobileAppAnalyticsData.findOne({
+        "pages.pagePath": pagePath,
+      });
+
+      const webPageData = webDoc?.pages?.find((p) => p.pagePath === pagePath);
+      const mobilePageData = mobileDoc?.pages?.find(
+        (p) => p.pagePath === pagePath
+      );
+
+      const webViews = parseInt(webPageData?.screenPageViews || 0);
+      const mobileViews = parseInt(mobilePageData?.screenPageViews || 0);
+
+      enrichedNews.push({
+        ...news._doc,
+        views: webViews + mobileViews,
+      });
+    }
+
+    return res.status(200).json({ status: true, news: enrichedNews, total });
   } catch (err) {
     return res.status(500).json({
       status: false,
@@ -753,27 +824,6 @@ const getNews = async (req, res) => {
   }
 };
 
-// const getNewsDetail = async (req, res) => {
-//   try {
-//     const { slug } = req.params;
-
-//     const newsObj = await News.findOne({ slug });
-
-//     if (!newsObj)
-//       return res
-//         .status(400)
-//         .json({ status: false, message: "News doesn't exist!" });
-
-//     return res.status(200).json({ status: true, news: newsObj });
-//   } catch (err) {
-//     return res.status(500).json({
-//       status: false,
-//       message: "Something went wrong!",
-//       error: err.message,
-//     });
-//   }
-// };
-
 const getNewsDetail = async (req, res) => {
   try {
     const { slug } = req.params;
@@ -781,36 +831,11 @@ const getNewsDetail = async (req, res) => {
     const newsObj = await News.findOne({ slug });
 
     if (!newsObj)
-      return res.status(400).json({
-        status: false,
-        message: "News doesn't exist!",
-      });
+      return res
+        .status(400)
+        .json({ status: false, message: "News doesn't exist!" });
 
-    const pagePath = `/newsdetails/${slug}`;
-    const webanalyticsDoc = await GoogleAnalyticsData.findOne({
-      "pages.pagePath": pagePath,
-    });
-    const mobileAnalyticsDoc = await MobileAppAnalyticsData.findOne({
-      "pages.pagePath": pagePath,
-    });
-
-    const webPageData = webanalyticsDoc?.pages?.find(
-      (p) => p.pagePath === pagePath
-    );
-    const mobilePageData = mobileAnalyticsDoc?.pages?.find(
-      (p) => p.pagePath === pagePath
-    );
-
-    const webScreenPageViews = webPageData?.screenPageViews || 0;
-    const mobileScreenPageViews = mobilePageData?.screenPageViews || 0;
-
-    const totalviews = webScreenPageViews + mobileScreenPageViews;
-
-    return res.status(200).json({
-      status: true,
-      news: newsObj,
-      views: totalviews,
-    });
+    return res.status(200).json({ status: true, news: newsObj });
   } catch (err) {
     return res.status(500).json({
       status: false,
