@@ -221,6 +221,7 @@ const getFavoriteCoin = async (req, res) => {
       .status(200)
       .json({ status: true, watchList, total: userCoins.favCoin.length });
   } catch (err) {
+    console.log(err.message, "watchlist error======================>");
     return res
       .status(500)
       .json({ status: 500, message: "Internal server error!" });
