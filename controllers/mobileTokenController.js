@@ -174,7 +174,7 @@ const getFavoriteCoin = async (req, res) => {
   const userId = req.userId;
   page = parseInt(page);
   size = parseInt(size);
-
+  console.log("-----------------------------------");
   try {
     if (!userId)
       return res
@@ -209,8 +209,12 @@ const getFavoriteCoin = async (req, res) => {
 
     let userCoins = await UserCoin.findOne({ userId });
 
+    if (!userCoins) {
+      return res.status(200).json({ status: true, watchList: [], total: 0 });
+    }
+
     const filteredUserCoins = coingeckoToken.filter((item) =>
-      userCoins.favCoin.includes(item.id)
+      userCoins?.favCoin.includes(item.id)
     );
 
     const startIndex = (page - 1) * size;
