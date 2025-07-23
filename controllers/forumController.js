@@ -384,7 +384,7 @@ const getForumByUser = async (req, res) => {
 
 const reactToForum = async (req, res) => {
   try {
-    let { categoryId, forumId, emoji } = req.body;
+    let { categoryId, subCategoryId, forumId, emoji } = req.body;
     const userId = req.userId;
     emoji = emoji ? normalizeEmoji(emoji) : "";
 
@@ -404,12 +404,19 @@ const reactToForum = async (req, res) => {
         $inc: { [`reactions.${newEmoji}`]: 1 },
       });
 
-      io.to(categoryId).emit("reactToForum", {
+      const socketResponse = {
+        subCategoryId,
         forumId,
         userId,
         emoji: "👍",
         action: "Added",
-      });
+      };
+
+      io.to(categoryId).emit("reactToForumForSubCategoryPage");
+
+      io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
+
+      io.to(forumId).emit("reactToForumForDetailPage", socketResponse);
 
       return res
         .status(201)
@@ -430,12 +437,22 @@ const reactToForum = async (req, res) => {
           { $unset: { [`reactions.${removedEmoji}`]: "" } }
         );
 
-        io.to(categoryId).emit("reactToForum", {
+        const socketResponse = {
+          subCategoryId,
           forumId,
           userId,
           emoji: "👍",
           action: "Remove",
-        });
+        };
+
+        io.to(categoryId).emit(
+          "reactToForumForSubCategoryPage",
+          socketResponse
+        );
+
+        io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
+
+        io.to(forumId).emit("reactToForumForDetailPage", socketResponse);
 
         return res
           .status(200)
@@ -458,13 +475,23 @@ const reactToForum = async (req, res) => {
           { $unset: { [`reactions.${oldEmoji}`]: "" } }
         );
 
-        io.to(categoryId).emit("reactToForum", {
+        const socketResponse = {
+          subCategoryId,
           forumId,
           userId,
           emoji: "👍",
           oldEmoji: "👎",
           action: "Updated",
-        });
+        };
+
+        io.to(categoryId).emit(
+          "reactToForumForSubCategoryPage",
+          socketResponse
+        );
+
+        io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
+
+        io.to(forumId).emit("reactToForumForDetailPage", socketResponse);
 
         return res.status(201).json({
           status: true,
@@ -483,7 +510,7 @@ const reactToForum = async (req, res) => {
 
 const reactToForumDislike = async (req, res) => {
   try {
-    let { categoryId, forumId, emoji } = req.body;
+    let { categoryId, subCategoryId, forumId, emoji } = req.body;
     const userId = req.userId;
     emoji = normalizeEmoji(emoji);
 
@@ -503,12 +530,25 @@ const reactToForumDislike = async (req, res) => {
         $inc: { [`reactions.${newEmoji}`]: 1 },
       });
 
-      io.to(categoryId).emit("reactToForumDislike", {
+      const socketResponse = {
+        subCategoryId,
         forumId,
         userId,
         emoji: "👎",
         action: "Added",
-      });
+      };
+
+      io.to(categoryId).emit(
+        "reactToForumDislikeForSubCategoryPage",
+        socketResponse
+      );
+
+      io.to(subCategoryId).emit(
+        "reactToForumDislikeForForumPage",
+        socketResponse
+      );
+
+      io.to(forumId).emit("reactToForumDislikeForDetailPage", socketResponse);
 
       return res
         .status(201)
@@ -529,12 +569,25 @@ const reactToForumDislike = async (req, res) => {
           { $unset: { [`reactions.${removedEmoji}`]: "" } }
         );
 
-        io.to(categoryId).emit("reactToForumDislike", {
+        const socketResponse = {
+          subCategoryId,
           forumId,
           userId,
           emoji: "👎",
           action: "Remove",
-        });
+        };
+
+        io.to(categoryId).emit(
+          "reactToForumDislikeForSubCategoryPage",
+          socketResponse
+        );
+
+        io.to(subCategoryId).emit(
+          "reactToForumDislikeForForumPage",
+          socketResponse
+        );
+
+        io.to(forumId).emit("reactToForumDislikeForDetailPage", socketResponse);
 
         return res
           .status(200)
@@ -557,13 +610,26 @@ const reactToForumDislike = async (req, res) => {
           { $unset: { [`reactions.${oldEmoji}`]: "" } }
         );
 
-        io.to(categoryId).emit("reactToForumDislike", {
+        const socketResponse = {
+          subCategoryId,
           forumId,
           userId,
           emoji,
           oldEmoji: "👍",
           action: "Updated",
-        });
+        };
+
+        io.to(categoryId).emit(
+          "reactToForumDislikeForSubCategoryPage",
+          socketResponse
+        );
+
+        io.to(subCategoryId).emit(
+          "reactToForumDislikeForForumPage",
+          socketResponse
+        );
+
+        io.to(forumId).emit("reactToForumDislikeForDetailPage", socketResponse);
 
         return res.status(201).json({
           status: true,

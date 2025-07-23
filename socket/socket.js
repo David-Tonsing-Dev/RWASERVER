@@ -22,6 +22,16 @@ io.on("connection", (socket) => {
     console.log("User leave category: ", categoryId);
   });
 
+  socket.on("joinSubCategory", ({ subCategoryId }) => {
+    socket.join(subCategoryId);
+    console.log("User joined SubCategory: ", subCategoryId);
+  });
+
+  socket.on("leaveSubCategory", ({ subCategoryId }) => {
+    socket.leave(subCategoryId);
+    console.log("User leave subCategory: ", subCategoryId);
+  });
+
   socket.on("joinForum", ({ forumId }) => {
     console.log("user joining....");
     socket.join(forumId);

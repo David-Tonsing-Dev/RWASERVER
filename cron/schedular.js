@@ -10,7 +10,7 @@ const { fetchTreasuryChart } = require("../helper/fetchTreasuryChart");
 
 const start = async () => {
   try {
-    cron.schedule("*/1 * * * *", async () => {
+    cron.schedule("*/5 * * * *", async () => {
       console.log("Fetching RWA market data...");
       await fetchTreasuryToken();
       await fetchAndStoreRwaData();
