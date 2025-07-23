@@ -61,57 +61,67 @@ const addForumSubCategory = async (req, res) => {
 
 const getForumSubCategory = async (req, res) => {
   try {
-    const { filter, category } = req.query;
+    const { category } = req.query;
 
-    if (!mongoose.Types.ObjectId.isValid(category)) {
-      return res.status(400).json({ message: "Invalid categoryId" });
+    if (category && !mongoose.Types.ObjectId.isValid(category)) {
+      return res.status(400).json({ error: "Invalid  categoryId" });
     }
 
-    if (!category)
-      return res
-        .status(400)
-        .json({ status: false, message: "Category is required" });
-    let filters = {};
-    if (filter) filters.name = { $regex: filter, $options: "i" };
-    if (category) filters.categoryId = category;
+    const filter = {};
+    if (category) filter.categoryId = category;
 
-    const subCategories = await ForumSubCategory.find(filters).sort({
-      updatedAt: -1,
-    });
+    const subCategories = await ForumSubCategory.find(filter);
 
-    const stats = await Forum.aggregate([
+    const subCategoryIds = subCategories.map((cat) => cat._id);
+
+    const forumStats = await Forum.aggregate([
       {
         $match: {
-          categoryId: mongoose.Types.ObjectId.createFromHexString(category),
+          categoryId: { $in: subCategoryIds },
         },
       },
       {
         $group: {
-          _id: null,
-          totalCommentsCount: { $sum: "$commentsCount" },
-          totalLikes: { $sum: { $ifNull: ["$reactions.👍", 0] } },
-          totalDislikes: { $sum: { $ifNull: ["$reactions.👎", 0] } },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          totalCommentsCount: 1,
-          totalLikes: 1,
-          totalDislikes: 1,
+          _id: "$categoryId",
+          totalComments: { $sum: "$commentsCount" },
+          totalLikes: {
+            $sum: {
+              $ifNull: [{ $getField: { field: "👍", input: "$reactions" } }, 0],
+            },
+          },
+          totalDislikes: {
+            $sum: {
+              $ifNull: [{ $getField: { field: "👎", input: "$reactions" } }, 0],
+            },
+          },
         },
       },
     ]);
 
-    return res
-      .status(200)
-      .json({
-        status: true,
-        subCategories,
-        totalCommentsCount: stats[0].totalCommentsCount,
-        totalLikes: stats[0].totalLikes,
-        totalDislikes: stats[0].totalDislikes,
-      });
+    const statsMap = {};
+    forumStats.forEach((stat) => {
+      statsMap[stat._id.toString()] = {
+        totalComments: stat.totalComments,
+        totalLikes: stat.totalLikes,
+        totalDislikes: stat.totalDislikes,
+      };
+    });
+
+    // Step 5: Combine stats with subcategories
+    const result = subCategories.map((category) => {
+      const stats = statsMap[category._id.toString()] || {
+        totalComments: 0,
+        totalLikes: 0,
+        totalDislikes: 0,
+      };
+
+      return {
+        ...category.toObject(),
+        ...stats,
+      };
+    });
+
+    return res.status(200).json(result);
   } catch (err) {
     return res
       .status(500)
