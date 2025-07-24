@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const ForumCategory = require("../models/forumCategoryModel");
+const ForumSubCategory = require("../models/forumSubCategoryModel");
 const { SUPERADMIN } = require("../../constant/role");
 const cloudinary = require("../../config/cloudinary");
 
@@ -57,14 +58,91 @@ const addForumCategory = async (req, res) => {
 
 const getForumCategory = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { categoryName, subCategoryName } = req.query;
 
     let filter = {};
-    if (category) filter.name = { $regex: category, $options: "i" };
+    let subFilter = {};
+    if (categoryName) filter.name = { $regex: categoryName, $options: "i" };
+
+    if (subCategoryName)
+      subFilter.name = { $regex: subCategoryName, $options: "i" };
+
+    let allCategories, subCategories;
+
+    if (categoryName && subCategoryName) {
+      const categories = await ForumCategory.find(filter).sort({
+        updatedAt: -1,
+      });
+
+      if (!categories)
+        return res
+          .status(400)
+          .json({ status: false, message: "Could not fetch category name" });
+
+      allCategories = await Promise.all(
+        categories.map(async (data) => {
+          const subCategories = await ForumSubCategory.find({
+            categoryId: data._id,
+          }).sort({ updatedAt: -1 });
+          return {
+            ...data.toObject(),
+            subCategories,
+          };
+        })
+      );
+
+      subCategories = await ForumSubCategory.find(subFilter).sort({
+        updatedAt: -1,
+      });
+
+      if (!allCategories)
+        return res
+          .status(400)
+          .json({ status: false, message: "Could not fetch sub-category" });
+
+      return res
+        .status(200)
+        .json({ status: true, allCategories, subCategories });
+    }
+
+    if (subCategoryName) {
+      subCategories = await ForumSubCategory.find(subFilter).sort({
+        updatedAt: -1,
+      });
+
+      if (!subCategories)
+        return res
+          .status(400)
+          .json({ status: false, message: "Could not fetch sub-category" });
+
+      return res
+        .status(200)
+        .json({ status: true, allCategories, subCategories });
+    }
 
     const categories = await ForumCategory.find(filter).sort({ updatedAt: -1 });
 
-    return res.status(200).json({ status: true, categories });
+    console.log("categories", categories);
+    console.log("filter", filter);
+
+    if (!categories)
+      return res
+        .status(400)
+        .json({ status: false, message: "Could not fetch category" });
+
+    allCategories = await Promise.all(
+      categories.map(async (data) => {
+        const subCategories = await ForumSubCategory.find({
+          categoryId: data._id,
+        }).sort({ updatedAt: -1 });
+        return {
+          ...data.toObject(),
+          subCategories,
+        };
+      })
+    );
+
+    return res.status(200).json({ status: true, allCategories, subCategories });
   } catch (err) {
     return res
       .status(500)

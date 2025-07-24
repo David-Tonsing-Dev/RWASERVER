@@ -7,7 +7,14 @@ const hotForumTopicsService = require("../services/hotForumTopicsService");
 
 const addComment = async (req, res) => {
   try {
-    const { categoryId, forumId, text, username, quotedCommentId } = req.body;
+    const {
+      categoryId,
+      subCategoryId,
+      forumId,
+      text,
+      username,
+      quotedCommentId,
+    } = req.body;
     const userId = req.userId;
 
     if (!userId)
@@ -31,7 +38,12 @@ const addComment = async (req, res) => {
 
     await Forum.findByIdAndUpdate(forumId, { $inc: { commentsCount: 1 } });
 
-    io.to(categoryId).emit("commentAdded", {
+    io.to(categoryId).emit("commentAddedForSubCategoryPage", {
+      subCategoryId,
+      action: "ADD",
+    });
+
+    io.to(subCategoryId).emit("commentAddedForForumPage", {
       forumId,
       action: "ADD",
     });
