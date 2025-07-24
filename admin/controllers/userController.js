@@ -181,9 +181,9 @@ const adminSignUpBySuperAdmin = async (req, res) => {
 
     nodemailerMailgun.sendMail(
       {
-        from: "super_admin@rwacamp.com",
+        from: "super_admin@rwapros.com",
         to: [email],
-        subject: "Appointment Notice: Admin for Condo-RWA Hedge Fund",
+        subject: "Appointment Notice: Admin for RWA Pros LLC",
         html: `<head>
     <meta charset="UTF-8" />
     <title>Login Details</title>
@@ -243,15 +243,15 @@ const adminSignUpBySuperAdmin = async (req, res) => {
 
      <p style="margin: 20px 0; font-size: 16px; color: #333;">
   You can now log in using the credentials above. <br/> Please navigate to
-  <a href="https://rwahedgefund.netlify.app/adminlogin" style="color: #0f1132; text-decoration: none; font-weight: bold;">
+  <a href="https://rwapros.com/adminlogin" style="color: #0f1132; text-decoration: none; font-weight: bold;">
     Admin Login
   </a>
   to access your dashboard.
 </p>
-        <p>Best regards,<br />Condo Team</p>
+        <p>Best regards,<br />RWA Pros Team</p>
       </div>
       <div class="footer">
-        © 2025 Condo-RWAHedgefund. All rights reserved.
+        © 2025 RWA Pros LLC All rights reserved.
       </div>
     </div>
   </body>
@@ -323,9 +323,9 @@ const reviewerSignUpBySuperAdmin = async (req, res) => {
 
     nodemailerMailgun.sendMail(
       {
-        from: "super_admin@rwacamp.com",
+        from: "super_admin@rwapros.com",
         to: [email],
-        subject: "Appointment Notice: Reviewer for Condo-RWA Hedge Fund",
+        subject: "Appointment Notice: Reviewer for RWA Pros LLC",
         html: `<head>
     <meta charset="UTF-8" />
     <title>Login Details</title>
@@ -385,15 +385,15 @@ const reviewerSignUpBySuperAdmin = async (req, res) => {
 
      <p style="margin: 20px 0; font-size: 16px; color: #333;">
   You can now log in using the credentials above. <br/> Please navigate to
-  <a href="https://rwahedgefund.netlify.app/adminlogin" style="color: #0f1132; text-decoration: none; font-weight: bold;">
+  <a href="https://rwapros.com/adminlogin" style="color: #0f1132; text-decoration: none; font-weight: bold;">
     Reviewer Login
   </a>
   to access your dashboard.
 </p>
-        <p>Best regards,<br />Condo Team</p>
+        <p>Best regards,<br />RWA Pros Team</p>
       </div>
       <div class="footer">
-        © 2025 Condo-RWAHedgefund. All rights reserved.
+        © 2025 RWA Pros LLC All rights reserved.
       </div>
     </div>
   </body>
@@ -443,14 +443,76 @@ const adminForgotPassword = async (req, res) => {
 
     nodemailerMailgun.sendMail(
       {
-        from: "service@rwacamp.com",
+        from: "service@rwapros.com",
         to: [email],
-        subject: "Reset password",
-        html: `<p>Hey there,</p>
-  <p>Click on the button below to reset your password </p>
-  <a href="${resetLink}"><button>Reset Password</button></a>
+        subject: "Reset Your Password – RWA Pros LLC",
+        html: `<head>
+    <meta charset="UTF-8" />
+    <title>Reset Password</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        max-width: 600px;
+        margin: 30px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .header {
+        background-color: #0f1132;
+        color: #ffffff;
+        padding: 20px;
+        text-align: center;
+        font-size: 24px;
+      }
+      .content {
+        padding: 30px;
+        font-size: 16px;
+        color: #333333;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        margin-top: 10px;
+        font-size: 16px;
+        color: #ffffff;
+        background-color: #0f1132;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+      }
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #999999;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Password Reset Request</div>
+      <div class="content">
+        <p>Hi there,</p>
+        <p>We received a request to reset your password. Click the button below to proceed:</p>
+        <a href="${resetLink}" class="button">Reset Password</a>
+        <p>If you didn't request a password reset, please ignore this email or contact our support team at <a href="mailto:admin@rwapros.com">admin@rwapros.com</a>.</p>
+        <p>Best regards,<br />RWA Pros Team</p>
+      </div>
+      <div class="footer">
+        © 2025 RWA Pros LLC. All rights reserved.
+      </div>
+    </div>
+  </body>
   `,
       },
+
       function (err, info) {
         if (err) {
           console.log("Error: " + err);

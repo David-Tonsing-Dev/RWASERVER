@@ -60,24 +60,170 @@ const signup = async (req, res) => {
     const nodemailerMailgun = nodemailer.createTransport(mg(auth));
 
     nodemailerMailgun.sendMail(
+      //       {
+      //         from: "service@rwapros.com",
+      //         to: [email],
+      //         subject: "Email Confirmation – RWA Pros LLC",
+      //         html: `<head>
+      //     <meta charset="UTF-8" />
+      //     <title>Email Confirmation</title>
+      //     <style>
+      //       body {
+      //         margin: 0;
+      //         padding: 0;
+      //         background-color: #f5f5f5;
+      //         font-family: Arial, sans-serif;
+      //       }
+      //       .container {
+      //         max-width: 600px;
+      //         margin: 30px auto;
+      //         background-color: #ffffff;
+      //         border-radius: 8px;
+      //         overflow: hidden;
+      //         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      //       }
+      //       .header {
+      //         background-color: #0f1132;
+      //         color: #ffffff;
+      //         padding: 20px;
+      //         text-align: center;
+      //         font-size: 24px;
+      //       }
+      //       .content {
+      //         padding: 30px;
+      //         font-size: 16px;
+      //         color: #333333;
+      //       }
+      //       .button {
+      //         display: inline-block;
+      //         padding: 12px 24px;
+      //         margin-top: 20px;
+      //         font-size: 16px;
+      //         color: #ffffff;
+      //         background-color: #0f1132;
+      //         border: none;
+      //         border-radius: 6px;
+      //         text-decoration: none;
+      //       }
+      //       .footer {
+      //         text-align: center;
+      //         font-size: 12px;
+      //         color: #999999;
+      //         padding: 20px;
+      //       }
+      //     </style>
+      //   </head>
+      //   <body>
+      //     <div class="container">
+      //       <div class="header">Confirm Your Email</div>
+      //       <div class="content">
+      //         <p>Dear ${userName},</p>
+      //         <p>Welcome to RWA Pros! Please confirm your email address to activate your account.</p>
+
+      //         <p style="text-align: center;">
+      //           <a href="${verificationLink}" class="button">Confirm Email</a>
+      //         </p>
+
+      // <p>If you did not sign up for this account, please ignore this email or contact our support team at <a href="mailto:admin@rwapros.com">admin@rwapros.com</a>.</p>
+
+      //         <p>Best regards,<br />RWA Pros Team</p>
+      //       </div>
+      //       <div class="footer">
+      //         © 2025 RWA Pros LLC. All rights reserved.
+      //       </div>
+      //     </div>
+      //   </body>
+      //   `,
+      //       },
       {
-        from: "admin@rwacamp.com",
+        from: "service@rwapros.com",
         to: [email],
-        subject: "Hey you, awesome!",
-        html: `<p>Dear ${userName}  </p>
-<p style="margin: 0; text-align: center; padding-bottom:20px">Tap the button below to confirm your email address.</p>
-
-<p style="margin:auto;text-align:center">
+        subject: "Email Confirmation – RWA Pros LLC",
+        html: `
  
+  <head>
+    <meta charset="UTF-8" />
+    <title>Email Confirmation</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        max-width: 600px;
+        margin: 30px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .header {
+        background-color: #0f1132;
+        color: #ffffff;
+        padding: 20px;
+        text-align: center;
+        font-size: 24px;
+      }
+      .content {
+        padding: 30px;
+        font-size: 16px;
+        color: #333333;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        margin-top: 20px;
+        font-size: 16px;
+        color: #ffffff;
+        background-color: #0f1132;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+      }
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #999999;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Confirm Your Email</div>
+      <div class="content">
+        <p>Dear ${userName},</p>
+        <p>Welcome to <strong>RWA Pros</strong>! Please confirm your email address to activate your account and start your journey into real-world asset investing.</p>
 
-<a href="${verificationLink}">
- <button style="padding:5px 10px;" >
-   Confirm
-  </button>
-  </a></p>
-<p style="border-radius: 6px;" align="center">&nbsp;</p>
-<p>&nbsp;</p>
-`,
+      <p style="text-align: center; margin: 30px 0;">
+  <a href="${verificationLink}"
+     style="display: inline-block;
+            padding: 12px 24px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #0f1132;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;">
+    Confirm Email
+  </a>
+</p>
+
+
+        <p>If you did not sign up for this account, please ignore this email or contact our support team at 
+        <a href="mailto:admin@rwapros.com" style="color: #0f1132; text-decoration: none;">admin@rwapros.com</a>.</p>
+
+        <p>Best regards,<br/>The RWA Pros Team</p>
+      </div>
+      <div class="footer">
+        © 2025 RWA Pros LLC. All rights reserved.
+      </div>
+    </div>
+  </body>
+
+  `,
       },
       function (err, info) {
         if (err) {
@@ -285,14 +431,79 @@ const forgotPassword = async (req, res) => {
 
     nodemailerMailgun.sendMail(
       {
-        from: "service@rwacamp.com",
+        from: "service@rwapros.com",
         to: [email],
-        subject: "Reset password",
-        html: `<p>Hey there,</p>
-  <p>Click on the button below to reset your password </p>
-  <a href="${resetLink}"><button>Reset Password</button></a>
+        subject: "Reset Your Password – RWA Pros LLC",
+        html: `<head>
+    <meta charset="UTF-8" />
+    <title>Password Reset</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        max-width: 600px;
+        margin: 30px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .header {
+        background-color: #0f1132;
+        color: #ffffff;
+        padding: 20px;
+        text-align: center;
+        font-size: 24px;
+      }
+      .content {
+        padding: 30px;
+        font-size: 16px;
+        color: #333333;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        margin-top: 20px;
+        font-size: 16px;
+        color: #ffffff;
+        background-color: #0f1132;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+      }
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #999999;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Reset Your Password</div>
+      <div class="content">
+        <p>Hi there,</p>
+        <p>We received a request to reset your password. Please click the button below to continue:</p>
+
+        <p style="text-align: center;">
+          <a href="${resetLink}" class="button">Reset Password</a>
+        </p>
+        <p>If you didn't request a password reset, please ignore this email or contact our support team at <a href="mailto:admin@rwapros.com">admin@rwapros.com</a>.</p>
+        <p>Best regards,<br />RWA Pros Team</p>
+      </div>
+      <div class="footer">
+        © 2025 RWA Pros LLC. All rights reserved.
+      </div>
+    </div>
+  </body>
   `,
       },
+
       function (err, info) {
         if (err) {
           console.log("Error: " + err);

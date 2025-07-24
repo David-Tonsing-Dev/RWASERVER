@@ -4,10 +4,10 @@ const {
   storeAllGAData,
 } = require("../admin/controllers/googleAnalyticsDataController");
 
-const startGA4 = async () => {
+const startGA = async () => {
   try {
     cron.schedule("*/1 * * * *", async () => {
-      console.log("Fetching GA4 data...");
+      console.log("Fetching GA data...");
       await fetchMobileAppGA4Data();
       await storeAllGAData();
     });
@@ -18,4 +18,4 @@ const startGA4 = async () => {
   }
 };
 
-module.exports = startGA4;
+module.exports = startGA;
