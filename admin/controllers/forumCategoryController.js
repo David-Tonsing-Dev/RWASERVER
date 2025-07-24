@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const ForumCategory = require("../models/forumCategoryModel");
 const ForumSubCategory = require("../models/forumSubCategoryModel");
+const Forum = require("../../models/forumModel");
 const { SUPERADMIN } = require("../../constant/role");
 const cloudinary = require("../../config/cloudinary");
 
@@ -79,36 +80,57 @@ const getForumCategory = async (req, res) => {
           .status(400)
           .json({ status: false, message: "Could not fetch category name" });
 
-      allCategories = await Promise.all(
-        categories.map(async (data) => {
-          const subCategories = await ForumSubCategory.find({
-            categoryId: data._id,
-          }).sort({ updatedAt: -1 });
+      const allCategories = await Promise.all(
+        categories.map(async (category) => {
+          const subCategoriesWithForums = await Promise.all(
+            (
+              await ForumSubCategory.find({ categoryId: category._id }).sort({
+                updatedAt: -1,
+              })
+            ).map(async (subCategory) => {
+              const forum = await Forum.find({ categoryId: subCategory._id })
+                .sort({ updatedAt: -1 })
+                .limit(3);
+              return {
+                ...subCategory.toObject(),
+                forum,
+              };
+            })
+          );
+
           return {
-            ...data.toObject(),
-            subCategories,
+            ...category.toObject(),
+            subCategories: subCategoriesWithForums,
           };
         })
       );
-
-      subCategories = await ForumSubCategory.find(subFilter).sort({
-        updatedAt: -1,
-      });
 
       if (!allCategories)
         return res
           .status(400)
           .json({ status: false, message: "Could not fetch sub-category" });
 
-      return res
-        .status(200)
-        .json({ status: true, allCategories, subCategories });
-    }
-
-    if (subCategoryName) {
-      subCategories = await ForumSubCategory.find(subFilter).sort({
+      const getSubCategories = await ForumSubCategory.find(subFilter).sort({
         updatedAt: -1,
       });
+
+      if (!getSubCategories)
+        return res
+          .status(400)
+          .json({ status: false, message: "Could not found sub-category" });
+
+      subCategories = await Promise.all(
+        getSubCategories.map(async (data) => {
+          const forum = await Forum.find({ categoryId: data._id })
+            .sort({ updatedAt: -1 })
+            .limit(3)
+            .populate({ path: "userId", select: "userName" });
+          return {
+            ...data.toObject(),
+            forum,
+          };
+        })
+      );
 
       if (!subCategories)
         return res
@@ -120,10 +142,40 @@ const getForumCategory = async (req, res) => {
         .json({ status: true, allCategories, subCategories });
     }
 
-    const categories = await ForumCategory.find(filter).sort({ updatedAt: -1 });
+    if (subCategoryName) {
+      const getSubCategories = await ForumSubCategory.find(subFilter).sort({
+        updatedAt: -1,
+      });
 
-    console.log("categories", categories);
-    console.log("filter", filter);
+      if (!getSubCategories)
+        return res
+          .status(400)
+          .json({ status: false, message: "Could not found sub-category" });
+
+      subCategories = await Promise.all(
+        getSubCategories.map(async (data) => {
+          const forum = await Forum.find({ categoryId: data._id })
+            .sort({ updatedAt: -1 })
+            .limit(3)
+            .populate({ path: "userId", select: "userName" });
+          return {
+            ...data.toObject(),
+            forum,
+          };
+        })
+      );
+
+      if (!subCategories)
+        return res
+          .status(400)
+          .json({ status: false, message: "Could not fetch sub-category" });
+
+      return res
+        .status(200)
+        .json({ status: true, allCategories: [], subCategories });
+    }
+
+    const categories = await ForumCategory.find(filter).sort({ updatedAt: -1 });
 
     if (!categories)
       return res
@@ -131,18 +183,34 @@ const getForumCategory = async (req, res) => {
         .json({ status: false, message: "Could not fetch category" });
 
     allCategories = await Promise.all(
-      categories.map(async (data) => {
-        const subCategories = await ForumSubCategory.find({
-          categoryId: data._id,
-        }).sort({ updatedAt: -1 });
+      categories.map(async (category) => {
+        const subCategoriesWithForums = await Promise.all(
+          (
+            await ForumSubCategory.find({ categoryId: category._id }).sort({
+              updatedAt: -1,
+            })
+          ).map(async (subCategory) => {
+            const forum = await Forum.find({ categoryId: subCategory._id })
+              .sort({ updatedAt: -1 })
+              .limit(3)
+              .populate({ path: "userId", select: "userName" });
+            return {
+              ...subCategory.toObject(),
+              forum,
+            };
+          })
+        );
+
         return {
-          ...data.toObject(),
-          subCategories,
+          ...category.toObject(),
+          subCategories: subCategoriesWithForums,
         };
       })
     );
 
-    return res.status(200).json({ status: true, allCategories, subCategories });
+    return res
+      .status(200)
+      .json({ status: true, allCategories, subCategories: [] });
   } catch (err) {
     return res
       .status(500)
@@ -155,8 +223,6 @@ const updateForumCategory = async (req, res) => {
     const role = req.role;
     const { categoryId } = req.params;
     const { name, description } = req.body;
-
-    console.log("name", name, description, categoryId, req.body);
 
     if (!mongoose.Types.ObjectId.isValid(categoryId))
       return res
@@ -186,7 +252,6 @@ const updateForumCategory = async (req, res) => {
 
     await checkCategory.save();
 
-    console.log("checkCategory", checkCategory);
     return res
       .status(200)
       .json({ status: true, message: "Category updated successfully" });
