@@ -412,7 +412,7 @@ const reactToForum = async (req, res) => {
         action: "Added",
       };
 
-      io.to(categoryId).emit("reactToForumForSubCategoryPage");
+      io.to(categoryId).emit("reactToForumForSubCategoryPage", socketResponse);
 
       io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
 
