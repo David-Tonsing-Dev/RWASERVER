@@ -35,7 +35,7 @@ const createForum = async (req, res) => {
         .json({ status: false, message: "Select sub-category for the forum" });
 
     const checkSubCategory = await ForumSubCategory.findOne({
-      categoryId,
+      _id: categoryId,
     }).populate({ path: "categoryId", select: "name" });
 
     if (!checkSubCategory)
