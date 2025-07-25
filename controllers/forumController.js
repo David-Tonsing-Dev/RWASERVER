@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { QuillDeltaToHtmlConverter } = require("quill-delta-to-html");
 const { io } = require("../socket/socket");
+const ForumSubCategory = require("../admin/models/forumSubCategoryModel");
 const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
 const normalizeEmoji = require("../helper/normalizeEmoji");
@@ -33,6 +34,15 @@ const createForum = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Select sub-category for the forum" });
 
+    const checkSubCategory = await ForumSubCategory.findOne({
+      categoryId,
+    }).populate({ path: "categoryId", select: "name" });
+
+    if (!checkSubCategory)
+      return res
+        .status(404)
+        .json({ status: false, message: "Sub-category not exist" });
+
     const newForum = new Forum({ title, text, categoryId, userId });
 
     await newForum.save();
@@ -41,7 +51,12 @@ const createForum = async (req, res) => {
 
     io.to(categoryId).emit("forumAdded", newForum);
 
-    io.emit("forumCategoryPage", { newForum, action: "ADD" });
+    io.emit("forumCategoryPage", {
+      categoryId: checkSubCategory.categoryId._id,
+      subCategoryId: categoryId,
+      newForum,
+      action: "ADD",
+    });
 
     return res.status(200).json({
       status: true,
