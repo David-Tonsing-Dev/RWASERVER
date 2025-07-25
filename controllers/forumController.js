@@ -412,11 +412,11 @@ const reactToForum = async (req, res) => {
         action: "Added",
       };
 
-      io.to(categoryId).emit("reactToForumForSubCategoryPage", socketResponse);
+      // io.to(categoryId).emit("reactToForum", socketResponse);
 
-      io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
+      io.to(subCategoryId).emit("reactToForum", socketResponse);
 
-      io.to(forumId).emit("reactToForumForDetailPage", socketResponse);
+      io.to(forumId).emit("reactToForum", socketResponse);
 
       return res
         .status(201)
@@ -445,14 +445,14 @@ const reactToForum = async (req, res) => {
           action: "Remove",
         };
 
-        io.to(categoryId).emit(
-          "reactToForumForSubCategoryPage",
-          socketResponse
-        );
+        // io.to(categoryId).emit(
+        //   "reactToForumForSubCategoryPage",
+        //   socketResponse
+        // );
 
-        io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
+        io.to(subCategoryId).emit("reactToForum", socketResponse);
 
-        io.to(forumId).emit("reactToForumForDetailPage", socketResponse);
+        io.to(forumId).emit("reactToForum", socketResponse);
 
         return res
           .status(200)
@@ -484,14 +484,14 @@ const reactToForum = async (req, res) => {
           action: "Updated",
         };
 
-        io.to(categoryId).emit(
-          "reactToForumForSubCategoryPage",
-          socketResponse
-        );
+        // io.to(categoryId).emit(
+        //   "reactToForumForSubCategoryPage",
+        //   socketResponse
+        // );
 
-        io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
+        io.to(subCategoryId).emit("reactToForum", socketResponse);
 
-        io.to(forumId).emit("reactToForumForDetailPage", socketResponse);
+        io.to(forumId).emit("reactToForum", socketResponse);
 
         return res.status(201).json({
           status: true,
@@ -538,17 +538,14 @@ const reactToForumDislike = async (req, res) => {
         action: "Added",
       };
 
-      io.to(categoryId).emit(
-        "reactToForumDislikeForSubCategoryPage",
-        socketResponse
-      );
+      // io.to(categoryId).emit(
+      //   "reactToForumDislikeForSubCategoryPage",
+      //   socketResponse
+      // );
 
-      io.to(subCategoryId).emit(
-        "reactToForumDislikeForForumPage",
-        socketResponse
-      );
+      io.to(subCategoryId).emit("reactToForumDislike", socketResponse);
 
-      io.to(forumId).emit("reactToForumDislikeForDetailPage", socketResponse);
+      io.to(forumId).emit("reactToForumDislike", socketResponse);
 
       return res
         .status(201)
@@ -577,17 +574,14 @@ const reactToForumDislike = async (req, res) => {
           action: "Remove",
         };
 
-        io.to(categoryId).emit(
-          "reactToForumDislikeForSubCategoryPage",
-          socketResponse
-        );
+        // io.to(categoryId).emit(
+        //   "reactToForumDislikeForSubCategoryPage",
+        //   socketResponse
+        // );
 
-        io.to(subCategoryId).emit(
-          "reactToForumDislikeForForumPage",
-          socketResponse
-        );
+        io.to(subCategoryId).emit("reactToForumDislike", socketResponse);
 
-        io.to(forumId).emit("reactToForumDislikeForDetailPage", socketResponse);
+        io.to(forumId).emit("reactToForumDislike", socketResponse);
 
         return res
           .status(200)
@@ -619,17 +613,14 @@ const reactToForumDislike = async (req, res) => {
           action: "Updated",
         };
 
-        io.to(categoryId).emit(
-          "reactToForumDislikeForSubCategoryPage",
-          socketResponse
-        );
+        // io.to(categoryId).emit(
+        //   "reactToForumDislikeForSubCategoryPage",
+        //   socketResponse
+        // );
 
-        io.to(subCategoryId).emit(
-          "reactToForumDislikeForForumPage",
-          socketResponse
-        );
+        io.to(subCategoryId).emit("reactToForumDislike", socketResponse);
 
-        io.to(forumId).emit("reactToForumDislikeForDetailPage", socketResponse);
+        io.to(forumId).emit("reactToForumDislike", socketResponse);
 
         return res.status(201).json({
           status: true,
