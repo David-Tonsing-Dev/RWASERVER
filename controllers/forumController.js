@@ -31,7 +31,7 @@ const createForum = async (req, res) => {
     if (!categoryId)
       return res
         .status(404)
-        .json({ status: false, message: "Select category for the forum" });
+        .json({ status: false, message: "Select sub-category for the forum" });
 
     const newForum = new Forum({ title, text, categoryId, userId });
 
@@ -40,6 +40,8 @@ const createForum = async (req, res) => {
     await newForum.populate({ path: "userId", select: "userName" });
 
     io.to(categoryId).emit("forumAdded", newForum);
+
+    io.emit("forumCategoryPage", { newForum, action: "ADD" });
 
     return res.status(200).json({
       status: true,
