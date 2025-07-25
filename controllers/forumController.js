@@ -9,6 +9,7 @@ const hotForumTopicsService = require("../services/hotForumTopicsService");
 
 const createForum = async (req, res) => {
   try {
+    /// Any changes here change, change for mobile too below controllers (createForumForMobile)
     const userId = req.userId;
 
     const { title, text, categoryId } = req.body;
@@ -97,6 +98,15 @@ const createForumForMobile = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Select category for the forum" });
 
+    const checkSubCategory = await ForumSubCategory.findOne({
+      _id: categoryId,
+    }).populate({ path: "categoryId", select: "name" });
+
+    if (!checkSubCategory)
+      return res
+        .status(404)
+        .json({ status: false, message: "Sub-category not exist" });
+
     const converterText = new QuillDeltaToHtmlConverter(text, {});
     const convertedText = converterText.convert();
 
@@ -112,6 +122,13 @@ const createForumForMobile = async (req, res) => {
     await newForum.populate({ path: "userId", select: "userName" });
 
     io.to(categoryId).emit("forumAdded", newForum);
+
+    io.emit("forumCategoryPage", {
+      categoryId: checkSubCategory.categoryId._id,
+      subCategoryId: categoryId,
+      newForum,
+      action: "ADD",
+    });
 
     return res.status(200).json({
       status: true,
