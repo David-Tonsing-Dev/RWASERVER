@@ -69,7 +69,7 @@ const addComment = async (req, res) => {
     io.emit("commentAddCategoryPage", {
       categoryId,
       subCategoryId,
-      forumId,
+      comment,
     });
 
     return res.status(201).json({ status: true, message: "Comment added" });
