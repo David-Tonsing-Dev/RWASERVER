@@ -1,7 +1,6 @@
 {
   "name": "rwacampserver",
   "version": "1.0.0",
-  "description": "",
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
@@ -33,5 +32,6 @@
     "passport-google-oauth20": "^2.0.0",
     "quill-delta-to-html": "^0.12.1",
     "socket.io": "^4.8.1"
-  }
+  },
+  "description": ""
 }
