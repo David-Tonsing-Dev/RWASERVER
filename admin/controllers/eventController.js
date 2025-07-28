@@ -96,8 +96,26 @@ const createEvent = async (req, res) => {
     if (role !== "SUPERADMIN")
       return res.status(401).json({
         status: false,
-        message: "Only Super admin can access",
+        message: "You are not authorized to perform this action.",
       });
+
+    if (
+      !title ||
+      !country ||
+      !eventLocation ||
+      !startDate ||
+      !endDate ||
+      !eventType ||
+      !eventTag ||
+      !eventLink ||
+      !eventDescription ||
+      !req.file
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "All fields are required to proceed.",
+      });
+    }
 
     const uploadImg = await cloudinary.uploader.upload(req.file.path, {
       use_filename: true,
@@ -160,7 +178,7 @@ const updateEvent = async (req, res) => {
     if (role !== "SUPERADMIN") {
       return res.status(401).json({
         status: false,
-        message: "Only Super admin can access",
+        message: "You are not authorized to perform this action.",
       });
     }
 
@@ -227,7 +245,7 @@ const deleteEvent = async (req, res) => {
     if (role !== "SUPERADMIN") {
       return res.status(401).json({
         status: false,
-        message: "Only Super admin can access",
+        message: "You are not authorized to perform this action.",
       });
     }
     const deletedEvent = await Event.findOneAndDelete({ _id: id });

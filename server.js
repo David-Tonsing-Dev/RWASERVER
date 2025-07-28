@@ -108,7 +108,7 @@ app.use("/api/admin/forum-sub-category", forumAdminSubCategoryRouter);
 app.use("/api/admin/events", eventRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
-  server.listen(PORT, async () => {
+  server.listen(PORT, "192.168.1.8", async () => {
     console.log(`Listening on port ${PORT}`);
     console.log("Database connection established");
     schedular();
