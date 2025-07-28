@@ -109,7 +109,8 @@ const createEvent = async (req, res) => {
         .status(500)
         .json({ status: false, message: "Error in uploading image" });
 
-    const parsedTags = eventTag.split(",").map((tag) => tag.trim());
+    const parsedTags = JSON.parse(eventTag);
+    // const parsedTags = eventTag.split(",").map((tag) => tag.trim());
 
     const newEvent = new Event({
       title,
@@ -163,6 +164,8 @@ const updateEvent = async (req, res) => {
       });
     }
 
+    const parsedTags = JSON.parse(eventTag);
+
     const updatedData = {
       title,
       country,
@@ -170,7 +173,7 @@ const updateEvent = async (req, res) => {
       startDate,
       endDate,
       eventType,
-      eventTag: eventTag?.split(",").map((tag) => tag.trim()),
+      eventTag: parsedTags,
       eventLink,
       eventDescription,
       eventMeetUpLink,
