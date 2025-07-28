@@ -38,12 +38,12 @@ const addComment = async (req, res) => {
 
     await Forum.findByIdAndUpdate(forumId, { $inc: { commentsCount: 1 } });
 
-    io.to(categoryId).emit("commentAddedForSubCategoryPage", {
-      subCategoryId,
-      action: "ADD",
-    });
+    // io.to(categoryId).emit("commentAddedForSubCategoryPage", {
+    //   subCategoryId,
+    //   action: "ADD",
+    // });
 
-    io.to(subCategoryId).emit("commentAddedForForumPage", {
+    io.to(subCategoryId).emit("commentAdded", {
       forumId,
       action: "ADD",
     });
@@ -64,6 +64,11 @@ const addComment = async (req, res) => {
       size: 10,
       hotTopics,
       total,
+    });
+
+    io.emit("commentCategoryPage", {
+      forumId,
+      action: "ADD",
     });
 
     return res.status(201).json({ status: true, message: "Comment added" });

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { QuillDeltaToHtmlConverter } = require("quill-delta-to-html");
 const { io } = require("../socket/socket");
+const ForumSubCategory = require("../admin/models/forumSubCategoryModel");
 const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
 const normalizeEmoji = require("../helper/normalizeEmoji");
@@ -8,6 +9,7 @@ const hotForumTopicsService = require("../services/hotForumTopicsService");
 
 const createForum = async (req, res) => {
   try {
+    /// Any changes here change, change for mobile too below controllers (createForumForMobile)
     const userId = req.userId;
 
     const { title, text, categoryId } = req.body;
@@ -31,7 +33,16 @@ const createForum = async (req, res) => {
     if (!categoryId)
       return res
         .status(404)
-        .json({ status: false, message: "Select category for the forum" });
+        .json({ status: false, message: "Select sub-category for the forum" });
+
+    const checkSubCategory = await ForumSubCategory.findOne({
+      _id: categoryId,
+    }).populate({ path: "categoryId", select: "name" });
+
+    if (!checkSubCategory)
+      return res
+        .status(404)
+        .json({ status: false, message: "Sub-category not exist" });
 
     const newForum = new Forum({ title, text, categoryId, userId });
 
@@ -40,6 +51,13 @@ const createForum = async (req, res) => {
     await newForum.populate({ path: "userId", select: "userName" });
 
     io.to(categoryId).emit("forumAdded", newForum);
+
+    io.emit("forumCategoryPage", {
+      categoryId: checkSubCategory.categoryId._id,
+      subCategoryId: categoryId,
+      newForum,
+      action: "ADD",
+    });
 
     return res.status(200).json({
       status: true,
@@ -80,6 +98,15 @@ const createForumForMobile = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Select category for the forum" });
 
+    const checkSubCategory = await ForumSubCategory.findOne({
+      _id: categoryId,
+    }).populate({ path: "categoryId", select: "name" });
+
+    if (!checkSubCategory)
+      return res
+        .status(404)
+        .json({ status: false, message: "Sub-category not exist" });
+
     const converterText = new QuillDeltaToHtmlConverter(text, {});
     const convertedText = converterText.convert();
 
@@ -95,6 +122,13 @@ const createForumForMobile = async (req, res) => {
     await newForum.populate({ path: "userId", select: "userName" });
 
     io.to(categoryId).emit("forumAdded", newForum);
+
+    io.emit("forumCategoryPage", {
+      categoryId: checkSubCategory.categoryId._id,
+      subCategoryId: categoryId,
+      newForum,
+      action: "ADD",
+    });
 
     return res.status(200).json({
       status: true,
@@ -412,11 +446,11 @@ const reactToForum = async (req, res) => {
         action: "Added",
       };
 
-      io.to(categoryId).emit("reactToForumForSubCategoryPage", socketResponse);
+      // io.to(categoryId).emit("reactToForum", socketResponse);
 
-      io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
+      io.to(subCategoryId).emit("reactToForum", socketResponse);
 
-      io.to(forumId).emit("reactToForumForDetailPage", socketResponse);
+      io.to(forumId).emit("reactToForum", socketResponse);
 
       return res
         .status(201)
@@ -445,14 +479,14 @@ const reactToForum = async (req, res) => {
           action: "Remove",
         };
 
-        io.to(categoryId).emit(
-          "reactToForumForSubCategoryPage",
-          socketResponse
-        );
+        // io.to(categoryId).emit(
+        //   "reactToForumForSubCategoryPage",
+        //   socketResponse
+        // );
 
-        io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
+        io.to(subCategoryId).emit("reactToForum", socketResponse);
 
-        io.to(forumId).emit("reactToForumForDetailPage", socketResponse);
+        io.to(forumId).emit("reactToForum", socketResponse);
 
         return res
           .status(200)
@@ -484,14 +518,14 @@ const reactToForum = async (req, res) => {
           action: "Updated",
         };
 
-        io.to(categoryId).emit(
-          "reactToForumForSubCategoryPage",
-          socketResponse
-        );
+        // io.to(categoryId).emit(
+        //   "reactToForumForSubCategoryPage",
+        //   socketResponse
+        // );
 
-        io.to(subCategoryId).emit("reactToForumForForumPage", socketResponse);
+        io.to(subCategoryId).emit("reactToForum", socketResponse);
 
-        io.to(forumId).emit("reactToForumForDetailPage", socketResponse);
+        io.to(forumId).emit("reactToForum", socketResponse);
 
         return res.status(201).json({
           status: true,
@@ -538,17 +572,14 @@ const reactToForumDislike = async (req, res) => {
         action: "Added",
       };
 
-      io.to(categoryId).emit(
-        "reactToForumDislikeForSubCategoryPage",
-        socketResponse
-      );
+      // io.to(categoryId).emit(
+      //   "reactToForumDislikeForSubCategoryPage",
+      //   socketResponse
+      // );
 
-      io.to(subCategoryId).emit(
-        "reactToForumDislikeForForumPage",
-        socketResponse
-      );
+      io.to(subCategoryId).emit("reactToForumDislike", socketResponse);
 
-      io.to(forumId).emit("reactToForumDislikeForDetailPage", socketResponse);
+      io.to(forumId).emit("reactToForumDislike", socketResponse);
 
       return res
         .status(201)
@@ -577,17 +608,14 @@ const reactToForumDislike = async (req, res) => {
           action: "Remove",
         };
 
-        io.to(categoryId).emit(
-          "reactToForumDislikeForSubCategoryPage",
-          socketResponse
-        );
+        // io.to(categoryId).emit(
+        //   "reactToForumDislikeForSubCategoryPage",
+        //   socketResponse
+        // );
 
-        io.to(subCategoryId).emit(
-          "reactToForumDislikeForForumPage",
-          socketResponse
-        );
+        io.to(subCategoryId).emit("reactToForumDislike", socketResponse);
 
-        io.to(forumId).emit("reactToForumDislikeForDetailPage", socketResponse);
+        io.to(forumId).emit("reactToForumDislike", socketResponse);
 
         return res
           .status(200)
@@ -619,17 +647,14 @@ const reactToForumDislike = async (req, res) => {
           action: "Updated",
         };
 
-        io.to(categoryId).emit(
-          "reactToForumDislikeForSubCategoryPage",
-          socketResponse
-        );
+        // io.to(categoryId).emit(
+        //   "reactToForumDislikeForSubCategoryPage",
+        //   socketResponse
+        // );
 
-        io.to(subCategoryId).emit(
-          "reactToForumDislikeForForumPage",
-          socketResponse
-        );
+        io.to(subCategoryId).emit("reactToForumDislike", socketResponse);
 
-        io.to(forumId).emit("reactToForumDislikeForDetailPage", socketResponse);
+        io.to(forumId).emit("reactToForumDislike", socketResponse);
 
         return res.status(201).json({
           status: true,
