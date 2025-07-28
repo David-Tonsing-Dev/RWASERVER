@@ -24,7 +24,8 @@ const apiCondoMarketData =
 const apiRWACategory =
   "https://pro-api.coingecko.com/api/v3/coins/categories/list?category_id=real-world-assets-rwa&name=Real World Assets (RWA)";
 
-const apiHighLight = "https://pro-api.coingecko.com/api/v3/coins/categories";
+const apiHighLight =
+  "https://pro-api.coingecko.com/api/v3/coins/categories/real-world-assets-rwa";
 
 // const getAllToken = async (req, res) => {
 //   let { category, page = 1, size = 100, sortDirection, sortBy } = req.query;
@@ -524,12 +525,7 @@ const getHighLightData = async (req, res) => {
         message: "Could not fetch highlight data!",
       });
     }
-
-    const highlightItem = highLightData.find(
-      (item) => item.id === "real-world-assets-rwa"
-    );
-
-    const todayVolume = highlightItem.volume_24h;
+    const todayVolume = highLightData.volume_24h;
 
     const yesterdayData = await HighLight.findOne();
     const yesterdayVolume = yesterdayData.volume_24h || 0;
@@ -540,7 +536,7 @@ const getHighLightData = async (req, res) => {
         : 0;
 
     const totalData = {
-      ...highlightItem,
+      ...highLightData,
       volume_24h_change_percentage: Number(volumeChange.toFixed(2)),
     };
 
