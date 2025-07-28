@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const condoTreasuryTokenSchema = new mongoose.Schema(
   {
+    tokenId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     tokenName: {
       type: String,
       required: true,
