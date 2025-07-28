@@ -35,6 +35,26 @@ const polyUrl = process.env.ALCHEMY_POLYGON_URL;
 const AurusXBalance = 25417;
 const formatEther = ethers.utils.formatEther;
 
+// const fetchMarketPrice = async (coinId) => {
+//   try {
+//     const url = `https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinId}`;
+//     const options = {
+//       headers: {
+//         "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+//       },
+//     };
+//     const resp = await axios.get(url, options);
+//     const data = resp.data;
+//     if (Array.isArray(data) && data.length > 0) {
+//       return data[0];
+//     }
+//     throw new Error("Invalid response from CoinGecko");
+//   } catch (err) {
+//     console.error(`Error fetching market price for ${coinId}:`, err.message);
+//     return { current_price: null };
+//   }
+// };
+
 const fetchMarketPrice = async (coinId) => {
   try {
     const url = `https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinId}`;
@@ -48,12 +68,16 @@ const fetchMarketPrice = async (coinId) => {
     if (Array.isArray(data) && data.length > 0) {
       return data[0];
     }
-    throw new Error("Invalid response from CoinGecko");
+
+    throw new Error(
+      `Invalid response from CoinGecko or delisted token: ${coinId}`
+    );
   } catch (err) {
-    console.error(`Error fetching market price for ${coinId}:`, err.message);
-    return { current_price: 0 };
+    console.warn(`Skipped token "${coinId}" due to error:`, err.message);
+    return null;
   }
 };
+
 const fetchIndexCoopPrice = async () => {
   try {
     const resp = await axios.get(
@@ -134,29 +158,33 @@ const fetchTreasuryToken = async () => {
     addressToCheck
   );
   const condoDetails = await fetchMarketPrice("condo");
-  await upsertToken({
-    tokenName: condoDetails.name,
-    tokenImg: condoDetails.image,
-    symbol: condoDetails.symbol,
-    chain: condoDetails.asset_platform_id,
-    tokenBalance: condoBalance,
-    tokenAddress: "",
-    balanceUsd: condoBalance * condoDetails.current_price,
-  });
+  if (condoDetails) {
+    await upsertToken({
+      tokenName: condoDetails.name,
+      tokenImg: condoDetails.image,
+      symbol: condoDetails.symbol,
+      chain: condoDetails.asset_platform_id,
+      tokenBalance: condoBalance,
+      tokenAddress: "",
+      balanceUsd: condoBalance * condoDetails.current_price,
+    });
+  }
 
   // ETH
   const ethRaw = await providerBase.getBalance(addressToCheck);
   const ethBalance = formatEther(ethRaw.toString());
   const ethDetails = await fetchMarketPrice("ethereum");
-  await upsertToken({
-    tokenName: ethDetails.name,
-    tokenImg: ethDetails.image,
-    symbol: ethDetails.symbol,
-    chain: ethDetails.asset_platform_id,
-    tokenBalance: ethBalance,
-    tokenAddress: "",
-    balanceUsd: ethBalance * ethDetails.current_price,
-  });
+  if (ethDetails) {
+    await upsertToken({
+      tokenName: ethDetails.name,
+      tokenImg: ethDetails.image,
+      symbol: ethDetails.symbol,
+      chain: ethDetails.asset_platform_id,
+      tokenBalance: ethBalance,
+      tokenAddress: "",
+      balanceUsd: ethBalance * ethDetails.current_price,
+    });
+  }
 
   // Maple Syrup
   const syrupBalance = await getBalance(
@@ -166,16 +194,17 @@ const fetchTreasuryToken = async () => {
     addressToCheck
   );
   const syrupDetails = await fetchMarketPrice("syrup");
-  await upsertToken({
-    tokenName: syrupDetails.name,
-    tokenImg: syrupDetails.image,
-    symbol: syrupDetails.symbol,
-    chain: syrupDetails.asset_platform_id,
-    tokenBalance: syrupBalance,
-    tokenAddress: "",
-    balanceUsd: syrupBalance * syrupDetails.current_price,
-  });
-
+  if (syrupDetails) {
+    await upsertToken({
+      tokenName: syrupDetails.name,
+      tokenImg: syrupDetails.image,
+      symbol: syrupDetails.symbol,
+      chain: syrupDetails.asset_platform_id,
+      tokenBalance: syrupBalance,
+      tokenAddress: "",
+      balanceUsd: syrupBalance * syrupDetails.current_price,
+    });
+  }
   // Brickken
   const brickkenBalance = await getBalance(
     providerBnb,
@@ -184,15 +213,17 @@ const fetchTreasuryToken = async () => {
     addressToCheck
   );
   const brickkenDetails = await fetchMarketPrice("brickken");
-  await upsertToken({
-    tokenName: brickkenDetails.name,
-    tokenImg: brickkenDetails.image,
-    symbol: brickkenDetails.symbol,
-    chain: brickkenDetails.asset_platform_id,
-    tokenBalance: brickkenBalance,
-    tokenAddress: "",
-    balanceUsd: brickkenBalance * brickkenDetails.current_price,
-  });
+  if (brickkenDetails) {
+    await upsertToken({
+      tokenName: brickkenDetails.name,
+      tokenImg: brickkenDetails.image,
+      symbol: brickkenDetails.symbol,
+      chain: brickkenDetails.asset_platform_id,
+      tokenBalance: brickkenBalance,
+      tokenAddress: "",
+      balanceUsd: brickkenBalance * brickkenDetails.current_price,
+    });
+  }
 
   // Index Coop
   const indexBalance = await getBalance(
@@ -202,16 +233,18 @@ const fetchTreasuryToken = async () => {
     addressToCheck
   );
   const indexUsd = (await fetchIndexCoopPrice()) || 0;
-  await upsertToken({
-    tokenName: "Index Coop Ethereum 2x Index",
-    tokenImg:
-      "https://res.cloudinary.com/dbtsrjssc/image/upload/v1749892058/97f6e4e525d31caad57194baf68ae5a729051273021c0cd972d8ae75b1f64f19_1_rfqlc8.png",
-    symbol: "ETH2X",
-    chain: "",
-    tokenBalance: indexBalance,
-    tokenAddress: "",
-    balanceUsd: indexBalance * indexUsd,
-  });
+  if (indexUsd) {
+    await upsertToken({
+      tokenName: "Index Coop Ethereum 2x Index",
+      tokenImg:
+        "https://res.cloudinary.com/dbtsrjssc/image/upload/v1749892058/97f6e4e525d31caad57194baf68ae5a729051273021c0cd972d8ae75b1f64f19_1_rfqlc8.png",
+      symbol: "ETH2X",
+      chain: "",
+      tokenBalance: indexBalance,
+      tokenAddress: "",
+      balanceUsd: indexBalance * indexUsd,
+    });
+  }
 
   // Dev Condo
   // const devBalance = await getBalance(
@@ -239,27 +272,31 @@ const fetchTreasuryToken = async () => {
     condoPolygonTreasury
   );
   const polyDetails = await fetchMarketPrice("polytrade");
-  await upsertToken({
-    tokenName: polyDetails.name,
-    tokenImg: polyDetails.image,
-    symbol: polyDetails.symbol,
-    chain: polyDetails.asset_platform_id,
-    tokenBalance: polyBalance,
-    tokenAddress: "",
-    balanceUsd: polyBalance * polyDetails.current_price,
-  });
+  if (polyDetails) {
+    await upsertToken({
+      tokenName: polyDetails.name,
+      tokenImg: polyDetails.image,
+      symbol: polyDetails.symbol,
+      chain: polyDetails.asset_platform_id,
+      tokenBalance: polyBalance,
+      tokenAddress: "",
+      balanceUsd: polyBalance * polyDetails.current_price,
+    });
+  }
 
   // AurusX (constant balance)
   const aurusXDetails = await fetchMarketPrice("aurusx");
-  await upsertToken({
-    tokenName: aurusXDetails.name,
-    tokenImg: aurusXDetails.image,
-    symbol: aurusXDetails.symbol,
-    chain: aurusXDetails.asset_platform_id,
-    tokenBalance: AurusXBalance,
-    tokenAddress: "",
-    balanceUsd: AurusXBalance * aurusXDetails.current_price,
-  });
+  if (aurusXDetails) {
+    await upsertToken({
+      tokenName: aurusXDetails.name,
+      tokenImg: aurusXDetails.image,
+      symbol: aurusXDetails.symbol,
+      chain: aurusXDetails.asset_platform_id,
+      tokenBalance: AurusXBalance,
+      tokenAddress: "",
+      balanceUsd: AurusXBalance * aurusXDetails.current_price,
+    });
+  }
 
   //USDC
   const usdcBalance = await getBalance(
@@ -271,15 +308,17 @@ const fetchTreasuryToken = async () => {
   );
 
   const usdcDetails = await fetchMarketPrice("usd-coin");
-  await upsertToken({
-    tokenName: usdcDetails.name,
-    tokenImg: usdcDetails.image,
-    symbol: usdcDetails.symbol,
-    chain: usdcDetails.asset_platform_id,
-    tokenBalance: usdcBalance,
-    tokenAddress: "",
-    balanceUsd: usdcBalance * usdcDetails.current_price,
-  });
+  if (usdcDetails) {
+    await upsertToken({
+      tokenName: usdcDetails.name,
+      tokenImg: usdcDetails.image,
+      symbol: usdcDetails.symbol,
+      chain: usdcDetails.asset_platform_id,
+      tokenBalance: usdcBalance,
+      tokenAddress: "",
+      balanceUsd: usdcBalance * usdcDetails.current_price,
+    });
+  }
 
   console.log("Token balances fetched and saved to DB.");
 };

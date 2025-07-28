@@ -35,9 +35,12 @@ const forumAdminSubCategoryRouter = require("./admin/routes/forumSubCategoryRout
 const treasuryChartRouter = require("./routes/treasuryChartRouters");
 const userAirdropRouter = require("./routes/userAirdropRouters");
 const podcastRouter = require("./routes/podcastRouters");
+const eventRouter = require("./admin/routes/eventRouters");
+const eventDataRouter = require("./routes/eventRouters");
 
 const schedular = require("./cron/schedular");
 const analysticsData = require("./cron/analystics");
+const hightLight = require("./cron/highLight");
 const mobileAppGA4Data = require("./admin/routes/googleAnalyticsDataRouters");
 const allowedOrigins = [
   "https://rwa.guide",
@@ -85,6 +88,7 @@ app.use("/api/portfolio", treasuryChartRouter);
 app.use("/api/mobileapp/googleAnalytics", mobileAppGA4Data);
 app.use("/api/airdrops", userAirdropRouter);
 app.use("/api/podcasts", podcastRouter);
+app.use("/api/events", eventDataRouter);
 
 app.use("/api/admin/users", adminUserRouter);
 app.use("/api/admin/news", adminNewsRouter);
@@ -101,6 +105,7 @@ app.use("/api/admin/term", termRouter);
 app.use("/api/admin/category", categoryRouter);
 app.use("/api/admin/forum-category", forumAdminCategoryRouter);
 app.use("/api/admin/forum-sub-category", forumAdminSubCategoryRouter);
+app.use("/api/admin/events", eventRouter);
 
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   server.listen(PORT, async () => {
@@ -108,5 +113,6 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
     console.log("Database connection established");
     schedular();
     analysticsData();
+    hightLight();
   });
 });
