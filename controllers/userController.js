@@ -58,172 +58,65 @@ const signup = async (req, res) => {
     const verificationLink = `${process.env.CLIENT_URL}/verify/${verificationToken}`;
 
     const nodemailerMailgun = nodemailer.createTransport(mg(auth));
+    const htmlContent = `
+<body style="margin: 0; padding: 0;  font-family: Arial, sans-serif;     box-shadow: 0 0 3px #b8cbe9b7;
+">
+  <div style="max-width: 600px; margin: 30px auto; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+
+    <!-- Header -->
+    <div style="background-color: #000000; padding: 30px 20px 20px; text-align: center;">
+      <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753419169/Group_8866_an1zkz.png" alt="RWA Pros Logo" style="max-height: 40px; display: block; margin: 0 auto 20px;" />
+      <h1 style="color: #ffffff; font-size: 24px; margin: 0;">Verify Your Email Address</h1>
+    </div>
+
+    <!-- Content -->
+    <div style="padding: 30px; color: #000000; font-size: 16px; line-height: 1.5;">
+      <p style="margin: 0 0 16px; color: #000000;">Hi ${userName},</p>
+      <p style="margin: 0 0 20px; color: #000000;">
+        Thank you for signing up with <strong>RWA Pros</strong>! To complete your registration and begin exploring real-world asset opportunities, please confirm your email address below.
+      </p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${verificationLink}" target="_blank" style="background-color: #ebb411; padding: 12px 24px; border-radius: 6px; color: #ffffff; font-weight: bold; font-size: 16px; text-decoration: none;">Confirm Email</a>
+      </div>
+
+<p style="font-size:15px; line-height:1.6; color: #000000;">
+  If you didn’t request this email, you can safely ignore it or contact us at  
+  <a href="mailto:admin@rwapros.com" style="color:#0f1132; text-decoration: underline;">admin@rwapros.com</a>.
+</p>
+      <p style="margin: 0; color: #000000;">Best wishes,<br />The RWA Pros Team</p>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; font-size: 12px; color: #999999; padding: 20px; border-top: 1.5px solid #ebb411; ">
+      <p style="margin: 4px 0;">RWA Pros LLC, Republic of Seychelles</p>
+      <p style="margin: 4px 0;">Email: <a href="mailto:admin@rwapros.com" style="color: #0f1132;  text-decoration: underline;">admin@rwapros.com</a></p>
+
+      <div style="margin: 12px 0;">
+        <a href="https://x.com/RWAPROS" style="margin: 0 6px; text-decoration: none;">
+          <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753445015/ic_baseline-telegram-2_2_vdxodc.png" alt="Twitter" width="30" style="vertical-align: middle;" />
+        </a>
+        <a href="https://t.me/RealWorldAssets2023" style="margin: 0 6px; text-decoration: none;">
+          <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753445015/ic_baseline-telegram-1_2_si1z8o.png" alt="Telegram" width="30" style="vertical-align: middle;" />
+        </a>
+        <a href="https://medium.com" style="margin: 0 6px; text-decoration: none;">
+          <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753445015/ic_baseline-telegram_2_yg8a4g.png" alt="Medium" width="30" style="vertical-align: middle;" />
+        </a>
+      </div>
+
+      <p style="margin: 4px 0;">© 2025 RWA Pros LLC. All rights reserved.</p>
+    </div>
+
+  </div>
+</body>
+`;
 
     nodemailerMailgun.sendMail(
-      //       {
-      //         from: "service@rwapros.com",
-      //         to: [email],
-      //         subject: "Email Confirmation – RWA Pros LLC",
-      //         html: `<head>
-      //     <meta charset="UTF-8" />
-      //     <title>Email Confirmation</title>
-      //     <style>
-      //       body {
-      //         margin: 0;
-      //         padding: 0;
-      //         background-color: #f5f5f5;
-      //         font-family: Arial, sans-serif;
-      //       }
-      //       .container {
-      //         max-width: 600px;
-      //         margin: 30px auto;
-      //         background-color: #ffffff;
-      //         border-radius: 8px;
-      //         overflow: hidden;
-      //         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      //       }
-      //       .header {
-      //         background-color: #0f1132;
-      //         color: #ffffff;
-      //         padding: 20px;
-      //         text-align: center;
-      //         font-size: 24px;
-      //       }
-      //       .content {
-      //         padding: 30px;
-      //         font-size: 16px;
-      //         color: #333333;
-      //       }
-      //       .button {
-      //         display: inline-block;
-      //         padding: 12px 24px;
-      //         margin-top: 20px;
-      //         font-size: 16px;
-      //         color: #ffffff;
-      //         background-color: #0f1132;
-      //         border: none;
-      //         border-radius: 6px;
-      //         text-decoration: none;
-      //       }
-      //       .footer {
-      //         text-align: center;
-      //         font-size: 12px;
-      //         color: #999999;
-      //         padding: 20px;
-      //       }
-      //     </style>
-      //   </head>
-      //   <body>
-      //     <div class="container">
-      //       <div class="header">Confirm Your Email</div>
-      //       <div class="content">
-      //         <p>Dear ${userName},</p>
-      //         <p>Welcome to RWA Pros! Please confirm your email address to activate your account.</p>
-
-      //         <p style="text-align: center;">
-      //           <a href="${verificationLink}" class="button">Confirm Email</a>
-      //         </p>
-
-      // <p>If you did not sign up for this account, please ignore this email or contact our support team at <a href="mailto:admin@rwapros.com">admin@rwapros.com</a>.</p>
-
-      //         <p>Best regards,<br />RWA Pros Team</p>
-      //       </div>
-      //       <div class="footer">
-      //         © 2025 RWA Pros LLC. All rights reserved.
-      //       </div>
-      //     </div>
-      //   </body>
-      //   `,
-      //       },
       {
         from: "service@rwapros.com",
         to: [email],
         subject: "Email Confirmation – RWA Pros LLC",
-        html: `
- 
-  <head>
-    <meta charset="UTF-8" />
-    <title>Email Confirmation</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #f5f5f5;
-        font-family: Arial, sans-serif;
-      }
-      .container {
-        max-width: 600px;
-        margin: 30px auto;
-        background-color: #ffffff;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      }
-      .header {
-        background-color: #0f1132;
-        color: #ffffff;
-        padding: 20px;
-        text-align: center;
-        font-size: 24px;
-      }
-      .content {
-        padding: 30px;
-        font-size: 16px;
-        color: #333333;
-      }
-      .button {
-        display: inline-block;
-        padding: 12px 24px;
-        margin-top: 20px;
-        font-size: 16px;
-        color: #ffffff;
-        background-color: #0f1132;
-        border: none;
-        border-radius: 6px;
-        text-decoration: none;
-      }
-      .footer {
-        text-align: center;
-        font-size: 12px;
-        color: #999999;
-        padding: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">Confirm Your Email</div>
-      <div class="content">
-        <p>Dear ${userName},</p>
-        <p>Welcome to <strong>RWA Pros</strong>! Please confirm your email address to activate your account and start your journey into real-world asset investing.</p>
-
-      <p style="text-align: center; margin: 30px 0;">
-  <a href="${verificationLink}"
-     style="display: inline-block;
-            padding: 12px 24px;
-            font-size: 16px;
-            color: #ffffff;
-            background-color: #0f1132;
-            border-radius: 6px;
-            text-decoration: none;
-            cursor: pointer;">
-    Confirm Email
-  </a>
-</p>
-
-
-        <p>If you did not sign up for this account, please ignore this email or contact our support team at 
-        <a href="mailto:admin@rwapros.com" style="color: #0f1132; text-decoration: none;">admin@rwapros.com</a>.</p>
-
-        <p>Best regards,<br/>The RWA Pros Team</p>
-      </div>
-      <div class="footer">
-        © 2025 RWA Pros LLC. All rights reserved.
-      </div>
-    </div>
-  </body>
-
-  `,
+        html: htmlContent,
       },
       function (err, info) {
         if (err) {
@@ -427,6 +320,61 @@ const forgotPassword = async (req, res) => {
     );
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${verificationToken}`;
 
+    const htmlContent = `
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; box-shadow: 0 0 3px #b8cbe9b7;">
+  <div style="max-width: 600px; margin: 30px auto; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+
+    <!-- Header -->
+    <div style="background-color: #000000; padding: 30px 20px 20px; text-align: center;">
+      <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753419169/Group_8866_an1zkz.png" alt="RWA Pros Logo" style="max-height: 40px; display: block; margin: 0 auto 20px;" />
+      <h1 style="color: #ffffff; font-size: 24px; margin: 0;">Reset Your Password</h1>
+    </div>
+
+    <!-- Content -->
+    <div style="padding: 30px; color: #000000; font-size: 16px; line-height: 1.5;">
+      <p style="margin: 0 0 16px; color: #000000;">Hi ${user.userName},</p>
+      <p style="margin: 0 0 20px; color: #000000;">
+        We received a request to reset your password. Click the button below to create a new password.<br />
+       
+      </p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resetLink}" target="_blank" style="background-color: #ebb411; padding: 12px 24px; border-radius: 6px; color: #ffffff; font-weight: bold; font-size: 16px; text-decoration: none;">Reset Password</a>
+      </div>
+
+      <p style="font-size: 15px; line-height: 1.6; color: #000000;">
+        Need assistance? Reach out to our support team at 
+        <a href="mailto:admin@rwapros.com" style="color: #0f1132; text-decoration: underline;">admin@rwapros.com</a>.
+      </p>
+
+      <p style="margin: 0; color: #000000;">Best regards,<br />The RWA Pros Team</p>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; font-size: 12px; color: #999999; padding: 20px; border-top: 1.5px solid #ebb411;">
+      <p style="margin: 4px 0;">RWA Pros LLC, Republic of Seychelles</p>
+      <p style="margin: 4px 0;">Email: 
+        <a href="mailto:admin@rwapros.com" style="color: #0f1132; text-decoration: underline;">admin@rwapros.com</a>
+      </p>
+
+      <div style="margin: 12px 0;">
+        <a href="https://x.com/RWAPROS" style="margin: 0 6px; text-decoration: none;">
+          <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753445015/ic_baseline-telegram-2_2_vdxodc.png" alt="Twitter" width="30" style="vertical-align: middle;" />
+        </a>
+        <a href="https://t.me/RealWorldAssets2023" style="margin: 0 6px; text-decoration: none;">
+          <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753445015/ic_baseline-telegram-1_2_si1z8o.png" alt="Telegram" width="30" style="vertical-align: middle;" />
+        </a>
+        <a href="https://medium.com" style="margin: 0 6px; text-decoration: none;">
+          <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753445015/ic_baseline-telegram_2_yg8a4g.png" alt="Medium" width="30" style="vertical-align: middle;" />
+        </a>
+      </div>
+
+      <p style="margin: 4px 0;">© 2025 RWA Pros LLC. All rights reserved.</p>
+    </div>
+
+  </div>
+</body>
+`;
     const nodemailerMailgun = nodemailer.createTransport(mg(auth));
 
     nodemailerMailgun.sendMail(
@@ -434,74 +382,7 @@ const forgotPassword = async (req, res) => {
         from: "service@rwapros.com",
         to: [email],
         subject: "Reset Your Password – RWA Pros LLC",
-        html: `<head>
-    <meta charset="UTF-8" />
-    <title>Password Reset</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #f5f5f5;
-        font-family: Arial, sans-serif;
-      }
-      .container {
-        max-width: 600px;
-        margin: 30px auto;
-        background-color: #ffffff;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      }
-      .header {
-        background-color: #0f1132;
-        color: #ffffff;
-        padding: 20px;
-        text-align: center;
-        font-size: 24px;
-      }
-      .content {
-        padding: 30px;
-        font-size: 16px;
-        color: #333333;
-      }
-      .button {
-        display: inline-block;
-        padding: 12px 24px;
-        margin-top: 20px;
-        font-size: 16px;
-        color: #ffffff;
-        background-color: #0f1132;
-        border: none;
-        border-radius: 6px;
-        text-decoration: none;
-      }
-      .footer {
-        text-align: center;
-        font-size: 12px;
-        color: #999999;
-        padding: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">Reset Your Password</div>
-      <div class="content">
-        <p>Hi there,</p>
-        <p>We received a request to reset your password. Please click the button below to continue:</p>
-
-        <p style="text-align: center;">
-          <a href="${resetLink}" class="button">Reset Password</a>
-        </p>
-        <p>If you didn't request a password reset, please ignore this email or contact our support team at <a href="mailto:admin@rwapros.com">admin@rwapros.com</a>.</p>
-        <p>Best regards,<br />RWA Pros Team</p>
-      </div>
-      <div class="footer">
-        © 2025 RWA Pros LLC. All rights reserved.
-      </div>
-    </div>
-  </body>
-  `,
+        html: htmlContent,
       },
 
       function (err, info) {

@@ -13,6 +13,8 @@ const Review = require("../admin/models/reviewModel");
 const { trendingCoin } = require("../helper/trendingCoin");
 const GoogleAnalyticsData = require("../admin/models/googleAnalyticsDataModel");
 const MobileAppAnalyticsData = require("../models/mobileAppAnalyticsDataModel");
+const HighLight = require("../models/highLightModel");
+const fetchHighLightData = require("../helper/fetchAndStoreHighlightData");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&per_page=250&sparkline=true&price_change_percentage=1h,7d";
@@ -22,7 +24,8 @@ const apiCondoMarketData =
 const apiRWACategory =
   "https://pro-api.coingecko.com/api/v3/coins/categories/list?category_id=real-world-assets-rwa&name=Real World Assets (RWA)";
 
-const apiHighLight = "https://pro-api.coingecko.com/api/v3/coins/categories";
+const apiHighLight =
+  "https://pro-api.coingecko.com/api/v3/coins/categories/real-world-assets-rwa";
 
 // const getAllToken = async (req, res) => {
 //   let { category, page = 1, size = 100, sortDirection, sortBy } = req.query;
@@ -190,7 +193,7 @@ const getAllToken = async (req, res) => {
       if (order === "ASC" || order === "asc") order = 1;
       if (order === "DESC" || order === "desc") order = -1;
     }
-    const matchStage = { enable: true };
+    const matchStage = { enable: true, is_active: true };
     if (filter) {
       matchStage.$or = [
         { name: { $regex: filter, $options: "i" } },
@@ -473,6 +476,38 @@ const getCoinDetail = async (req, res) => {
   }
 };
 
+// const getHighLightData = async (req, res) => {
+//   try {
+//     const resp = await axios.get(apiHighLight, {
+//       headers: {
+//         "x-cg-pro-api-key": process.env.COINGECKO_KEY,
+//         "Access-Control-Allow-Origin": "*",
+//       },
+//     });
+
+//     const highLightData = await resp.data;
+
+//     const highlightFilter = highLightData.filter(
+//       (item) => item.id === "real-world-assets-rwa"
+//     );
+
+//     if (!highLightData)
+//       return res
+//         .status(400)
+//         .json({ status: false, message: "Could not fetch hightlight data!" });
+
+//     return res
+//       .status(200)
+//       .json({ status: true, highlightData: highlightFilter[0] });
+//   } catch (err) {
+//     return res.status(500).json({
+//       status: false,
+//       message: "Something went wrong!",
+//       error: err.message,
+//     });
+//   }
+// };
+
 const getHighLightData = async (req, res) => {
   try {
     const resp = await axios.get(apiHighLight, {
@@ -484,18 +519,31 @@ const getHighLightData = async (req, res) => {
 
     const highLightData = await resp.data;
 
-    const highlightFilter = highLightData.filter(
-      (item) => item.id === "real-world-assets-rwa"
-    );
+    if (!highLightData) {
+      return res.status(400).json({
+        status: false,
+        message: "Could not fetch highlight data!",
+      });
+    }
+    const todayVolume = highLightData.volume_24h;
 
-    if (!highLightData)
-      return res
-        .status(400)
-        .json({ status: false, message: "Could not fetch hightlight data!" });
+    const yesterdayData = await HighLight.findOne();
+    const yesterdayVolume = yesterdayData.volume_24h || 0;
 
-    return res
-      .status(200)
-      .json({ status: true, highlightData: highlightFilter[0] });
+    const volumeChange =
+      yesterdayVolume > 0
+        ? ((todayVolume - yesterdayVolume) / yesterdayVolume) * 100
+        : 0;
+
+    const totalData = {
+      ...highLightData,
+      volume_24h_change_percentage: Number(volumeChange.toFixed(2)),
+    };
+
+    return res.status(200).json({
+      status: true,
+      highlightData: totalData,
+    });
   } catch (err) {
     return res.status(500).json({
       status: false,

@@ -6,7 +6,7 @@ const {
 
 const startGA = async () => {
   try {
-    cron.schedule("*/1 * * * *", async () => {
+    cron.schedule("*/3 * * * *", async () => {
       console.log("Fetching GA data...");
       await fetchMobileAppGA4Data();
       await storeAllGAData();
@@ -14,7 +14,7 @@ const startGA = async () => {
 
     console.log("GA CRON job started successfully!");
   } catch (err) {
-    console.error("DB error:", err);
+    console.error("Error:", err);
   }
 };
 
