@@ -450,7 +450,8 @@ const reactToForum = async (req, res) => {
 
       io.to(subCategoryId).emit("reactToForum", socketResponse);
 
-      io.to(forumId).emit("reactToForum", socketResponse);
+      io.to(forumId).emit("reactToForumDetail", socketResponse);
+      io.to(forumId).emit("reactToForum", socketResponse); // For mobile
 
       return res
         .status(201)
@@ -486,7 +487,9 @@ const reactToForum = async (req, res) => {
 
         io.to(subCategoryId).emit("reactToForum", socketResponse);
 
-        io.to(forumId).emit("reactToForum", socketResponse);
+        io.to(forumId).emit("reactToForumDetail", socketResponse);
+
+        io.to(forumId).emit("reactToForum", socketResponse); // for mobile
 
         return res
           .status(200)
@@ -525,7 +528,9 @@ const reactToForum = async (req, res) => {
 
         io.to(subCategoryId).emit("reactToForum", socketResponse);
 
-        io.to(forumId).emit("reactToForum", socketResponse);
+        io.to(forumId).emit("reactToForumDetail", socketResponse);
+
+        io.to(forumId).emit("reactToForum", socketResponse); // for mobile
 
         return res.status(201).json({
           status: true,
@@ -579,7 +584,9 @@ const reactToForumDislike = async (req, res) => {
 
       io.to(subCategoryId).emit("reactToForumDislike", socketResponse);
 
-      io.to(forumId).emit("reactToForumDislike", socketResponse);
+      io.to(forumId).emit("reactToForumDislikeDetail", socketResponse);
+
+      io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
 
       return res
         .status(201)
@@ -615,7 +622,9 @@ const reactToForumDislike = async (req, res) => {
 
         io.to(subCategoryId).emit("reactToForumDislike", socketResponse);
 
-        io.to(forumId).emit("reactToForumDislike", socketResponse);
+        io.to(forumId).emit("reactToForumDislikeDetail", socketResponse);
+
+        io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
 
         return res
           .status(200)
@@ -654,7 +663,9 @@ const reactToForumDislike = async (req, res) => {
 
         io.to(subCategoryId).emit("reactToForumDislike", socketResponse);
 
-        io.to(forumId).emit("reactToForumDislike", socketResponse);
+        io.to(forumId).emit("reactToForumDislikeDetail", socketResponse);
+
+        io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
 
         return res.status(201).json({
           status: true,
