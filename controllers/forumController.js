@@ -4,6 +4,7 @@ const { io } = require("../socket/socket");
 const ForumSubCategory = require("../admin/models/forumSubCategoryModel");
 const Forum = require("../models/forumModel");
 const ForumReaction = require("../models/forumReactionModel");
+const UserStat = require("../models/userStatModel");
 const normalizeEmoji = require("../helper/normalizeEmoji");
 const hotForumTopicsService = require("../services/hotForumTopicsService");
 
@@ -58,6 +59,12 @@ const createForum = async (req, res) => {
       newForum,
       action: "ADD",
     });
+
+    await UserStat.findOneAndUpdate(
+      { userId },
+      { $inc: { totalThreadPosted: 1 } },
+      { upsert: true }
+    );
 
     return res.status(200).json({
       status: true,
@@ -129,6 +136,12 @@ const createForumForMobile = async (req, res) => {
       newForum,
       action: "ADD",
     });
+
+    await UserStat.findOneAndUpdate(
+      { userId },
+      { $inc: { totalThreadPosted: 1 } },
+      { upsert: true }
+    );
 
     return res.status(200).json({
       status: true,
@@ -346,6 +359,13 @@ const deleteForum = async (req, res) => {
         .json({ status: false, message: "Unauthorized to delete this forum" });
 
     await forum.deleteOne();
+
+    await UserStat.findOneAndUpdate(
+      { userId },
+      { $inc: { totalThreadPosted: -1 } },
+      { upsert: true }
+    );
+
     return res.status(200).json({ status: true, message: "Forum deleted" });
   } catch (err) {
     return res.status(500).json({
@@ -453,6 +473,12 @@ const reactToForum = async (req, res) => {
       io.to(forumId).emit("reactToForumDetail", socketResponse);
       io.to(forumId).emit("reactToForum", socketResponse); // For mobile
 
+      await UserStat.findOneAndUpdate(
+        { userId: Forum.userId },
+        { $inc: { totalLikeReceived: 1 } },
+        { upsert: true }
+      );
+
       return res
         .status(201)
         .json({ status: true, message: "Reaction added.", reaction });
@@ -490,6 +516,12 @@ const reactToForum = async (req, res) => {
         io.to(forumId).emit("reactToForumDetail", socketResponse);
 
         io.to(forumId).emit("reactToForum", socketResponse); // for mobile
+
+        await UserStat.findOneAndUpdate(
+          { userId: Forum.userId },
+          { $inc: { totalLikeReceived: -1 } },
+          { upsert: true }
+        );
 
         return res
           .status(200)
@@ -588,6 +620,12 @@ const reactToForumDislike = async (req, res) => {
 
       io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
 
+      await UserStat.findOneAndUpdate(
+        { userId: Forum.userId },
+        { $inc: { totalLikeReceived: 1 } },
+        { upsert: true }
+      );
+
       return res
         .status(201)
         .json({ status: true, message: "Reaction dislike added.", reaction });
@@ -625,6 +663,12 @@ const reactToForumDislike = async (req, res) => {
         io.to(forumId).emit("reactToForumDislikeDetail", socketResponse);
 
         io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
+
+        await UserStat.findOneAndUpdate(
+          { userId: Forum.userId },
+          { $inc: { totalLikeReceived: -1 } },
+          { upsert: true }
+        );
 
         return res
           .status(200)

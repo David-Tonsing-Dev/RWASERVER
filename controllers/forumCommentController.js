@@ -1,6 +1,7 @@
 const Comment = require("../models/forumCommentModel");
 const CommentReaction = require("../models/forumCommentReactionModel");
 const Forum = require("../models/forumModel");
+const UserStat = require("../models/userStatModel");
 const { io } = require("../socket/socket");
 const normalizeEmoji = require("../helper/normalizeEmoji");
 const hotForumTopicsService = require("../services/hotForumTopicsService");
@@ -71,6 +72,18 @@ const addComment = async (req, res) => {
       action: "ADD",
     });
 
+    await UserStat.findOneAndUpdate(
+      { userId: Forum.userId },
+      { $inc: { totalCommentReceived: 1 } },
+      { upsert: true }
+    );
+
+    await UserStat.findOneAndUpdate(
+      { userId },
+      { $inc: { totalCommentGiven: 1 } },
+      { upsert: true }
+    );
+
     return res.status(201).json({ status: true, message: "Comment added" });
   } catch (err) {
     return res.status(500).json({
@@ -129,6 +142,18 @@ const deleteComment = async (req, res) => {
     await Forum.findByIdAndUpdate(comment.forumId, {
       $inc: { commentsCount: -1 },
     });
+
+    await UserStat.findOneAndUpdate(
+      { userId: Forum.userId },
+      { $inc: { totalCommentReceived: -1 } },
+      { upsert: true }
+    );
+
+    await UserStat.findOneAndUpdate(
+      { userId },
+      { $inc: { totalCommentGiven: -1 } },
+      { upsert: true }
+    );
 
     return res.status(200).json({ status: true, message: "Comment deleted" });
   } catch (err) {

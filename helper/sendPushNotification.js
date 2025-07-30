@@ -1,12 +1,6 @@
-const admin = require("firebase-admin");
+const admin = require("../config/firebase");
 const User = require("../models/userModel");
 const Guest = require("../models/guestUserModel");
-
-const serviceAccount = JSON.parse(process.env.FIREBASE_SETUP);
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
 
 async function sendPushNotification(data) {
   // const getTokens = await User.find({
