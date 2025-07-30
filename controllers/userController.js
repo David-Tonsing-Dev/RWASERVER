@@ -4,9 +4,10 @@ const nodemailer = require("nodemailer");
 const mg = require("nodemailer-mailgun-transport");
 const UserModel = require("../models/userModel");
 const UserCoin = require("../models/userCoinModel");
-const { capitalizeAfterSpace } = require("../helper/capitalize");
-const password = require("passport");
+const UserStat = require("../models/userStatModel");
 const Guest = require("../models/guestUserModel");
+const { capitalizeAfterSpace } = require("../helper/capitalize");
+const differenceTwoDates = require("../helper/moments/dateDifference");
 
 const createToken = (id) => {
   const jwtkey = process.env.JWT_SECRET_KEY;
@@ -49,6 +50,9 @@ const signup = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(user.password, salt);
     await user.save();
+
+    const userStat = new UserStat({ userId: user._id });
+    await userStat.save();
 
     const verificationToken = jwt.sign(
       { email: email },
@@ -197,6 +201,119 @@ const signin = async (req, res) => {
 
     const token = createToken(user._id);
 
+    const userStat = await UserStat.findOneAndUpdate(
+      {
+        userId: user._id,
+      },
+      {},
+      { upsert: true }
+    ).lean();
+
+    if (userStat) {
+      for (let field in userStat) {
+        if (userStat[field] === false) {
+          delete userStat[field];
+        }
+      }
+    }
+
+    // for Tiered Progression Badges
+    if (
+      differenceTwoDates(user.createdAt, new Date()) >= 360 &&
+      userStat.totalThreadPosted >= 50 &&
+      userStat.totalCommentGiven >= 300 &&
+      userStat.totalLikeReceived >= 250 &&
+      userStat.totalFollower >= 50 &&
+      userStat.totalViewReceived >= 10000
+    ) {
+      userStat.tieredProgression = "Veteran";
+    } else if (
+      differenceTwoDates(user.createdAt, new Date()) >= 30 &&
+      userStat.totalThreadPosted >= 10 &&
+      userStat.totalCommentGiven >= 50 &&
+      userStat.totalLikeReceived >= 50 &&
+      userStat.totalFollower >= 10 &&
+      userStat.totalViewReceived >= 1000
+    ) {
+      userStat.tieredProgression = "Contributor";
+    } else if (
+      differenceTwoDates(user.createdAt, new Date()) >= 1 &&
+      userStat.totalThreadPosted >= 1 &&
+      userStat.totalCommentGiven >= 1
+    ) {
+      userStat.tieredProgression = "Explorer";
+    } else {
+      userStat.tieredProgression = "New user";
+    }
+
+    // for Skill & Reputation-Based Badges
+    if (
+      userStat.totalThreadPosted >= 75 &&
+      userStat.totalCommentGiven >= 500 &&
+      userStat.totalLikeReceived >= 500 &&
+      userStat.totalFollower >= 100 &&
+      userStat.totalViewReceived >= 25000
+    ) {
+      userStat.reputation = "Pro";
+    } else if (
+      userStat.totalThreadPosted >= 100 &&
+      userStat.totalCommentGiven >= 750 &&
+      userStat.totalLikeReceived >= 1000 &&
+      userStat.totalFollower >= 200 &&
+      userStat.totalViewReceived >= 50000
+    ) {
+      userStat.reputation = "Expert";
+    } else if (
+      userStat.totalThreadPosted >= 150 &&
+      userStat.totalCommentGiven >= 1000 &&
+      userStat.totalLikeReceived >= 2500 &&
+      userStat.totalFollower >= 400 &&
+      userStat.totalViewReceived >= 100000
+    ) {
+      userStat.reputation = "Top contributor";
+    }
+
+    // For social influencer
+    if (
+      differenceTwoDates(user.createdAt, new Date()) <= 30 &&
+      userStat.totalThreadPosted >= 5 &&
+      userStat.totalCommentGiven >= 20 &&
+      userStat.totalLikeReceived >= 50 &&
+      userStat.totalFollower >= 25 &&
+      userStat.totalViewReceived >= 5000
+    ) {
+      userStat.star = "Rising start";
+    }
+
+    // For influencer
+    if (
+      userStat.totalLikeReceived >= 2000 &&
+      userStat.totalFollower >= 500 &&
+      userStat.totalViewReceived >= 100000
+    ) {
+      userStat.influence = "Influencer";
+    }
+
+    // For quality badge
+    if (
+      differenceTwoDates(user.createdAt, new Date()) >= 90 &&
+      userStat.totalThreadPosted >= 20 &&
+      userStat.totalCommentGiven >= 20 &&
+      userStat.totalLikeReceived >= 1000 &&
+      userStat.totalFollower >= 100 &&
+      userStat.totalViewReceived >= 5000
+    ) {
+      userStat.quality = "Trusted member";
+    }
+
+    // For VIP badge
+    if (
+      userStat.totalFollower >= 1000 &&
+      userStat.totalViewReceived >= 250000
+    ) {
+      userStat.vip = "VIP";
+    }
+
     return res.status(200).json({
       status: true,
       message: "Login successfully!",
@@ -204,6 +321,7 @@ const signin = async (req, res) => {
       name: user.userName,
       token,
       email,
+      stat: userStat,
     });
   } catch (err) {
     return res.status(500).json({
@@ -235,6 +353,9 @@ const googleData = async (req, res) => {
     if (!user) {
       addUser = new UserModel({ userName, email, profileImg, googleId });
       await addUser.save();
+
+      const userStat = new UserStat({ userId: addUser._id });
+      await userStat.save();
     }
 
     const verificationToken = jwt.sign(
@@ -245,11 +366,125 @@ const googleData = async (req, res) => {
       process.env.JWT_SECRET_KEY
     );
 
+    const userStat = await UserStat.findOneAndUpdate(
+      {
+        userId: user._id,
+      },
+      {},
+      { upsert: true }
+    ).lean();
+
+    if (userStat) {
+      for (let field in userStat) {
+        if (userStat[field] === false) {
+          delete userStat[field];
+        }
+      }
+    }
+
+    // for Tiered Progression Badges
+    if (
+      differenceTwoDates(user.createdAt, new Date()) >= 360 &&
+      userStat.totalThreadPosted >= 50 &&
+      userStat.totalCommentGiven >= 300 &&
+      userStat.totalLikeReceived >= 250 &&
+      userStat.totalFollower >= 50 &&
+      userStat.totalViewReceived >= 10000
+    ) {
+      userStat.tieredProgression = "Veteran";
+    } else if (
+      differenceTwoDates(user.createdAt, new Date()) >= 30 &&
+      userStat.totalThreadPosted >= 10 &&
+      userStat.totalCommentGiven >= 50 &&
+      userStat.totalLikeReceived >= 50 &&
+      userStat.totalFollower >= 10 &&
+      userStat.totalViewReceived >= 1000
+    ) {
+      userStat.tieredProgression = "Contributor";
+    } else if (
+      differenceTwoDates(user.createdAt, new Date()) >= 1 &&
+      userStat.totalThreadPosted >= 1 &&
+      userStat.totalCommentGiven >= 1
+    ) {
+      userStat.tieredProgression = "Explorer";
+    } else {
+      userStat.tieredProgression = "New user";
+    }
+
+    // for Skill & Reputation-Based Badges
+    if (
+      userStat.totalThreadPosted >= 75 &&
+      userStat.totalCommentGiven >= 500 &&
+      userStat.totalLikeReceived >= 500 &&
+      userStat.totalFollower >= 100 &&
+      userStat.totalViewReceived >= 25000
+    ) {
+      userStat.reputation = "Pro";
+    } else if (
+      userStat.totalThreadPosted >= 100 &&
+      userStat.totalCommentGiven >= 750 &&
+      userStat.totalLikeReceived >= 1000 &&
+      userStat.totalFollower >= 200 &&
+      userStat.totalViewReceived >= 50000
+    ) {
+      userStat.reputation = "Expert";
+    } else if (
+      userStat.totalThreadPosted >= 150 &&
+      userStat.totalCommentGiven >= 1000 &&
+      userStat.totalLikeReceived >= 2500 &&
+      userStat.totalFollower >= 400 &&
+      userStat.totalViewReceived >= 100000
+    ) {
+      userStat.reputation = "Top contributor";
+    }
+
+    // For social influencer
+    if (
+      differenceTwoDates(user.createdAt, new Date()) <= 30 &&
+      userStat.totalThreadPosted >= 5 &&
+      userStat.totalCommentGiven >= 20 &&
+      userStat.totalLikeReceived >= 50 &&
+      userStat.totalFollower >= 25 &&
+      userStat.totalViewReceived >= 5000
+    ) {
+      userStat.star = "Rising start";
+    }
+
+    // For influencer
+    if (
+      userStat.totalLikeReceived >= 2000 &&
+      userStat.totalFollower >= 500 &&
+      userStat.totalViewReceived >= 100000
+    ) {
+      userStat.influence = "Influencer";
+    }
+
+    // For quality badge
+    if (
+      differenceTwoDates(user.createdAt, new Date()) >= 90 &&
+      userStat.totalThreadPosted >= 20 &&
+      userStat.totalCommentGiven >= 20 &&
+      userStat.totalLikeReceived >= 1000 &&
+      userStat.totalFollower >= 100 &&
+      userStat.totalViewReceived >= 5000
+    ) {
+      userStat.quality = "Trusted member";
+    }
+
+    // For VIP badge
+    if (
+      userStat.totalFollower >= 1000 &&
+      userStat.totalViewReceived >= 250000
+    ) {
+      userStat.vip = "VIP";
+    }
+
     return res.status(200).json({
       status: true,
       message: "Token generated successfully",
       id: addUser ? addUser._id : user._id,
       token: verificationToken,
+      stat: userStat,
     });
   } catch (error) {
     return res.status(500).json({

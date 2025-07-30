@@ -16,6 +16,7 @@ const treasuryTokens = require("./routes/condoTreasuryTokenRouters");
 const forumCategoryRouter = require("./routes/forumCategoryRouters");
 const forumRouter = require("./routes/forumRouters");
 const forumCommentRouter = require("./routes/forumCommentRouters");
+const followRouter = require("./routes/followRouters");
 
 const adminUserRouter = require("./admin/routes/userRouters");
 const adminNewsRouter = require("./admin/routes/newsRouters");
@@ -89,6 +90,7 @@ app.use("/api/mobileapp/googleAnalytics", mobileAppGA4Data);
 app.use("/api/airdrops", userAirdropRouter);
 app.use("/api/podcasts", podcastRouter);
 app.use("/api/events", eventDataRouter);
+app.use("/api/follow", followRouter);
 
 app.use("/api/admin/users", adminUserRouter);
 app.use("/api/admin/news", adminNewsRouter);
