@@ -76,7 +76,9 @@ const getForumSubCategory = async (req, res) => {
     const filter = {};
     if (category) filter.categoryId = category;
 
-    const subCategories = await ForumSubCategory.find(filter);
+    const subCategories = await ForumSubCategory.find(filter).sort({
+      position: 1,
+    });
 
     const subCategoryIds = subCategories.map((cat) => cat._id);
 

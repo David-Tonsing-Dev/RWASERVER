@@ -240,7 +240,7 @@ const addBlogs = async (req, res) => {
 
       const sendEmails = recipientEmails.map((email) =>
         nodemailerMailgun.sendMail({
-          from: "service@rwacamp.com",
+          from: "service@rwapros.com",
           to: email,
           subject,
           html,
