@@ -27,6 +27,6 @@ router.put(
   adminAuthMiddleware,
   updateForumCategory
 );
-router.delete("/:categoryId", deleteForumCategory);
+router.delete("/:categoryId", adminAuthMiddleware, deleteForumCategory);
 
 module.exports = router;
