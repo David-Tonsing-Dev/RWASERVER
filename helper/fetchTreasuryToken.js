@@ -75,6 +75,7 @@ const fetchIndexCoopPrice = async () => {
   }
 };
 
+// ===================>
 async function upsertToken({
   tokenId,
   tokenName,
@@ -106,6 +107,315 @@ async function upsertToken({
   }
 }
 
+// // const getBalance = async (
+// //   provider,
+// //   contractAddress,
+// //   abi,
+// //   holder,
+// //   decimals = 18
+// // ) => {
+// //   const contract = new ethers.Contract(contractAddress, abi, provider);
+// //   const raw = await contract.balanceOf(holder);
+// //   return ethers.utils.formatUnits(raw.toString(), decimals);
+// // };
+// const getBalance = async (
+//   provider,
+//   contractAddress,
+//   abi,
+//   holder,
+//   decimals = 18
+// ) => {
+//   try {
+//     const contract = new ethers.Contract(contractAddress, abi, provider);
+//     const raw = await contract.balanceOf(holder);
+//     return ethers.utils.formatUnits(raw.toString(), decimals);
+//   } catch (error) {
+//     console.warn(
+//       `Skipping balance fetch for ${contractAddress} - ${error.message}`
+//     );
+//     return null;
+//   }
+// };
+
+// const fetchTreasuryToken = async () => {
+//   const providerBase = new ethers.providers.JsonRpcProvider(baseUrl);
+//   const providerEth = new ethers.providers.JsonRpcProvider(ethUrl);
+//   const providerBnb = new ethers.providers.JsonRpcProvider(bnbUrl);
+//   const providerPoly = new ethers.providers.JsonRpcProvider(polyUrl);
+
+//   const handleToken = async (balance, details) =>
+//     await upsertToken({
+//       tokenId: details.id,
+//       tokenName: details.name,
+//       tokenImg: details.image.large,
+//       symbol: details.symbol,
+//       chain: details.asset_platform_id,
+//       tokenBalance: balance,
+//       tokenAddress: "",
+//       balanceUsd: details.market_data.current_price.usd
+//         ? balance * details.market_data.current_price.usd
+//         : null,
+//     });
+
+//   const condoBalance = await getBalance(
+//     providerBase,
+//     baseWalletAddress,
+//     condoABI,
+//     addressToCheck
+//   );
+//   if (condoBalance != null) {
+//     const condoDetails = await fetchMarketPrice("condo");
+//     if (condoDetails) await handleToken(condoBalance, condoDetails);
+//     else {
+//       await Treasure.findOneAndUpdate(
+//         { tokenId: "condo" },
+//         {
+//           $set: {
+//             tokenBalance: condoBalance,
+//             balanceUsd: null,
+//             active: false,
+//           },
+//         },
+//         { upsert: true, new: true }
+//       );
+//     }
+//   } else {
+//     console.warn("Skipping condo: balance fetch failed.");
+//   }
+
+//   const ethRaw = await providerBase.getBalance(addressToCheck);
+//   if (ethRaw != null) {
+//     const ethBalance = formatEther(ethRaw.toString());
+//     const ethDetails = await fetchMarketPrice("ethereum");
+//     if (ethDetails) await handleToken(ethBalance, ethDetails);
+//     else {
+//       await Treasure.findOneAndUpdate(
+//         { tokenId: "ethereum" },
+//         {
+//           $set: {
+//             tokenBalance: ethBalance,
+//             balanceUsd: null,
+//             active: false,
+//           },
+//         },
+//         { upsert: true, new: true }
+//       );
+//     }
+//   } else {
+//     console.warn("Skipping ethereum: balance fetch failed.");
+//   }
+
+//   const syrupBalance = await getBalance(
+//     providerEth,
+//     syrupContract,
+//     mapleABI,
+//     addressToCheck
+//   );
+//   if (syrupBalance != null) {
+//     const syrupDetails = await fetchMarketPrice("syrup");
+//     if (syrupDetails) await handleToken(syrupBalance, syrupDetails);
+//     else {
+//       await Treasure.findOneAndUpdate(
+//         { tokenId: "syrup" },
+//         {
+//           $set: {
+//             tokenBalance: syrupBalance,
+//             balanceUsd: null,
+//             active: false,
+//           },
+//         },
+//         { upsert: true, new: true }
+//       );
+//     }
+//   } else {
+//     console.warn("Skipping syrup: balance fetch failed.");
+//   }
+
+//   const brickkenBalance = await getBalance(
+//     providerBnb,
+//     brickkenContract,
+//     brickkenABI,
+//     addressToCheck
+//   );
+//   if (brickkenBalance != null) {
+//     const brickkenDetails = await fetchMarketPrice("brickken");
+//     if (brickkenDetails) await handleToken(brickkenBalance, brickkenDetails);
+//     else {
+//       await Treasure.findOneAndUpdate(
+//         { tokenId: "brickken" },
+//         {
+//           $set: {
+//             tokenBalance: brickkenBalance,
+//             balanceUsd: null,
+//             active: false,
+//           },
+//         },
+//         { upsert: true, new: true }
+//       );
+//     }
+//   } else {
+//     console.warn("Skipping brickken: balance fetch failed.");
+//   }
+
+//   const indexBalance = await getBalance(
+//     providerBase,
+//     indexCoopContract,
+//     indexCoopABI,
+//     addressToCheck
+//   );
+//   if (indexBalance != null) {
+//     const indexUsd = await fetchIndexCoopPrice();
+//     if (indexUsd) {
+//       await upsertToken({
+//         tokenId: "index-coop-ethereum-2x-index",
+//         tokenName: "Index Coop Ethereum 2x Index",
+//         tokenImg:
+//           "https://res.cloudinary.com/dbtsrjssc/image/upload/v1749892058/97f6e4e525d31caad57194baf68ae5a729051273021c0cd972d8ae75b1f64f19_1_rfqlc8.png",
+//         symbol: "ETH2X",
+//         chain: "",
+//         tokenBalance: indexBalance,
+//         tokenAddress: "",
+//         balanceUsd: indexUsd ? indexBalance * indexUsd : null,
+//       });
+//     } else {
+//       await Treasure.findOneAndUpdate(
+//         { tokenId: "index-coop-ethereum-2x-index" },
+//         {
+//           $set: {
+//             tokenBalance: indexBalance,
+//             balanceUsd: null,
+//             active: false,
+//           },
+//         },
+//         { upsert: true, new: true }
+//       );
+//     }
+//   } else {
+//     console.warn("Skipping index coop: balance fetch failed.");
+//   }
+//   //   // Dev Condo
+//   //   // const devBalance = await getBalance(
+//   //   //   providerBase,
+//   //   //   devCondoContract,
+//   //   //   devCondoABI,
+//   //   //   devAddress
+//   //   // );
+//   //   // await upsertToken({
+//   //   //   tokenName: "Dev Wallet Condo",
+//   //   //   symbol: "Dev",
+//   //   //   tokenImg:
+//   //   //     "https://res.cloudinary.com/dbtsrjssc/image/upload/v1749903699/https___www.raspada-blog.co.uk_storage_wink_images_Gc6M9khVyDOBxjyvlW1E1UbLmROmZei0P76riW6n_1_xesoqb.jpg",
+//   //   //   chain: "",
+//   //   //   tokenBalance: devBalance,
+//   //   //   tokenAddress: "",
+//   //   //   balanceUsd: devBalance * condoDetails.current_price,
+//   //   // });
+
+//   const polyBalance = await getBalance(
+//     providerPoly,
+//     polytradeContractAddress,
+//     polytradeABI,
+//     condoPolygonTreasury
+//   );
+//   if (polyBalance != null) {
+//     const polyDetails = await fetchMarketPrice("polytrade");
+//     if (polyDetails) await handleToken(polyBalance, polyDetails);
+//     else {
+//       await Treasure.findOneAndUpdate(
+//         { tokenId: "polytrade" },
+//         {
+//           $set: {
+//             tokenBalance: polyBalance,
+//             balanceUsd: null,
+//             active: false,
+//           },
+//         },
+//         { upsert: true, new: true }
+//       );
+//     }
+//   } else {
+//     console.warn("Skipping polytrade: balance fetch failed.");
+//   }
+//   const aurusXDetails = await fetchMarketPrice("aurusx");
+//   if (aurusXDetails) await handleToken(AurusXBalance, aurusXDetails);
+//   else {
+//     await Treasure.findOneAndUpdate(
+//       { tokenId: "aurusx" },
+//       {
+//         $set: {
+//           tokenBalance: AurusXBalance,
+//           balanceUsd: null,
+//           active: false,
+//         },
+//       },
+//       { upsert: true, new: true }
+//     );
+//   }
+
+//   const usdcBalance = await getBalance(
+//     providerBase,
+//     usdcContractAddress,
+//     usdcABI,
+//     addressToCheck,
+//     6
+//   );
+//   if (usdcBalance != null) {
+//     const usdcDetails = await fetchMarketPrice("usd-coin");
+//     if (usdcDetails) await handleToken(usdcBalance, usdcDetails);
+//     else {
+//       await Treasure.findOneAndUpdate(
+//         { tokenId: "usd-coin" },
+//         {
+//           $set: {
+//             tokenBalance: usdcBalance,
+//             balanceUsd: null,
+//             active: false,
+//           },
+//         },
+//         { upsert: true, new: true }
+//       );
+//     }
+//   } else {
+//     console.warn("Skipping USDC: balance fetch failed.");
+//   }
+
+//   console.log("Token balances fetched and saved to DB.");
+// };
+// =======================>
+
+// const upsertToken = async ({
+//   tokenId,
+//   tokenName,
+//   tokenImg,
+//   symbol,
+//   chain,
+//   tokenBalance,
+//   tokenAddress,
+//   balanceUsd,
+// }) => {
+//   const existing = await Treasure.findOne({ tokenId });
+//   if (existing) {
+//     Object.assign(existing, {
+//       tokenBalance,
+//       balanceUsd,
+//       tokenImg,
+//       active: true,
+//     });
+//     await existing.save();
+//   } else {
+//     await Treasure.create({
+//       tokenId,
+//       tokenName,
+//       tokenImg,
+//       symbol,
+//       chain,
+//       tokenBalance,
+//       tokenAddress,
+//       balanceUsd,
+//     });
+//   }
+// };
+
 const getBalance = async (
   provider,
   contractAddress,
@@ -113,18 +423,35 @@ const getBalance = async (
   holder,
   decimals = 18
 ) => {
-  const contract = new ethers.Contract(contractAddress, abi, provider);
-  const raw = await contract.balanceOf(holder);
-  return ethers.utils.formatUnits(raw.toString(), decimals);
+  try {
+    const contract = new ethers.Contract(contractAddress, abi, provider);
+    const raw = await contract.balanceOf(holder);
+    return ethers.utils.formatUnits(raw.toString(), decimals);
+  } catch (error) {
+    console.warn(`Skipping balance for ${contractAddress} - ${error.message}`);
+    return null;
+  }
 };
 
-const fetchTreasuryToken = async () => {
-  const providerBase = new ethers.providers.JsonRpcProvider(baseUrl);
-  const providerEth = new ethers.providers.JsonRpcProvider(ethUrl);
-  const providerBnb = new ethers.providers.JsonRpcProvider(bnbUrl);
-  const providerPoly = new ethers.providers.JsonRpcProvider(polyUrl);
+const processToken = async ({
+  tokenId,
+  provider,
+  contract,
+  abi,
+  holder = addressToCheck,
+  decimals = 18,
+  hardcodedBalance = null,
+}) => {
+  const balance =
+    hardcodedBalance ??
+    (await getBalance(provider, contract, abi, holder, decimals));
+  if (balance == null) {
+    console.warn(`Skipping ${tokenId}: balance fetch failed.`);
+    return;
+  }
 
-  const handleToken = async (balance, details) =>
+  const details = await fetchMarketPrice(tokenId);
+  if (details) {
     await upsertToken({
       tokenId: details.id,
       tokenName: details.name,
@@ -133,25 +460,16 @@ const fetchTreasuryToken = async () => {
       chain: details.asset_platform_id,
       tokenBalance: balance,
       tokenAddress: "",
-      balanceUsd: details.market_data.current_price.usd
+      balanceUsd: details.market_data?.current_price?.usd
         ? balance * details.market_data.current_price.usd
         : null,
     });
-
-  const condoBalance = await getBalance(
-    providerBase,
-    baseWalletAddress,
-    condoABI,
-    addressToCheck
-  );
-  const condoDetails = await fetchMarketPrice("condo");
-  if (condoDetails) await handleToken(condoBalance, condoDetails);
-  else {
+  } else {
     await Treasure.findOneAndUpdate(
-      { tokenId: "condo" },
+      { tokenId },
       {
         $set: {
-          tokenBalance: condoBalance,
+          tokenBalance: balance,
           balanceUsd: null,
           active: false,
         },
@@ -159,77 +477,71 @@ const fetchTreasuryToken = async () => {
       { upsert: true, new: true }
     );
   }
+};
 
-  const ethRaw = await providerBase.getBalance(addressToCheck);
-  const ethBalance = formatEther(ethRaw.toString());
-  const ethDetails = await fetchMarketPrice("ethereum");
-  if (ethDetails) await handleToken(ethBalance, ethDetails);
-  else {
-    await Treasure.findOneAndUpdate(
-      { tokenId: "ethereum" },
-      {
-        $set: {
-          tokenBalance: ethBalance,
-          balanceUsd: null,
-          active: false,
-        },
-      },
-      { upsert: true, new: true }
-    );
+const fetchTreasuryToken = async () => {
+  const providerBase = new ethers.providers.JsonRpcProvider(baseUrl);
+  const providerEth = new ethers.providers.JsonRpcProvider(ethUrl);
+  const providerBnb = new ethers.providers.JsonRpcProvider(bnbUrl);
+  const providerPoly = new ethers.providers.JsonRpcProvider(polyUrl);
+
+  await processToken({
+    tokenId: "condo",
+    provider: providerBase,
+    contract: baseWalletAddress,
+    abi: condoABI,
+  });
+
+  await processToken({
+    tokenId: "syrup",
+    provider: providerEth,
+    contract: syrupContract,
+    abi: mapleABI,
+  });
+
+  await processToken({
+    tokenId: "brickken",
+    provider: providerBnb,
+    contract: brickkenContract,
+    abi: brickkenABI,
+  });
+
+  await processToken({
+    tokenId: "polytrade",
+    provider: providerPoly,
+    contract: polytradeContractAddress,
+    abi: polytradeABI,
+    holder: condoPolygonTreasury,
+  });
+
+  await processToken({
+    tokenId: "usd-coin",
+    provider: providerBase,
+    contract: usdcContractAddress,
+    abi: usdcABI,
+    decimals: 6,
+  });
+
+  try {
+    const ethRaw = await providerBase.getBalance(addressToCheck);
+    const ethBalance = formatEther(ethRaw.toString());
+    await processToken({
+      tokenId: "ethereum",
+      hardcodedBalance: ethBalance,
+    });
+  } catch (err) {
+    console.warn("Skipping ethereum balance:", err.message);
   }
 
-  const syrupBalance = await getBalance(
-    providerEth,
-    syrupContract,
-    mapleABI,
-    addressToCheck
-  );
-  const syrupDetails = await fetchMarketPrice("syrup");
-  if (syrupDetails) await handleToken(syrupBalance, syrupDetails);
-  else {
-    await Treasure.findOneAndUpdate(
-      { tokenId: "syrup" },
-      {
-        $set: {
-          tokenBalance: syrupBalance,
-          balanceUsd: null,
-          active: false,
-        },
-      },
-      { upsert: true, new: true }
-    );
-  }
-
-  const brickkenBalance = await getBalance(
-    providerBnb,
-    brickkenContract,
-    brickkenABI,
-    addressToCheck
-  );
-  const brickkenDetails = await fetchMarketPrice("brickken");
-  if (brickkenDetails) await handleToken(brickkenBalance, brickkenDetails);
-  else {
-    await Treasure.findOneAndUpdate(
-      { tokenId: "brickken" },
-      {
-        $set: {
-          tokenBalance: brickkenBalance,
-          balanceUsd: null,
-          active: false,
-        },
-      },
-      { upsert: true, new: true }
-    );
-  }
-
+  // Index Coop
   const indexBalance = await getBalance(
     providerBase,
     indexCoopContract,
     indexCoopABI,
     addressToCheck
   );
-  const indexUsd = await fetchIndexCoopPrice();
-  if (indexUsd) {
+  if (indexBalance != null) {
+    const indexUsd = await fetchIndexCoopPrice();
     await upsertToken({
       tokenId: "index-coop-ethereum-2x-index",
       tokenName: "Index Coop Ethereum 2x Index",
@@ -242,95 +554,13 @@ const fetchTreasuryToken = async () => {
       balanceUsd: indexUsd ? indexBalance * indexUsd : null,
     });
   } else {
-    await Treasure.findOneAndUpdate(
-      { tokenId: "index-coop-ethereum-2x-index" },
-      {
-        $set: {
-          tokenBalance: indexBalance,
-          balanceUsd: null,
-          active: false,
-        },
-      },
-      { upsert: true, new: true }
-    );
-  }
-  //   // Dev Condo
-  //   // const devBalance = await getBalance(
-  //   //   providerBase,
-  //   //   devCondoContract,
-  //   //   devCondoABI,
-  //   //   devAddress
-  //   // );
-  //   // await upsertToken({
-  //   //   tokenName: "Dev Wallet Condo",
-  //   //   symbol: "Dev",
-  //   //   tokenImg:
-  //   //     "https://res.cloudinary.com/dbtsrjssc/image/upload/v1749903699/https___www.raspada-blog.co.uk_storage_wink_images_Gc6M9khVyDOBxjyvlW1E1UbLmROmZei0P76riW6n_1_xesoqb.jpg",
-  //   //   chain: "",
-  //   //   tokenBalance: devBalance,
-  //   //   tokenAddress: "",
-  //   //   balanceUsd: devBalance * condoDetails.current_price,
-  //   // });
-
-  const polyBalance = await getBalance(
-    providerPoly,
-    polytradeContractAddress,
-    polytradeABI,
-    condoPolygonTreasury
-  );
-  const polyDetails = await fetchMarketPrice("polytrade");
-  if (polyDetails) await handleToken(polyBalance, polyDetails);
-  else {
-    await Treasure.findOneAndUpdate(
-      { tokenId: "polytrade" },
-      {
-        $set: {
-          tokenBalance: polyBalance,
-          balanceUsd: null,
-          active: false,
-        },
-      },
-      { upsert: true, new: true }
-    );
-  }
-  const aurusXDetails = await fetchMarketPrice("aurusx");
-  if (aurusXDetails) await handleToken(AurusXBalance, aurusXDetails);
-  else {
-    await Treasure.findOneAndUpdate(
-      { tokenId: "aurusx" },
-      {
-        $set: {
-          tokenBalance: AurusXBalance,
-          balanceUsd: null,
-          active: false,
-        },
-      },
-      { upsert: true, new: true }
-    );
+    console.warn("Skipping index coop: balance fetch failed.");
   }
 
-  const usdcBalance = await getBalance(
-    providerBase,
-    usdcContractAddress,
-    usdcABI,
-    addressToCheck,
-    6
-  );
-  const usdcDetails = await fetchMarketPrice("usd-coin");
-  if (usdcDetails) await handleToken(usdcBalance, usdcDetails);
-  else {
-    await Treasure.findOneAndUpdate(
-      { tokenId: "usd-coin" },
-      {
-        $set: {
-          tokenBalance: usdcBalance,
-          balanceUsd: null,
-          active: false,
-        },
-      },
-      { upsert: true, new: true }
-    );
-  }
+  await processToken({
+    tokenId: "aurusx",
+    hardcodedBalance: AurusXBalance,
+  });
 
   console.log("Token balances fetched and saved to DB.");
 };
