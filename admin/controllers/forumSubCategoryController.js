@@ -40,11 +40,17 @@ const addForumSubCategory = async (req, res) => {
         .status(500)
         .json({ status: false, message: "Error in uploading image" });
 
+    const lastCategory = await ForumSubCategory.findOne().sort({
+      position: -1,
+    });
+    const nextPosition = lastCategory ? lastCategory.position + 1 : 1;
+
     const newCategory = new ForumSubCategory({
       name,
       description,
       subCategoryImage: subCategoryImage.secure_url,
       categoryId,
+      position: nextPosition,
     });
     await newCategory.save();
 
@@ -135,7 +141,7 @@ const updateForumSubCategory = async (req, res) => {
     const { subCategoryId } = req.params;
     const { name, description, categoryId } = req.body;
 
-    console.log("name", name, description, subCategoryId, req.body);
+    // console.log("name", name, description, subCategoryId, req.body);
 
     if (!mongoose.Types.ObjectId.isValid(subCategoryId))
       return res
@@ -185,6 +191,37 @@ const updateForumSubCategory = async (req, res) => {
   }
 };
 
+const updateSubCategoryPriority = async (req, res) => {
+  try {
+    const { subCategoryIds } = req.body;
+    const role = req.role;
+    if (role !== SUPERADMIN)
+      return res
+        .status(403)
+        .json({ status: false, message: "Unauthorized user" });
+
+    const bulkOps = subCategoryIds.map((cat, index) => ({
+      updateOne: {
+        filter: { _id: cat },
+        update: { $set: { position: index + 1 } },
+      },
+    }));
+
+    await ForumSubCategory.bulkWrite(bulkOps);
+
+    return res.status(200).json({
+      message: "SubCategory positions updated successfully",
+      status: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong try again later",
+      error: error.message,
+    });
+  }
+};
+
 const deleteForumSubCategory = async (req, res) => {
   try {
     const role = req.role;
@@ -223,4 +260,5 @@ module.exports = {
   getForumSubCategory,
   updateForumSubCategory,
   deleteForumSubCategory,
+  updateSubCategoryPriority,
 };

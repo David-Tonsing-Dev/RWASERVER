@@ -89,7 +89,7 @@ const getForumCategory = async (req, res) => {
           const subCategoriesWithForums = await Promise.all(
             (
               await ForumSubCategory.find({ categoryId: category._id }).sort({
-                updatedAt: -1,
+                position: 1,
               })
             ).map(async (subCategory) => {
               const forum = await Forum.find({ categoryId: subCategory._id })
@@ -115,7 +115,7 @@ const getForumCategory = async (req, res) => {
           .json({ status: false, message: "Could not fetch sub-category" });
 
       const getSubCategories = await ForumSubCategory.find(subFilter).sort({
-        updatedAt: -1,
+        position: 1,
       });
 
       if (!getSubCategories)
@@ -148,7 +148,7 @@ const getForumCategory = async (req, res) => {
 
     if (subCategoryName) {
       const getSubCategories = await ForumSubCategory.find(subFilter).sort({
-        updatedAt: -1,
+        position: 1,
       });
 
       if (!getSubCategories)
@@ -191,7 +191,7 @@ const getForumCategory = async (req, res) => {
         const subCategoriesWithForums = await Promise.all(
           (
             await ForumSubCategory.find({ categoryId: category._id }).sort({
-              updatedAt: -1,
+              position: 1,
             })
           ).map(async (subCategory) => {
             const forum = await Forum.find({ categoryId: subCategory._id })
@@ -293,14 +293,14 @@ const deleteForumCategory = async (req, res) => {
 
 const updateCategoryPriority = async (req, res) => {
   try {
-    const { categories } = req.body;
+    const { categoryIds } = req.body;
     const role = req.role;
     if (role !== SUPERADMIN)
       return res
         .status(403)
         .json({ status: false, message: "Unauthorized user" });
 
-    const bulkOps = categories.map((cat, index) => ({
+    const bulkOps = categoryIds.map((cat, index) => ({
       updateOne: {
         filter: { _id: cat },
         update: { $set: { position: index + 1 } },

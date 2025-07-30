@@ -6,6 +6,7 @@ const {
   getForumSubCategory,
   updateForumSubCategory,
   deleteForumSubCategory,
+  updateSubCategoryPriority,
 } = require("../controllers/forumSubCategoryController");
 const { adminAuthMiddleware } = require("../../middlewares/authMiddleware");
 const upload = require("../../multer/multer");
@@ -17,6 +18,7 @@ router.post(
   addForumSubCategory
 );
 router.get("/", getForumSubCategory);
+router.put("/reorder", adminAuthMiddleware, updateSubCategoryPriority);
 router.put(
   "/:subCategoryId",
   upload.single("subCategoryImage"),
