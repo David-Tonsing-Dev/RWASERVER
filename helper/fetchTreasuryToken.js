@@ -37,7 +37,7 @@ const formatEther = ethers.utils.formatEther;
 
 const fetchMarketPrice = async (coinId) => {
   try {
-    const url = `https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinId}`;
+    const url = `https://pro-api.coingecko.com/api/v3/coins/${coinId}`;
     const options = {
       headers: {
         "x-cg-pro-api-key": process.env.COINGECKO_KEY,
@@ -45,13 +45,16 @@ const fetchMarketPrice = async (coinId) => {
     };
     const resp = await axios.get(url, options);
     const data = resp.data;
-    if (Array.isArray(data) && data.length > 0) {
-      return data[0];
+    // if (Array.isArray(data) && data.length > 0) {
+    //   return data;
+    // }
+    if (!data) {
+      throw new Error(
+        `Invalid response from CoinGecko or delisted token: ${coinId}`
+      );
     }
 
-    throw new Error(
-      `Invalid response from CoinGecko or delisted token: ${coinId}`
-    );
+    return data;
   } catch (err) {
     console.warn(`Skipped token "${coinId}" due to error:`, err.message);
     return null;
@@ -87,6 +90,7 @@ async function upsertToken({
     existing.tokenBalance = tokenBalance;
     existing.balanceUsd = balanceUsd;
     existing.tokenImg = tokenImg;
+    existing.active = true;
     await existing.save();
   } else {
     await Treasure.create({
@@ -124,13 +128,13 @@ const fetchTreasuryToken = async () => {
     await upsertToken({
       tokenId: details.id,
       tokenName: details.name,
-      tokenImg: details.image,
+      tokenImg: details.image.large,
       symbol: details.symbol,
       chain: details.asset_platform_id,
       tokenBalance: balance,
       tokenAddress: "",
-      balanceUsd: details.current_price
-        ? balance * details.current_price
+      balanceUsd: details.market_data.current_price.usd
+        ? balance * details.market_data.current_price.usd
         : null,
     });
 
@@ -142,11 +146,37 @@ const fetchTreasuryToken = async () => {
   );
   const condoDetails = await fetchMarketPrice("condo");
   if (condoDetails) await handleToken(condoBalance, condoDetails);
+  else {
+    await Treasure.findOneAndUpdate(
+      { tokenId: "condo" },
+      {
+        $set: {
+          tokenBalance: condoBalance,
+          balanceUsd: null,
+          active: false,
+        },
+      },
+      { upsert: true, new: true }
+    );
+  }
 
   const ethRaw = await providerBase.getBalance(addressToCheck);
   const ethBalance = formatEther(ethRaw.toString());
   const ethDetails = await fetchMarketPrice("ethereum");
   if (ethDetails) await handleToken(ethBalance, ethDetails);
+  else {
+    await Treasure.findOneAndUpdate(
+      { tokenId: "ethereum" },
+      {
+        $set: {
+          tokenBalance: ethBalance,
+          balanceUsd: null,
+          active: false,
+        },
+      },
+      { upsert: true, new: true }
+    );
+  }
 
   const syrupBalance = await getBalance(
     providerEth,
@@ -156,6 +186,19 @@ const fetchTreasuryToken = async () => {
   );
   const syrupDetails = await fetchMarketPrice("syrup");
   if (syrupDetails) await handleToken(syrupBalance, syrupDetails);
+  else {
+    await Treasure.findOneAndUpdate(
+      { tokenId: "syrup" },
+      {
+        $set: {
+          tokenBalance: syrupBalance,
+          balanceUsd: null,
+          active: false,
+        },
+      },
+      { upsert: true, new: true }
+    );
+  }
 
   const brickkenBalance = await getBalance(
     providerBnb,
@@ -165,6 +208,19 @@ const fetchTreasuryToken = async () => {
   );
   const brickkenDetails = await fetchMarketPrice("brickken");
   if (brickkenDetails) await handleToken(brickkenBalance, brickkenDetails);
+  else {
+    await Treasure.findOneAndUpdate(
+      { tokenId: "brickken" },
+      {
+        $set: {
+          tokenBalance: brickkenBalance,
+          balanceUsd: null,
+          active: false,
+        },
+      },
+      { upsert: true, new: true }
+    );
+  }
 
   const indexBalance = await getBalance(
     providerBase,
@@ -173,18 +229,31 @@ const fetchTreasuryToken = async () => {
     addressToCheck
   );
   const indexUsd = await fetchIndexCoopPrice();
-  await upsertToken({
-    tokenId: "index-coop-ethereum-2x-index",
-    tokenName: "Index Coop Ethereum 2x Index",
-    tokenImg:
-      "https://res.cloudinary.com/dbtsrjssc/image/upload/v1749892058/97f6e4e525d31caad57194baf68ae5a729051273021c0cd972d8ae75b1f64f19_1_rfqlc8.png",
-    symbol: "ETH2X",
-    chain: "",
-    tokenBalance: indexBalance,
-    tokenAddress: "",
-    balanceUsd: indexUsd ? indexBalance * indexUsd : null,
-  });
-
+  if (indexUsd) {
+    await upsertToken({
+      tokenId: "index-coop-ethereum-2x-index",
+      tokenName: "Index Coop Ethereum 2x Index",
+      tokenImg:
+        "https://res.cloudinary.com/dbtsrjssc/image/upload/v1749892058/97f6e4e525d31caad57194baf68ae5a729051273021c0cd972d8ae75b1f64f19_1_rfqlc8.png",
+      symbol: "ETH2X",
+      chain: "",
+      tokenBalance: indexBalance,
+      tokenAddress: "",
+      balanceUsd: indexUsd ? indexBalance * indexUsd : null,
+    });
+  } else {
+    await Treasure.findOneAndUpdate(
+      { tokenId: "index-coop-ethereum-2x-index" },
+      {
+        $set: {
+          tokenBalance: indexBalance,
+          balanceUsd: null,
+          active: false,
+        },
+      },
+      { upsert: true, new: true }
+    );
+  }
   //   // Dev Condo
   //   // const devBalance = await getBalance(
   //   //   providerBase,
@@ -211,9 +280,34 @@ const fetchTreasuryToken = async () => {
   );
   const polyDetails = await fetchMarketPrice("polytrade");
   if (polyDetails) await handleToken(polyBalance, polyDetails);
-
+  else {
+    await Treasure.findOneAndUpdate(
+      { tokenId: "polytrade" },
+      {
+        $set: {
+          tokenBalance: polyBalance,
+          balanceUsd: null,
+          active: false,
+        },
+      },
+      { upsert: true, new: true }
+    );
+  }
   const aurusXDetails = await fetchMarketPrice("aurusx");
   if (aurusXDetails) await handleToken(AurusXBalance, aurusXDetails);
+  else {
+    await Treasure.findOneAndUpdate(
+      { tokenId: "aurusx" },
+      {
+        $set: {
+          tokenBalance: AurusXBalance,
+          balanceUsd: null,
+          active: false,
+        },
+      },
+      { upsert: true, new: true }
+    );
+  }
 
   const usdcBalance = await getBalance(
     providerBase,
@@ -224,6 +318,19 @@ const fetchTreasuryToken = async () => {
   );
   const usdcDetails = await fetchMarketPrice("usd-coin");
   if (usdcDetails) await handleToken(usdcBalance, usdcDetails);
+  else {
+    await Treasure.findOneAndUpdate(
+      { tokenId: "usd-coin" },
+      {
+        $set: {
+          tokenBalance: usdcBalance,
+          balanceUsd: null,
+          active: false,
+        },
+      },
+      { upsert: true, new: true }
+    );
+  }
 
   console.log("Token balances fetched and saved to DB.");
 };

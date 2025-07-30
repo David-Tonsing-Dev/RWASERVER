@@ -432,7 +432,10 @@ const getCoinDetail = async (req, res) => {
         .status(400)
         .json({ status: false, message: "Could not fetch detail!" });
 
-    const getDescAndImg = await Token.findOne({ id: coinId });
+    const getDescAndImg = await Token.findOne({ id: coinId }).populate({
+      path: "category",
+      select: "categoryName",
+    });
 
     if (getDescAndImg) {
       if (getDescAndImg.description) {
@@ -443,6 +446,12 @@ const getCoinDetail = async (req, res) => {
         coinDetail.image.thumb = getDescAndImg.image;
         coinDetail.image.small = getDescAndImg.image;
         coinDetail.image.large = getDescAndImg.image;
+      }
+
+      if (getDescAndImg.category) {
+        coinDetail.categories = getDescAndImg.category.map(
+          (cat) => cat.categoryName
+        );
       }
     }
 
