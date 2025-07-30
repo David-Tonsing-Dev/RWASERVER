@@ -39,10 +39,14 @@ const addForumCategory = async (req, res) => {
         .status(500)
         .json({ status: false, message: "Error in uploading image" });
 
+    const lastCategory = await ForumCategory.findOne().sort({ position: -1 });
+    const nextPosition = lastCategory ? lastCategory.position + 1 : 1;
+
     const newCategory = new ForumCategory({
       name,
       description,
       categoryImage: categoryImage.secure_url,
+      position: nextPosition,
     });
     await newCategory.save();
 
@@ -72,7 +76,7 @@ const getForumCategory = async (req, res) => {
 
     if (categoryName && subCategoryName) {
       const categories = await ForumCategory.find(filter).sort({
-        updatedAt: -1,
+        position: 1,
       });
 
       if (!categories)
@@ -85,7 +89,7 @@ const getForumCategory = async (req, res) => {
           const subCategoriesWithForums = await Promise.all(
             (
               await ForumSubCategory.find({ categoryId: category._id }).sort({
-                updatedAt: -1,
+                position: 1,
               })
             ).map(async (subCategory) => {
               const forum = await Forum.find({ categoryId: subCategory._id })
@@ -111,7 +115,7 @@ const getForumCategory = async (req, res) => {
           .json({ status: false, message: "Could not fetch sub-category" });
 
       const getSubCategories = await ForumSubCategory.find(subFilter).sort({
-        updatedAt: -1,
+        position: 1,
       });
 
       if (!getSubCategories)
@@ -144,7 +148,7 @@ const getForumCategory = async (req, res) => {
 
     if (subCategoryName) {
       const getSubCategories = await ForumSubCategory.find(subFilter).sort({
-        updatedAt: -1,
+        position: 1,
       });
 
       if (!getSubCategories)
@@ -175,7 +179,7 @@ const getForumCategory = async (req, res) => {
         .json({ status: true, allCategories: [], subCategories });
     }
 
-    const categories = await ForumCategory.find(filter).sort({ updatedAt: -1 });
+    const categories = await ForumCategory.find(filter).sort({ position: 1 });
 
     if (!categories)
       return res
@@ -187,7 +191,7 @@ const getForumCategory = async (req, res) => {
         const subCategoriesWithForums = await Promise.all(
           (
             await ForumSubCategory.find({ categoryId: category._id }).sort({
-              updatedAt: -1,
+              position: 1,
             })
           ).map(async (subCategory) => {
             const forum = await Forum.find({ categoryId: subCategory._id })
@@ -267,6 +271,11 @@ const deleteForumCategory = async (req, res) => {
     const role = req.role;
     const { categoryId } = req.params;
 
+    if (role !== SUPERADMIN)
+      return res
+        .status(403)
+        .json({ status: false, message: "Unauthorized user" });
+
     const checkCategory = await ForumCategory.findOneAndDelete({
       _id: categoryId,
     });
@@ -287,9 +296,41 @@ const deleteForumCategory = async (req, res) => {
   }
 };
 
+const updateCategoryPriority = async (req, res) => {
+  try {
+    const { categoryIds } = req.body;
+    const role = req.role;
+    if (role !== SUPERADMIN)
+      return res
+        .status(403)
+        .json({ status: false, message: "Unauthorized user" });
+
+    const bulkOps = categoryIds.map((cat, index) => ({
+      updateOne: {
+        filter: { _id: cat },
+        update: { $set: { position: index + 1 } },
+      },
+    }));
+
+    await ForumCategory.bulkWrite(bulkOps);
+
+    return res.status(200).json({
+      message: "Category positions updated successfully",
+      status: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong try again later",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   addForumCategory,
   getForumCategory,
   updateForumCategory,
   deleteForumCategory,
+  updateCategoryPriority,
 };
