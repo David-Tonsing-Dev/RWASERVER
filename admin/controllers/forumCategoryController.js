@@ -271,6 +271,11 @@ const deleteForumCategory = async (req, res) => {
     const role = req.role;
     const { categoryId } = req.params;
 
+    if (role !== SUPERADMIN)
+      return res
+        .status(403)
+        .json({ status: false, message: "Unauthorized user" });
+
     const checkCategory = await ForumCategory.findOneAndDelete({
       _id: categoryId,
     });
