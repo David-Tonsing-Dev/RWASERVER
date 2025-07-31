@@ -95,12 +95,14 @@ const followUser = async (req, res) => {
       { path: "followerId", select: "userName" },
     ]);
 
-    await sendPushNotificationForum({
-      userId: follow.userId.fcmToken,
-      title: "New follower",
-      body: `${follow.followerId.userName} follows you`,
-      image: "https://avatar.iran.liara.run/public/boy",
-    });
+    if (follow.userId.fcmToken && follow.userId.fcmToken.length >= 1) {
+      await sendPushNotificationForum({
+        userId: follow.userId.fcmToken,
+        title: "New follower",
+        body: `${follow.followerId.userName} follows you`,
+        image: "https://avatar.iran.liara.run/public/boy",
+      });
+    }
 
     await UserStat.findOneAndUpdate(
       { userId },
@@ -149,12 +151,12 @@ const unFollowUser = async (req, res) => {
     const checkAlreadyUnfollow = await Follow.findOne({
       userId: followId,
       followerId: userId,
-    }).populate({ path: "userId", select: "userName" });
+    });
 
     if (!checkAlreadyUnfollow)
       return res.status(200).json({
         status: true,
-        message: `You already unfollowed ${checkAlreadyUnfollow.userId.userName}`,
+        message: `Already unfollowed`,
       });
 
     const unFollow = await Follow.findOneAndDelete({
