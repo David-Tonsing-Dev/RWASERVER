@@ -421,114 +421,114 @@ const getCommentsByForumId = async (req, res) => {
 };
 
 const getCommentsByUserId = async (req, res) => {
-  //   let { forumId, page, size } = req.query;
-  //   const { userId } = req.params;
-  //   page = page ? parseInt(page) : 1;
-  //   size = size ? parseInt(size) : 50;
-  //   try {
-  //     if (forumId) {
-  //       if (!mongoose.Types.ObjectId.isValid(forumId))
-  //         return res
-  //           .status(400)
-  //           .json({ status: false.valueOf, message: "Invalid category" });
-  //       const userComments = await Comment.aggregate([
-  //         {
-  //           $match: {
-  //             userId: mongoose.Types.ObjectId.createFromHexString(userId),
-  //           },
-  //         },
-  //         {
-  //           $lookup: {
-  //             from: "forums",
-  //             localField: "forumId",
-  //             foreignField: "_id",
-  //             as: "forumId",
-  //           },
-  //         },
-  //         {
-  //           $unwind: "$forumId",
-  //         },
-  //         {
-  //           $match: {
-  //             "forumId._id": mongoose.Types.ObjectId.createFromHexString(forumId),
-  //           },
-  //         },
-  //         {
-  //           $lookup: {
-  //             from: "users",
-  //             localField: "userId",
-  //             foreignField: "_id",
-  //             as: "userId",
-  //           },
-  //         },
-  //         {
-  //           $unwind: "$userId",
-  //         },
-  //         {
-  //           $lookup: {
-  //             from: "forumcomments",
-  //             localField: "quotedCommentedId",
-  //             foreignField: "_id",
-  //             as: "quotedCommentedId",
-  //           },
-  //         },
-  //         {
-  //           $unwind: {
-  //             path: "$quotedCommentedId",
-  //             preserveNullAndEmptyArrays: true,
-  //           },
-  //         },
-  //         {
-  //           $project: {
-  //             _id: 1,
-  //             forumId: {
-  //               _id: 1,
-  //               title: 1,
-  //             },
-  //             text: 1,
-  //             username: 1,
-  //             userId: {
-  //               profileImg: 1,
-  //               _id: 1,
-  //               userName: 1,
-  //             },
-  //             quotedCommentedId: {
-  //               _id: 1,
-  //               text: 1,
-  //               username: 1,
-  //             },
-  //             isReported: 1,
-  //             reportCount: 1,
-  //             reactions: 1,
-  //             createdAt: 1,
-  //             updatedAt: 1,
-  //             __v: 1,
-  //           },
-  //         },
-  //         { $sort: { createdAt: -1 } },
-  //         { $skip: (page - 1) * size },
-  //         { $limit: size },
-  //       ]);
-  //       return res.status(200).json({ status: true, userComments });
-  //     }
-  //     const userComments = await Comment.find({ userId })
-  //       .populate({
-  //         path: "forumId",
-  //         select: "title",
-  //       })
-  //       .populate({ path: "userId", select: "userName profileImg" })
-  //       .populate({ path: "quotedCommentedId", select: "text username" })
-  //       .sort({ createdAt: -1 })
-  //       .skip((page - 1) * size)
-  //       .limit(size);
-  //     return res.status(200).json({ status: true, userComments });
-  //   } catch (err) {
-  //     return res.status(500).json({
-  //       status: false,
-  //       message: "Something went wrong, try again later",
-  //       error: err.message,
-  //     });
-  //   }
+  let { forumId, page, size } = req.query;
+  const { userId } = req.params;
+  page = page ? parseInt(page) : 1;
+  size = size ? parseInt(size) : 50;
+  try {
+    if (forumId) {
+      // if (!mongoose.Types.ObjectId.isValid(forumId))
+      //   return res
+      //     .status(400)
+      //     .json({ status: false.valueOf, message: "Invalid category" });
+      // const userComments = await Comment.aggregate([
+      //   {
+      //     $match: {
+      //       userId: mongoose.Types.ObjectId.createFromHexString(userId),
+      //     },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: "forums",
+      //       localField: "forumId",
+      //       foreignField: "_id",
+      //       as: "forumId",
+      //     },
+      //   },
+      //   {
+      //     $unwind: "$forumId",
+      //   },
+      //   {
+      //     $match: {
+      //       "forumId._id": mongoose.Types.ObjectId.createFromHexString(forumId),
+      //     },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: "users",
+      //       localField: "userId",
+      //       foreignField: "_id",
+      //       as: "userId",
+      //     },
+      //   },
+      //   {
+      //     $unwind: "$userId",
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: "forumcomments",
+      //       localField: "quotedCommentedId",
+      //       foreignField: "_id",
+      //       as: "quotedCommentedId",
+      //     },
+      //   },
+      //   {
+      //     $unwind: {
+      //       path: "$quotedCommentedId",
+      //       preserveNullAndEmptyArrays: true,
+      //     },
+      //   },
+      //   {
+      //     $project: {
+      //       _id: 1,
+      //       forumId: {
+      //         _id: 1,
+      //         title: 1,
+      //       },
+      //       text: 1,
+      //       username: 1,
+      //       userId: {
+      //         profileImg: 1,
+      //         _id: 1,
+      //         userName: 1,
+      //       },
+      //       quotedCommentedId: {
+      //         _id: 1,
+      //         text: 1,
+      //         username: 1,
+      //       },
+      //       isReported: 1,
+      //       reportCount: 1,
+      //       reactions: 1,
+      //       createdAt: 1,
+      //       updatedAt: 1,
+      //       __v: 1,
+      //     },
+      //   },
+      //   { $sort: { createdAt: -1 } },
+      //   { $skip: (page - 1) * size },
+      //   { $limit: size },
+      // ]);
+      // return res.status(200).json({ status: true, userComments });
+    }
+    const userComments = await Comment.find({ userId })
+      .populate({
+        path: "forumId",
+        select: "title",
+      })
+      .populate({ path: "userId", select: "userName profileImg" })
+      .populate({ path: "quotedCommentedId", select: "text username" })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * size)
+      .limit(size);
+    return res.status(200).json({ status: true, userComments });
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again later",
+      error: err.message,
+    });
+  }
 };
 
 module.exports = {
