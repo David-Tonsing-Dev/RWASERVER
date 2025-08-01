@@ -829,7 +829,7 @@ const fcmToken = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const {
+    let {
       userName,
       email,
       link,
@@ -838,6 +838,8 @@ const updateUser = async (req, res) => {
     } = req.body;
     const { profileImg, bannerImg } = req.files;
     const userId = req.userId;
+
+    link = JSON.parse(link);
 
     if (!userName)
       return res
@@ -929,13 +931,11 @@ const updateUser = async (req, res) => {
       .json({ status: true, message: "User updated successfully" });
   } catch (err) {
     console.log("ERROR::", err.message);
-    return res
-      .status(500)
-      .json({
-        status: false,
-        message: "Something went wrong, try again.",
-        error: err.message,
-      });
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again.",
+      error: err.message,
+    });
   }
 };
 
