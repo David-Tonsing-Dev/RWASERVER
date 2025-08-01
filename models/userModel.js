@@ -40,6 +40,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    bannerImg: {
+      type: String,
+      default: null,
+    },
+    link: [
+      {
+        platform: { type: String },
+        url: { type: String },
+      },
+    ],
     fcmToken: {
       type: [String],
       default: [],

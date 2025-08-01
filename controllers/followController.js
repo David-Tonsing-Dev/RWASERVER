@@ -156,7 +156,7 @@ const unFollowUser = async (req, res) => {
     if (!checkAlreadyUnfollow)
       return res.status(200).json({
         status: true,
-        message: `Already unfollowed`,
+        message: "Not followed",
       });
 
     const unFollow = await Follow.findOneAndDelete({

@@ -2,10 +2,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const mg = require("nodemailer-mailgun-transport");
+const mongoose = require("mongoose");
 const UserModel = require("../models/userModel");
 const UserCoin = require("../models/userCoinModel");
 const UserStat = require("../models/userStatModel");
 const Guest = require("../models/guestUserModel");
+const cloudinary = require("../config/cloudinary");
 const { capitalizeAfterSpace } = require("../helper/capitalize");
 const differenceTwoDates = require("../helper/moments/dateDifference");
 
@@ -815,6 +817,113 @@ const fcmToken = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const {
+      userName,
+      email,
+      link,
+      removeProfileImg = false,
+      removeBannerImg = false,
+    } = req.body;
+    const { profileImg, bannerImg } = req.files;
+    const userId = req.userId;
+
+    if (!userName)
+      return res
+        .status(400)
+        .json({ status: false, message: "Username cannot be empty" });
+
+    if (!email)
+      return res
+        .status(400)
+        .json({ status: false, message: "Email cannot be empty" });
+
+    if (!mongoose.Types.ObjectId.isValid(userId) || !userId)
+      return res.status(403).json({ status: false, message: "User not found" });
+
+    const checkUser = await UserModel.findOne({ _id: userId });
+
+    if (!checkUser)
+      return res.status(404).json({ status: false, message: "User not found" });
+
+    if (userName) checkUser.userName = userName;
+    if (email) checkUser.email = email;
+    if (link && link.length > 0) checkUser.link = link;
+    // if (link && link.length > 0) {
+    //   if (checkUser.link.length > 0) {
+    //     const linkMap = new Map();
+    //     checkUser.link.forEach((link) =>
+    //       linkMap.set(link._id.toString(), link)
+    //     );
+    //     link.forEach(({ _id, platform, url }) => {
+    //       if (!platform || !url) return;
+
+    //       if (linkMap.has(_id)) {
+    //         linkMap.get(_id).platform = platform;
+    //         linkMap.get(_id).url = url;
+    //       } else {
+    //         linkMap.set(_id, { platform, url });
+    //       }
+    //     });
+    //     checkUser.link = Array.from(linkMap.values());
+    //   } else {
+    //     checkUser.link = link;
+    //   }
+    // }
+
+    if (profileImg && !bannerImg && !removeProfileImg) {
+      const response = await cloudinary.uploader.upload(profileImg[0].path, {
+        use_filename: true,
+        folder: "rwa/user/profile",
+      });
+
+      checkUser.profileImg = response.secure_url;
+    }
+
+    if (bannerImg && !profileImg && !removeBannerImg) {
+      const response = await cloudinary.uploader.upload(bannerImg[0].path, {
+        use_filename: true,
+        folder: "rwa/user/banner",
+      });
+
+      checkUser.bannerImg = response.secure_url;
+    }
+
+    if (profileImg && bannerImg && !removeProfileImg && !removeBannerImg) {
+      const profileResponse = cloudinary.uploader.upload(profileImg[0].path, {
+        use_filename: true,
+        folder: "rwa/user/profile",
+      });
+
+      const bannerResponse = cloudinary.uploader.upload(bannerImg[0].path, {
+        use_filename: true,
+        folder: "rwa/user/banner",
+      });
+
+      const [profile, banner] = await Promise.all([
+        profileResponse,
+        bannerResponse,
+      ]);
+      checkUser.profileImg = profile.secure_url;
+      checkUser.bannerImg = banner.secure_url;
+    }
+
+    if (removeProfileImg) checkUser.profileImg = null;
+    if (removeBannerImg) checkUser.bannerImg = null;
+
+    await checkUser.save();
+
+    return res
+      .status(200)
+      .json({ status: true, message: "User updated successfully" });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ status: false, message: "Something went wrong, try again." });
+  }
+};
+
 module.exports = {
   signup,
   signin,
@@ -824,6 +933,7 @@ module.exports = {
   verifyEmail,
   forgotPassword,
   resetPassword,
+  updateUser,
   addUserFavCoin,
   deleteUserFavCoin,
   googleData,

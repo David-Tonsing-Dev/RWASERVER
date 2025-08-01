@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["SUPERADMIN", "ADMIN", "USER", "REVIEWER"],
+    enum: ["SUPERADMIN", "ADMIN", "USER", "REVIEWER", "MODERATOR"],
     default: "ADMIN",
   },
 });
