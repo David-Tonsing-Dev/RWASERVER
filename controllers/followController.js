@@ -6,12 +6,54 @@ const sendPushNotificationForum = require("../helper/notifications/sendPushNotif
 const getAllFollower = async (req, res) => {
   try {
     const userId = req.userId;
-    const { page = 1, size = 50 } = req.query;
+    let { page, size, filter } = req.query;
+
+    page = !page ? 1 : parseInt(page);
+    size = !size ? 50 : parseInt(size);
 
     if (!userId)
       return res
         .status(403)
         .json({ status: false, message: "Could not find user" });
+
+    if (filter) {
+      const followers = await Follow.aggregate([
+        {
+          $match: {
+            userId: mongoose.Types.ObjectId.createFromHexString(userId),
+          },
+        },
+        {
+          $lookup: {
+            from: "users", // Collection name
+            localField: "followerId",
+            foreignField: "_id",
+            as: "follower",
+          },
+        },
+        { $unwind: "$follower" },
+        {
+          $match: {
+            "follower.userName": { $regex: filter, $options: "i" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            follower: {
+              userName: 1,
+              profileImg: 1,
+            },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: (page - 1) * size },
+        { $limit: size },
+      ]);
+
+      return res.status(200).json({ status: true, followers });
+    }
 
     const followers = await Follow.find({ userId })
       .populate({ path: "followerId", select: "userName profilePic" })
@@ -21,6 +63,7 @@ const getAllFollower = async (req, res) => {
 
     return res.status(200).json({ status: true, followers });
   } catch (err) {
+    console.log("ERROR::", err.message);
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later!",
@@ -31,12 +74,56 @@ const getAllFollower = async (req, res) => {
 const getAllFollowing = async (req, res) => {
   try {
     const userId = req.userId;
-    const { page = 1, size = 50 } = req.query;
+    let { page, size, filter } = req.query;
+
+    page = !page ? 1 : parseInt(page);
+    size = !size ? 50 : parseInt(size);
 
     if (!userId)
       return res
         .status(403)
         .json({ status: false, message: "Could not find user" });
+
+    if (filter) {
+      const followings = await Follow.aggregate([
+        {
+          $match: {
+            followerId: mongoose.Types.ObjectId.createFromHexString(userId),
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "following",
+          },
+        },
+        {
+          $unwind: "$following",
+        },
+        {
+          $match: {
+            "following.userName": { $regex: filter, $options: "i" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            following: {
+              userName: 1,
+              profileImg: 1,
+            },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: (page - 1) * size },
+        { $limit: size },
+      ]);
+
+      return res.status(200).json({ status: true, followings });
+    }
 
     const followings = await Follow.find({ followerId: userId })
       .populate({ path: "userId", select: "userName profilePic" })
