@@ -928,9 +928,14 @@ const updateUser = async (req, res) => {
       .status(200)
       .json({ status: true, message: "User updated successfully" });
   } catch (err) {
+    console.log("ERROR::", err.message);
     return res
       .status(500)
-      .json({ status: false, message: "Something went wrong, try again." });
+      .json({
+        status: false,
+        message: "Something went wrong, try again.",
+        error: err.message,
+      });
   }
 };
 

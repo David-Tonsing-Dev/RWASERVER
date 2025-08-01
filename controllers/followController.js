@@ -98,22 +98,22 @@ const getAllFollowing = async (req, res) => {
             from: "users",
             localField: "userId",
             foreignField: "_id",
-            as: "followingId",
+            as: "userId",
           },
         },
         {
-          $unwind: "$followingId",
+          $unwind: "$userId",
         },
         {
           $match: {
-            "followingId.userName": { $regex: filter, $options: "i" },
+            "userId.userName": { $regex: filter, $options: "i" },
           },
         },
         {
           $project: {
             _id: 1,
             createdAt: 1,
-            followingId: {
+            userId: {
               userName: 1,
               profileImg: 1,
               _id: 1,

@@ -8,6 +8,7 @@ const {
   reactToComment,
   getCommentsByForumId,
   reactToCommentDislike,
+  getCommentsByUserId,
 } = require("../controllers/forumCommentController");
 const {
   authMiddleware,
@@ -20,5 +21,6 @@ router.delete("/:id", authMiddleware, deleteComment);
 router.post("/react", authMiddleware, reactToComment);
 router.post("/react/dislike", authMiddleware, reactToCommentDislike);
 router.get("/forum/:forumId", nonAuthMiddleware, getCommentsByForumId);
+router.get("/user/:userId", getCommentsByUserId);
 
 module.exports = router;
