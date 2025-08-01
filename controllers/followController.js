@@ -28,22 +28,23 @@ const getAllFollower = async (req, res) => {
             from: "users", // Collection name
             localField: "followerId",
             foreignField: "_id",
-            as: "follower",
+            as: "followerId",
           },
         },
-        { $unwind: "$follower" },
+        { $unwind: "$followerId" },
         {
           $match: {
-            "follower.userName": { $regex: filter, $options: "i" },
+            "followerId.userName": { $regex: filter, $options: "i" },
           },
         },
         {
           $project: {
             _id: 1,
             createdAt: 1,
-            follower: {
+            followerId: {
               userName: 1,
               profileImg: 1,
+              _id: 1,
             },
           },
         },
@@ -56,7 +57,8 @@ const getAllFollower = async (req, res) => {
     }
 
     const followers = await Follow.find({ userId })
-      .populate({ path: "followerId", select: "userName profilePic" })
+      .populate({ path: "followerId", select: "userName profileImg" })
+      .select("-userId -updatedAt -__v")
       .skip((page - 1) * size)
       .limit(size)
       .sort({ createdAt: -1 });
@@ -96,24 +98,25 @@ const getAllFollowing = async (req, res) => {
             from: "users",
             localField: "userId",
             foreignField: "_id",
-            as: "following",
+            as: "followingId",
           },
         },
         {
-          $unwind: "$following",
+          $unwind: "$followingId",
         },
         {
           $match: {
-            "following.userName": { $regex: filter, $options: "i" },
+            "followingId.userName": { $regex: filter, $options: "i" },
           },
         },
         {
           $project: {
             _id: 1,
             createdAt: 1,
-            following: {
+            followingId: {
               userName: 1,
               profileImg: 1,
+              _id: 1,
             },
           },
         },
@@ -126,7 +129,8 @@ const getAllFollowing = async (req, res) => {
     }
 
     const followings = await Follow.find({ followerId: userId })
-      .populate({ path: "userId", select: "userName profilePic" })
+      .populate({ path: "userId", select: "userName profileImg" })
+      .select("-followerId -updatedAt -__v")
       .skip((page - 1) * size)
       .limit(size)
       .sort({ createdAt: -1 });
