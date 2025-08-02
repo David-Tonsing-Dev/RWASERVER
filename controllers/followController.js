@@ -63,7 +63,9 @@ const getAllFollower = async (req, res) => {
       .limit(size)
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({ status: true, followers });
+    const total = await Follow.countDocuments({ userId });
+
+    return res.status(200).json({ status: true, followers, total });
   } catch (err) {
     console.log("ERROR::", err.message);
     return res.status(500).json({
@@ -135,7 +137,9 @@ const getAllFollowing = async (req, res) => {
       .limit(size)
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({ status: true, followings });
+    const total = await Follow.countDocuments({ followerId: userId });
+
+    return res.status(200).json({ status: true, followings, total });
   } catch (err) {
     return res.status(500).json({
       status: false,

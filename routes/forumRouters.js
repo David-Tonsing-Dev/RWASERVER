@@ -12,6 +12,7 @@ const {
   getForumByUser,
   reactToForum,
   reactToForumDislike,
+  getForumLikeByUser,
 } = require("../controllers/forumController");
 const {
   nonAuthMiddleware,
@@ -29,5 +30,6 @@ router.delete("/:id", authMiddleware, deleteForum);
 router.get("/user/:userId", nonAuthMiddleware, getForumByUser);
 router.post("/react", authMiddleware, reactToForum);
 router.post("/react/dislike", authMiddleware, reactToForumDislike);
+router.get("/likes/user/:userId", getForumLikeByUser);
 
 module.exports = router;

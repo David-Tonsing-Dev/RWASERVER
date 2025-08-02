@@ -521,7 +521,9 @@ const getCommentsByUserId = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * size)
       .limit(size);
-    return res.status(200).json({ status: true, userComments });
+
+    const total = await Comment.countDocuments({ userId });
+    return res.status(200).json({ status: true, userComments, total });
   } catch (err) {
     return res.status(500).json({
       status: false,

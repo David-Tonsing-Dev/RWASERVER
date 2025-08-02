@@ -753,6 +753,43 @@ const getHotTopic = async (req, res) => {
     });
   }
 };
+
+const getForumLikeByUser = async (req, res) => {
+  try {
+    let { page, size, subCategoryId } = req.query;
+    let { userId } = req.params;
+
+    page = page ? parseInt(page) : 1;
+    size = size ? parseInt(size) : 50;
+
+    const likedForum = await ForumReaction.find({
+      userId,
+      emoji: "👍",
+    })
+      .populate({
+        path: "forumId",
+        select: "title",
+        populate: { path: "userId", select: "userName profileImg" },
+      })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * size)
+      .limit(size);
+
+    const total = await ForumReaction.countDocuments({
+      userId,
+      emoji: "👍",
+    });
+
+    return res.status(200).json({ status: true, likedForum, total });
+  } catch (err) {
+    console.log("ERROR::", err.message);
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again later",
+    });
+  }
+};
+
 module.exports = {
   createForum,
   createForumForMobile,
@@ -765,4 +802,5 @@ module.exports = {
   getForumByUser,
   reactToForum,
   reactToForumDislike,
+  getForumLikeByUser,
 };
