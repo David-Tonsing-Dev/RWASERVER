@@ -844,6 +844,8 @@ const updateUser = async (req, res) => {
     console.log("profileImg", profileImg);
     console.log("bannerImg", bannerImg);
     console.log("link", link);
+    console.log("removeProfileImg", removeProfileImg);
+    console.log("removeBannerImg", removeBannerImg);
 
     if (!userName)
       return res
@@ -889,24 +891,27 @@ const updateUser = async (req, res) => {
     // }
 
     if (profileImg && !bannerImg && !removeProfileImg) {
+      console.log("profile=========================");
       const response = await cloudinary.uploader.upload(profileImg[0].path, {
         use_filename: true,
         folder: "rwa/user/profile",
       });
-
+      console.log("responseProfile", response);
       checkUser.profileImg = response.secure_url;
     }
 
     if (bannerImg && !profileImg && !removeBannerImg) {
+      console.log("banner=========================");
       const response = await cloudinary.uploader.upload(bannerImg[0].path, {
         use_filename: true,
         folder: "rwa/user/banner",
       });
-
+      console.log("responseProfile", response);
       checkUser.bannerImg = response.secure_url;
     }
 
     if (profileImg && bannerImg && !removeProfileImg && !removeBannerImg) {
+      console.log("-=-=-=-=-=-=-=-=-=-uploaddddd");
       const profileResponse = cloudinary.uploader.upload(profileImg[0].path, {
         use_filename: true,
         folder: "rwa/user/profile",
