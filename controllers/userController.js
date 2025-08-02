@@ -834,13 +834,14 @@ const updateUser = async (req, res) => {
       userName,
       email,
       link,
+      description,
       removeProfileImg = false,
       removeBannerImg = false,
     } = req.body;
     const { profileImg, bannerImg } = req.files;
     const userId = req.userId;
 
-    link = JSON.parse(link);
+    link = link && link.length ? JSON.parse(link) : [];
     removeProfileImg =
       removeProfileImg && removeProfileImg === "true" ? true : false;
     removeBannerImg =
@@ -867,6 +868,7 @@ const updateUser = async (req, res) => {
     if (userName) checkUser.userName = userName;
     if (email) checkUser.email = email;
     if (link && link.length > 0) checkUser.link = link;
+    if (description) checkUser.description = description;
     // if (link && link.length > 0) {
     //   if (checkUser.link.length > 0) {
     //     const linkMap = new Map();
@@ -935,7 +937,6 @@ const updateUser = async (req, res) => {
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later",
-      error: err.message,
     });
   }
 };
