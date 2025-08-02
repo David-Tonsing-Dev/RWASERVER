@@ -840,10 +840,10 @@ const updateUser = async (req, res) => {
     const { profileImg, bannerImg } = req.files;
     const userId = req.userId;
 
-    // link = JSON.parse(link);
-
+    link = JSON.parse(link);
     console.log("profileImg", profileImg);
     console.log("bannerImg", bannerImg);
+    console.log("link", link);
 
     if (!userName)
       return res
@@ -934,6 +934,7 @@ const updateUser = async (req, res) => {
       .status(200)
       .json({ status: true, message: "User updated successfully" });
   } catch (err) {
+    console.log("ERROR::", err.message);
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later",
