@@ -15,6 +15,7 @@ const GoogleAnalyticsData = require("../admin/models/googleAnalyticsDataModel");
 const MobileAppAnalyticsData = require("../models/mobileAppAnalyticsDataModel");
 const HighLight = require("../models/highLightModel");
 const fetchHighLightData = require("../helper/fetchAndStoreHighlightData");
+const { getClientIP } = require("../helper/getClientIP");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&per_page=250&sparkline=true&price_change_percentage=1h,7d";
