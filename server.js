@@ -109,6 +109,12 @@ app.use("/api/admin/forum-category", forumAdminCategoryRouter);
 app.use("/api/admin/forum-sub-category", forumAdminSubCategoryRouter);
 app.use("/api/admin/events", eventRouter);
 
+app.use((req, res, next) => {
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || null;
+  console.log("Visitor IP:", ip);
+  next();
+});
+
 mongoose.connect(process.env.MONGODB_URI).then(() => {
   server.listen(PORT, async () => {
     console.log(`Listening on port ${PORT}`);
