@@ -11,6 +11,7 @@ const {
   forgotPassword,
   resetPassword,
   updateUser,
+  getUserDetailById,
   addUserFavCoin,
   deleteUserFavCoin,
   googleSignIn,
@@ -49,6 +50,7 @@ router.put(
   ]),
   updateUser
 );
+router.get("/detail/:userId", getUserDetailById);
 
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
