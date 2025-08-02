@@ -841,11 +841,10 @@ const updateUser = async (req, res) => {
     const userId = req.userId;
 
     link = JSON.parse(link);
-    console.log("profileImg", profileImg);
-    console.log("bannerImg", bannerImg);
-    console.log("link", link);
-    console.log("removeProfileImg", removeProfileImg);
-    console.log("removeBannerImg", removeBannerImg);
+    removeProfileImg =
+      removeProfileImg && removeProfileImg === "true" ? true : false;
+    removeBannerImg =
+      removeBannerImg && removeBannerImg === "true" ? true : false;
 
     if (!userName)
       return res
@@ -889,29 +888,21 @@ const updateUser = async (req, res) => {
     //     checkUser.link = link;
     //   }
     // }
-    console.log("reach1");
     if (profileImg && !bannerImg && !removeProfileImg) {
-      console.log("profile=========================");
       const response = await cloudinary.uploader.upload(profileImg[0].path, {
         use_filename: true,
         folder: "rwa/user/profile",
       });
-      console.log("responseProfile", response);
       checkUser.profileImg = response.secure_url;
     }
-    console.log("reach2");
     if (bannerImg && !profileImg && !removeBannerImg) {
-      console.log("banner=========================");
       const response = await cloudinary.uploader.upload(bannerImg[0].path, {
         use_filename: true,
         folder: "rwa/user/banner",
       });
-      console.log("responseProfile", response);
       checkUser.bannerImg = response.secure_url;
     }
-    console.log("reach3");
     if (profileImg && bannerImg && !removeProfileImg && !removeBannerImg) {
-      console.log("-=-=-=-=-=-=-=-=-=-uploaddddd");
       const profileResponse = cloudinary.uploader.upload(profileImg[0].path, {
         use_filename: true,
         folder: "rwa/user/profile",
@@ -926,8 +917,7 @@ const updateUser = async (req, res) => {
         profileResponse,
         bannerResponse,
       ]);
-      console.log("profile", profile);
-      console.log("banner", banner);
+
       checkUser.profileImg = profile.secure_url;
       checkUser.bannerImg = banner.secure_url;
     }
