@@ -6,21 +6,68 @@ const sendPushNotificationForum = require("../helper/notifications/sendPushNotif
 const getAllFollower = async (req, res) => {
   try {
     const userId = req.userId;
-    const { page = 1, size = 50 } = req.query;
+    let { page, size, filter } = req.query;
+
+    page = !page ? 1 : parseInt(page);
+    size = !size ? 50 : parseInt(size);
 
     if (!userId)
       return res
         .status(403)
         .json({ status: false, message: "Could not find user" });
 
+    if (filter) {
+      const followers = await Follow.aggregate([
+        {
+          $match: {
+            userId: mongoose.Types.ObjectId.createFromHexString(userId),
+          },
+        },
+        {
+          $lookup: {
+            from: "users", // Collection name
+            localField: "followerId",
+            foreignField: "_id",
+            as: "followerId",
+          },
+        },
+        { $unwind: "$followerId" },
+        {
+          $match: {
+            "followerId.userName": { $regex: filter, $options: "i" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            followerId: {
+              userName: 1,
+              profileImg: 1,
+              _id: 1,
+            },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: (page - 1) * size },
+        { $limit: size },
+      ]);
+
+      return res.status(200).json({ status: true, followers });
+    }
+
     const followers = await Follow.find({ userId })
-      .populate({ path: "followerId", select: "userName profilePic" })
+      .populate({ path: "followerId", select: "userName profileImg" })
+      .select("-userId -updatedAt -__v")
       .skip((page - 1) * size)
       .limit(size)
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({ status: true, followers });
+    const total = await Follow.countDocuments({ userId });
+
+    return res.status(200).json({ status: true, followers, total });
   } catch (err) {
+    console.log("ERROR::", err.message);
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later!",
@@ -31,20 +78,68 @@ const getAllFollower = async (req, res) => {
 const getAllFollowing = async (req, res) => {
   try {
     const userId = req.userId;
-    const { page = 1, size = 50 } = req.query;
+    let { page, size, filter } = req.query;
+
+    page = !page ? 1 : parseInt(page);
+    size = !size ? 50 : parseInt(size);
 
     if (!userId)
       return res
         .status(403)
         .json({ status: false, message: "Could not find user" });
 
+    if (filter) {
+      const followings = await Follow.aggregate([
+        {
+          $match: {
+            followerId: mongoose.Types.ObjectId.createFromHexString(userId),
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userId",
+          },
+        },
+        {
+          $unwind: "$userId",
+        },
+        {
+          $match: {
+            "userId.userName": { $regex: filter, $options: "i" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            createdAt: 1,
+            userId: {
+              userName: 1,
+              profileImg: 1,
+              _id: 1,
+            },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: (page - 1) * size },
+        { $limit: size },
+      ]);
+
+      return res.status(200).json({ status: true, followings });
+    }
+
     const followings = await Follow.find({ followerId: userId })
-      .populate({ path: "userId", select: "userName profilePic" })
+      .populate({ path: "userId", select: "userName profileImg" })
+      .select("-followerId -updatedAt -__v")
       .skip((page - 1) * size)
       .limit(size)
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({ status: true, followings });
+    const total = await Follow.countDocuments({ followerId: userId });
+
+    return res.status(200).json({ status: true, followings, total });
   } catch (err) {
     return res.status(500).json({
       status: false,
@@ -95,12 +190,14 @@ const followUser = async (req, res) => {
       { path: "followerId", select: "userName" },
     ]);
 
-    await sendPushNotificationForum({
-      userId: follow.userId.fcmToken,
-      title: "New follower",
-      body: `${follow.followerId.userName} follows you`,
-      image: "https://avatar.iran.liara.run/public/boy",
-    });
+    if (follow.userId.fcmToken && follow.userId.fcmToken.length >= 1) {
+      await sendPushNotificationForum({
+        userId: follow.userId.fcmToken,
+        title: "New follower",
+        body: `${follow.followerId.userName} follows you`,
+        image: "https://avatar.iran.liara.run/public/boy",
+      });
+    }
 
     await UserStat.findOneAndUpdate(
       { userId },
@@ -149,12 +246,12 @@ const unFollowUser = async (req, res) => {
     const checkAlreadyUnfollow = await Follow.findOne({
       userId: followId,
       followerId: userId,
-    }).populate({ path: "userId", select: "userName" });
+    });
 
     if (!checkAlreadyUnfollow)
       return res.status(200).json({
         status: true,
-        message: `You already unfollowed ${checkAlreadyUnfollow.userId.userName}`,
+        message: "Not followed",
       });
 
     const unFollow = await Follow.findOneAndDelete({

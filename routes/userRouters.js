@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const passport = require("passport");
+const upload = require("../multer/multer");
 const {
   signup,
   signin,
@@ -8,6 +10,8 @@ const {
   verifyEmail,
   forgotPassword,
   resetPassword,
+  updateUser,
+  getUserDetailById,
   addUserFavCoin,
   deleteUserFavCoin,
   googleSignIn,
@@ -18,7 +22,6 @@ const {
   authMiddleware,
   nonAuthMiddleware,
 } = require("../middlewares/authMiddleware");
-const passport = require("passport");
 
 router.post("/signup", signup);
 router.post("/signin", signin);
@@ -38,6 +41,16 @@ router.post("/auth/google", googleData);
 router.get("/verify/:token", verifyEmail);
 router.get("/:userId", findUser);
 router.get("/", getUsers);
+router.put(
+  "/update",
+  authMiddleware,
+  upload.fields([
+    { name: "profileImg", maxCount: 1 },
+    { name: "bannerImg", maxCount: 1 },
+  ]),
+  updateUser
+);
+router.get("/detail/:userId", getUserDetailById);
 
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
