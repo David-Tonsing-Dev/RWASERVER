@@ -325,6 +325,7 @@ const signin = async (req, res) => {
       bannerImg: user.bannerImg,
       createdAt: user.createdAt,
       description: user.description,
+      link: user.link,
       token,
       email,
       stat: userStat,
@@ -839,7 +840,10 @@ const updateUser = async (req, res) => {
     const { profileImg, bannerImg } = req.files;
     const userId = req.userId;
 
-    link = JSON.parse(link);
+    // link = JSON.parse(link);
+
+    console.log("profileImg", profileImg);
+    console.log("bannerImg", bannerImg);
 
     if (!userName)
       return res
@@ -933,6 +937,7 @@ const updateUser = async (req, res) => {
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later",
+      error: err.message,
     });
   }
 };
