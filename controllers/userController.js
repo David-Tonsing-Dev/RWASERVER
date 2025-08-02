@@ -921,6 +921,8 @@ const updateUser = async (req, res) => {
         profileResponse,
         bannerResponse,
       ]);
+      console.log("profile", profile);
+      console.log("banner", banner);
       checkUser.profileImg = profile.secure_url;
       checkUser.bannerImg = banner.secure_url;
     }
