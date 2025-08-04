@@ -887,6 +887,7 @@ const getNews = async (req, res) => {
 const getNewsDetail = async (req, res) => {
   try {
     const { slug } = req.params;
+    await getClientIP(req, slug);
 
     const newsObj = await News.findOne({ slug });
 
@@ -908,8 +909,7 @@ const getNewsDetail = async (req, res) => {
 const getBlogDetail = async (req, res) => {
   try {
     const { slug } = req.params;
-    const ip = getClientIP(req);
-    console.log(ip, "============>ip");
+    await getClientIP(req, slug);
 
     const getBlog = await Blog.findOne({ slug });
 
