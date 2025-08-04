@@ -17,6 +17,7 @@ const {
   googleSignIn,
   googleData,
   fcmToken,
+  getUserBadges,
 } = require("../controllers/userController");
 const {
   authMiddleware,
@@ -51,6 +52,7 @@ router.put(
   updateUser
 );
 router.get("/detail/:userId", getUserDetailById);
+router.get("/badges/:userId", getUserBadges);
 
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);

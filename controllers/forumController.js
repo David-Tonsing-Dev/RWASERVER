@@ -7,6 +7,7 @@ const ForumReaction = require("../models/forumReactionModel");
 const UserStat = require("../models/userStatModel");
 const normalizeEmoji = require("../helper/normalizeEmoji");
 const hotForumTopicsService = require("../services/hotForumTopicsService");
+const { getClientIP } = require("../helper/getClientIP");
 
 const createForum = async (req, res) => {
   try {
@@ -219,6 +220,7 @@ const getForumById = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.userId;
+    await getClientIP(req, id, userId);
 
     if (!mongoose.Types.ObjectId.isValid(id))
       return res.status(400).json({ message: "Invalid forum Id" });

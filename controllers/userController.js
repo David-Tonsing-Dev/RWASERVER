@@ -245,7 +245,7 @@ const signin = async (req, res) => {
     ) {
       userStat.tieredProgression = "Explorer";
     } else {
-      userStat.tieredProgression = "New user";
+      userStat.tieredProgression = "Observer";
     }
 
     // for Skill & Reputation-Based Badges
@@ -415,7 +415,7 @@ const googleData = async (req, res) => {
     ) {
       userStat.tieredProgression = "Explorer";
     } else {
-      userStat.tieredProgression = "New user";
+      userStat.tieredProgression = "Observer";
     }
 
     // for Skill & Reputation-Based Badges
@@ -997,7 +997,7 @@ const getUserDetailById = async (req, res) => {
     ) {
       userStat.tieredProgression = "Explorer";
     } else {
-      userStat.tieredProgression = "New user";
+      userStat.tieredProgression = "Observer";
     }
 
     // for Skill & Reputation-Based Badges
@@ -1078,6 +1078,156 @@ const getUserDetailById = async (req, res) => {
   }
 };
 
+const getUserBadges = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId))
+      return res.status(400).json({ status: false, message: "User not found" });
+
+    const checkUser = await UserModel.findOne({ _id: userId });
+
+    if (!checkUser)
+      return res.status(404).json({ status: false, message: "User not found" });
+
+    const userStat = await UserStat.findOneAndUpdate(
+      {
+        userId,
+      },
+      {},
+      { upsert: true }
+    ).lean();
+
+    if (userStat) {
+      for (let field in userStat) {
+        if (userStat[field] === false) {
+          delete userStat[field];
+        }
+      }
+    }
+
+    // for Tiered Progression Badges
+    if (
+      differenceTwoDates(checkUser.createdAt, new Date()) >= 360 &&
+      userStat.totalThreadPosted >= 50 &&
+      userStat.totalCommentGiven >= 300 &&
+      userStat.totalLikeReceived >= 250 &&
+      userStat.totalFollower >= 50 &&
+      userStat.totalViewReceived >= 10000
+    ) {
+      userStat.tieredProgression = [
+        "Veteran",
+        "Contributor",
+        "Explorer",
+        "Observer",
+      ];
+    } else if (
+      differenceTwoDates(checkUser.createdAt, new Date()) >= 30 &&
+      userStat.totalThreadPosted >= 10 &&
+      userStat.totalCommentGiven >= 50 &&
+      userStat.totalLikeReceived >= 50 &&
+      userStat.totalFollower >= 10 &&
+      userStat.totalViewReceived >= 1000
+    ) {
+      userStat.tieredProgression = ["Contributor", "Explorer", "Observer"];
+    } else if (
+      differenceTwoDates(checkUser.createdAt, new Date()) >= 1 &&
+      userStat.totalThreadPosted >= 1 &&
+      userStat.totalCommentGiven >= 1
+    ) {
+      userStat.tieredProgression = ["Explorer", "Observer"];
+    } else {
+      userStat.tieredProgression = ["Observer"];
+    }
+
+    // for Skill & Reputation-Based Badges
+    if (
+      userStat.totalThreadPosted >= 75 &&
+      userStat.totalCommentGiven >= 500 &&
+      userStat.totalLikeReceived >= 500 &&
+      userStat.totalFollower >= 100 &&
+      userStat.totalViewReceived >= 25000
+    ) {
+      userStat.reputation = ["Pro", "Expert", "Top contributor"];
+    } else if (
+      userStat.totalThreadPosted >= 100 &&
+      userStat.totalCommentGiven >= 750 &&
+      userStat.totalLikeReceived >= 1000 &&
+      userStat.totalFollower >= 200 &&
+      userStat.totalViewReceived >= 50000
+    ) {
+      userStat.reputation = ["Expert", "Top contributor"];
+    } else if (
+      userStat.totalThreadPosted >= 150 &&
+      userStat.totalCommentGiven >= 1000 &&
+      userStat.totalLikeReceived >= 2500 &&
+      userStat.totalFollower >= 400 &&
+      userStat.totalViewReceived >= 100000
+    ) {
+      userStat.reputation = ["Top contributor"];
+    } else {
+      userStat.reputation = [];
+    }
+
+    // For social influencer
+    if (
+      differenceTwoDates(checkUser.createdAt, new Date()) <= 30 &&
+      userStat.totalThreadPosted >= 5 &&
+      userStat.totalCommentGiven >= 20 &&
+      userStat.totalLikeReceived >= 50 &&
+      userStat.totalFollower >= 25 &&
+      userStat.totalViewReceived >= 5000
+    ) {
+      userStat.star = "Rising start";
+    } else {
+      userStat.star = "";
+    }
+
+    // For influencer
+    if (
+      userStat.totalLikeReceived >= 2000 &&
+      userStat.totalFollower >= 500 &&
+      userStat.totalViewReceived >= 100000
+    ) {
+      userStat.influence = "Influencer";
+    } else {
+      userStat.influence = "";
+    }
+
+    // For quality badge
+    if (
+      differenceTwoDates(checkUser.createdAt, new Date()) >= 90 &&
+      userStat.totalThreadPosted >= 20 &&
+      userStat.totalCommentGiven >= 20 &&
+      userStat.totalLikeReceived >= 1000 &&
+      userStat.totalFollower >= 100 &&
+      userStat.totalViewReceived >= 5000
+    ) {
+      userStat.quality = "Trusted member";
+    } else {
+      userStat.quality = "";
+    }
+
+    // For VIP badge
+    if (
+      userStat.totalFollower >= 1000 &&
+      userStat.totalViewReceived >= 250000
+    ) {
+      userStat.vip = "VIP";
+    } else {
+      userStat.vip = "";
+    }
+
+    return res.status(200).json({ status: true, userStat });
+  } catch (err) {
+    console.log("ERROR::", err.message);
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong, try again later",
+    });
+  }
+};
+
 module.exports = {
   signup,
   signin,
@@ -1093,4 +1243,5 @@ module.exports = {
   deleteUserFavCoin,
   googleData,
   fcmToken,
+  getUserBadges,
 };
