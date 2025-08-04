@@ -15,6 +15,7 @@ const GoogleAnalyticsData = require("../admin/models/googleAnalyticsDataModel");
 const MobileAppAnalyticsData = require("../models/mobileAppAnalyticsDataModel");
 const HighLight = require("../models/highLightModel");
 const fetchHighLightData = require("../helper/fetchAndStoreHighlightData");
+const { getClientIP } = require("../helper/getClientIP");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&per_page=250&sparkline=true&price_change_percentage=1h,7d";
@@ -686,6 +687,8 @@ const getTopGainer = async (req, res) => {
 const getBlog = async (req, res) => {
   try {
     let { page = 1, size = 10, filter, sortBy, order } = req.query;
+    const ip = getClientIP(req);
+    console.log(ip, "============>ip");
     page = parseInt(page);
     size = parseInt(size);
     sortBy = sortBy || "createdAt";
@@ -884,6 +887,7 @@ const getNews = async (req, res) => {
 const getNewsDetail = async (req, res) => {
   try {
     const { slug } = req.params;
+    await getClientIP(req, slug);
 
     const newsObj = await News.findOne({ slug });
 
@@ -905,6 +909,7 @@ const getNewsDetail = async (req, res) => {
 const getBlogDetail = async (req, res) => {
   try {
     const { slug } = req.params;
+    await getClientIP(req, slug);
 
     const getBlog = await Blog.findOne({ slug });
 

@@ -152,6 +152,61 @@ const addBlogs = async (req, res) => {
     });
 
     await addBlog.save();
+    const blogUrl = `${process.env.CLIENT_URL}/blogdetails/${addBlog.slug}`;
+
+    const htmlContent = `
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; box-shadow: 0 0 3px #b8cbe9b7;">
+  <div style="max-width: 600px; margin: 30px auto; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1); background-color: #ffffff;">
+
+    <!-- Header -->
+    <div style="background-color: #000000; padding: 30px 20px 20px; text-align: center;">
+      <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753419169/Group_8866_an1zkz.png" alt="RWA Pros Logo" style="max-height: 40px; display: block; margin: 0 auto 20px;" />
+      <h1 style="color: #ffffff; font-size: 24px; margin: 0;">New Blog Post Published</h1>
+    </div>
+
+    <!-- Content -->
+        <div style="padding: 30px; color: #000000; font-size: 16px; line-height: 1.5;">
+      <p style="margin: 0 0 10px; color: #0f1132; font-weight: bold; font-size: 20px;">${addBlog.title}</p>
+      <p style="margin: 0 0 20px; color: #666666; font-size: 16px;">${addBlog.subTitle}</p>
+      
+      <p style="margin: 0 0 20px; color: #000000;">
+        We’ve published a new article we think you'll find interesting. Click below to read the full blog post.
+      </p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${blogUrl}" target="_blank" style="background-color: #ebb411; padding: 12px 24px; border-radius: 6px; color: #ffffff; font-weight: bold; font-size: 16px; text-decoration: none;">
+          Read More
+        </a>
+      </div>
+
+          <p style="margin: 0; color: #000000; ">Best regards,<br />The RWA Pros Team</p>
+
+    </div>
+
+
+    <!-- Footer -->
+    <div style="text-align: center; font-size: 12px; color: #999999; padding: 20px; border-top: 1.5px solid #ebb411;">
+      <p style="margin: 4px 0;">RWA Pros LLC, Republic of Seychelles</p>
+      <p style="margin: 4px 0;">Email: <a href="mailto:admin@rwapros.com" style="color: #0f1132; text-decoration: underline;">admin@rwapros.com</a></p>
+
+      <div style="margin: 12px 0;">
+        <a href="https://x.com/RWAPROS" style="margin: 0 6px; text-decoration: none;">
+          <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753445015/ic_baseline-telegram-2_2_vdxodc.png" alt="Twitter" width="30" style="vertical-align: middle;" />
+        </a>
+        <a href="https://t.me/RealWorldAssets2023" style="margin: 0 6px; text-decoration: none;">
+          <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753445015/ic_baseline-telegram-1_2_si1z8o.png" alt="Telegram" width="30" style="vertical-align: middle;" />
+        </a>
+        <a href="https://medium.com" style="margin: 0 6px; text-decoration: none;">
+          <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753445015/ic_baseline-telegram_2_yg8a4g.png" alt="Medium" width="30" style="vertical-align: middle;" />
+        </a>
+      </div>
+
+      <p style="margin: 4px 0;">© 2025 RWA Pros. All rights reserved.</p>
+    </div>
+
+  </div>
+</body>
+`;
 
     const nodemailerMailgun = nodemailer.createTransport(mg(auth));
 
@@ -159,91 +214,14 @@ const addBlogs = async (req, res) => {
     const recipientEmails = subscribers.map((sub) => sub.email);
 
     if (recipientEmails.length > 0) {
-      const blogUrl = `${process.env.CLIENT_URL}/blogdetails/${addBlog.slug}`;
       const subject = `New Blog Published: ${addBlog.title}`;
-
-      const html = `
-  <head>
-    <meta charset="UTF-8" />
-    <title>New Blog Alert</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #f5f5f5;
-        font-family: Arial, sans-serif;
-      }
-      .container {
-        max-width: 600px;
-        margin: 30px auto;
-        background-color: #ffffff;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      }
-      .header {
-        background-color: #0f1132;
-        color: #ffffff;
-        padding: 20px;
-        text-align: center;
-        font-size: 22px;
-        font-weight: bold;
-      }
-      .content {
-        padding: 30px;
-        font-size: 16px;
-        color: #333333;
-      }
-      .blog-title {
-        font-size: 20px;
-        font-weight: bold;
-        color: #0f1132;
-      }
-      .blog-subtitle {
-        font-size: 16px;
-        color: #666666;
-        margin-bottom: 20px;
-      }
-      .read-more {
-        display: inline-block;
-        margin-top: 15px;
-        padding: 10px 20px;
-        background-color: #0f1132;
-        color: #ffffff !important;
-        text-decoration: none;
-        border-radius: 5px;
-      }
-      .footer {
-        text-align: center;
-        font-size: 12px;
-        color: #999999;
-        padding: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">New Blog Notification</div>
-      <div class="content">
-        <div class="blog-title">${addBlog.title}</div>
-        <div class="blog-subtitle">${addBlog.subTitle}</div>
-        <p>We’ve published a new article we think you'll find interesting.</p>
-        <a href="${blogUrl}" class="read-more" target="_blank">Read Full Blog</a>
-        <p style="margin-top: 30px;">Best regards,<br/>Condo Team</p>
-      </div>
-      <div class="footer">
-        © 2025 Condo-RWAHedgefund. All rights reserved.
-      </div>
-    </div>
-  </body>
-  `;
 
       const sendEmails = recipientEmails.map((email) =>
         nodemailerMailgun.sendMail({
           from: "service@rwapros.com",
           to: email,
           subject,
-          html,
+          html: htmlContent,
         })
       );
 
