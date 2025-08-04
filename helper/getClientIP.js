@@ -3,13 +3,51 @@ const PageView = require("../models/pageViewModel");
 const UserStat = require("../models/userStatModel");
 
 const getClientIP = async (req, id, userId) => {
+  // try {
+  //   // const ip = req.headers["x-forwarded-for"]?.split(",")[0];
+  //   const ip = req.ip;
+
+  //   try {
+  //     await PageView.create({ pageId: id, ip });
+
+  //     await PageCount.updateOne(
+  //       { pageId: id },
+  //       { $inc: { views: 1 } },
+  //       { upsert: true }
+  //     );
+
+  //     if (userId) {
+  //       await UserStat.updateOne(
+  //         { userId },
+  //         { $inc: { totalViewReceived: 1 } },
+  //         { upsert: true }
+  //       );
+  //     }
+  //   } catch (err) {
+  //     if (err.code === 11000) {
+  //       return;
+  //     }
+  //     throw err;
+  //   }
+  // } catch (err) {
+  //   console.error("Error saving view:", err);
+  // }
+
+  const ip = req.ip;
+  let isUnique = false;
+
   try {
-    // const ip = req.headers["x-forwarded-for"]?.split(",")[0];
-    const ip = req.ip;
+    await PageView.create({ pageId: id, ip });
+    isUnique = true;
+  } catch (err) {
+    if (err.code !== 11000) {
+      console.error("Unexpected error saving PageView:", err);
+    }
+    return;
+  }
 
+  if (isUnique) {
     try {
-      await PageView.create({ pageId: id, ip });
-
       await PageCount.updateOne(
         { pageId: id },
         { $inc: { views: 1 } },
@@ -24,17 +62,9 @@ const getClientIP = async (req, id, userId) => {
         );
       }
     } catch (err) {
-      if (err.code === 11000) {
-        return;
-      }
-      throw err;
+      console.error("Error incrementing counters:", err);
     }
-  } catch (err) {
-    console.error("Error saving view:", err);
   }
-
-  //   const pageCount = await PageCount.findOne({ pageType, pageId: id });
-  //   return pageCount ? pageCount.views : 0;
 };
 
 module.exports = { getClientIP };
