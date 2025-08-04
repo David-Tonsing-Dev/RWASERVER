@@ -33,7 +33,8 @@ const getClientIP = async (req, id, userId) => {
   //   console.error("Error saving view:", err);
   // }
 
-  const ip = req.ip;
+  // const ip = req.ip;
+  const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim();
   let isUnique = false;
 
   try {
