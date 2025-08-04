@@ -34,7 +34,7 @@ const getClientIP = async (req, id, userId) => {
   // }
 
   // const ip = req.ip;
-  const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim();
+  const ip = req.headers["x-forwarded-for"]?.split(",")[0];
   let isUnique = false;
 
   try {
