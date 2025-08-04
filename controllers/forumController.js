@@ -220,7 +220,6 @@ const getForumById = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.userId;
-    await getClientIP(req, id, userId);
 
     if (!mongoose.Types.ObjectId.isValid(id))
       return res.status(400).json({ message: "Invalid forum Id" });
@@ -229,6 +228,8 @@ const getForumById = async (req, res) => {
       .populate({ path: "userId", select: "userName" })
       .populate({ path: "categoryId", select: "name" })
       .lean();
+
+    await getClientIP(req, id, forum.userId);
 
     if (!forum)
       return res
