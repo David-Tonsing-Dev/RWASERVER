@@ -143,8 +143,6 @@ const updateForumSubCategory = async (req, res) => {
     const { subCategoryId } = req.params;
     const { name, description, categoryId } = req.body;
 
-    // console.log("name", name, description, subCategoryId, req.body);
-
     if (!mongoose.Types.ObjectId.isValid(subCategoryId))
       return res
         .status(400)

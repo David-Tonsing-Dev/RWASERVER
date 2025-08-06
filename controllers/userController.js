@@ -10,6 +10,12 @@ const Guest = require("../models/guestUserModel");
 const cloudinary = require("../config/cloudinary");
 const { capitalizeAfterSpace } = require("../helper/capitalize");
 const differenceTwoDates = require("../helper/moments/dateDifference");
+const {
+  calculateForBadge,
+  calculateForBadgeWithoutImage,
+  calculateUserAllBadges,
+  calculateUserAllBadgesWithoutImg,
+} = require("../helper/calculationForBadges");
 
 const createToken = (id) => {
   const jwtkey = process.env.JWT_SECRET_KEY;
@@ -25,6 +31,8 @@ const auth = {
 
 const signup = async (req, res) => {
   let { userName, email, password, confirmPassword, subscribe } = req.body;
+
+  email = email.toLowerCase();
 
   try {
     if (!userName || !email || !password || !confirmPassword)
@@ -174,7 +182,9 @@ const verifyEmail = async (req, res) => {
 };
 
 const signin = async (req, res) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
+
+  email = email.toLowerCase();
 
   try {
     if (!email || !password)
@@ -219,102 +229,8 @@ const signin = async (req, res) => {
       }
     }
 
-    // for Tiered Progression Badges
-    if (
-      differenceTwoDates(user.createdAt, new Date()) >= 360 &&
-      userStat.totalThreadPosted >= 50 &&
-      userStat.totalCommentGiven >= 300 &&
-      userStat.totalLikeReceived >= 250 &&
-      userStat.totalFollower >= 50 &&
-      userStat.totalViewReceived >= 10000
-    ) {
-      userStat.tieredProgression = "Veteran";
-    } else if (
-      differenceTwoDates(user.createdAt, new Date()) >= 30 &&
-      userStat.totalThreadPosted >= 10 &&
-      userStat.totalCommentGiven >= 50 &&
-      userStat.totalLikeReceived >= 50 &&
-      userStat.totalFollower >= 10 &&
-      userStat.totalViewReceived >= 1000
-    ) {
-      userStat.tieredProgression = "Contributor";
-    } else if (
-      differenceTwoDates(user.createdAt, new Date()) >= 1 &&
-      userStat.totalThreadPosted >= 1 &&
-      userStat.totalCommentGiven >= 1
-    ) {
-      userStat.tieredProgression = "Explorer";
-    } else {
-      userStat.tieredProgression = "Observer";
-    }
-
-    // for Skill & Reputation-Based Badges
-    if (
-      userStat.totalThreadPosted >= 75 &&
-      userStat.totalCommentGiven >= 500 &&
-      userStat.totalLikeReceived >= 500 &&
-      userStat.totalFollower >= 100 &&
-      userStat.totalViewReceived >= 25000
-    ) {
-      userStat.reputation = "Pro";
-    } else if (
-      userStat.totalThreadPosted >= 100 &&
-      userStat.totalCommentGiven >= 750 &&
-      userStat.totalLikeReceived >= 1000 &&
-      userStat.totalFollower >= 200 &&
-      userStat.totalViewReceived >= 50000
-    ) {
-      userStat.reputation = "Expert";
-    } else if (
-      userStat.totalThreadPosted >= 150 &&
-      userStat.totalCommentGiven >= 1000 &&
-      userStat.totalLikeReceived >= 2500 &&
-      userStat.totalFollower >= 400 &&
-      userStat.totalViewReceived >= 100000
-    ) {
-      userStat.reputation = "Top contributor";
-    }
-
-    // For social influencer
-    if (
-      differenceTwoDates(user.createdAt, new Date()) <= 30 &&
-      userStat.totalThreadPosted >= 5 &&
-      userStat.totalCommentGiven >= 20 &&
-      userStat.totalLikeReceived >= 50 &&
-      userStat.totalFollower >= 25 &&
-      userStat.totalViewReceived >= 5000
-    ) {
-      userStat.star = "Rising start";
-    }
-
-    // For influencer
-    if (
-      userStat.totalLikeReceived >= 2000 &&
-      userStat.totalFollower >= 500 &&
-      userStat.totalViewReceived >= 100000
-    ) {
-      userStat.influence = "Influencer";
-    }
-
-    // For quality badge
-    if (
-      differenceTwoDates(user.createdAt, new Date()) >= 90 &&
-      userStat.totalThreadPosted >= 20 &&
-      userStat.totalCommentGiven >= 20 &&
-      userStat.totalLikeReceived >= 1000 &&
-      userStat.totalFollower >= 100 &&
-      userStat.totalViewReceived >= 5000
-    ) {
-      userStat.quality = "Trusted member";
-    }
-
-    // For VIP badge
-    if (
-      userStat.totalFollower >= 1000 &&
-      userStat.totalViewReceived >= 250000
-    ) {
-      userStat.vip = "VIP";
-    }
+    // const badges = calculateForBadge(user, userStat);
+    const badgesWithoutImg = calculateForBadgeWithoutImage(user, userStat);
 
     return res.status(200).json({
       status: true,
@@ -328,7 +244,7 @@ const signin = async (req, res) => {
       link: user.link,
       token,
       email,
-      stat: userStat,
+      stat: badgesWithoutImg,
     });
   } catch (err) {
     return res.status(500).json({
@@ -343,12 +259,14 @@ const googleSignIn = async (req, res) => {
   const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: "1d",
   });
-  res.redirect(`http://localhost:5173/auth-success?token=${token}`);
+  res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`);
 };
 
 const googleData = async (req, res) => {
   try {
-    const { userName, email, profileImg, googleId } = req.body;
+    let { userName, email, profileImg, googleId } = req.body;
+    email = email.toLowerCase();
+
     if (!email || !userName)
       return res
         .status(400)
@@ -389,102 +307,8 @@ const googleData = async (req, res) => {
       }
     }
 
-    // for Tiered Progression Badges
-    if (
-      differenceTwoDates(user.createdAt, new Date()) >= 360 &&
-      userStat.totalThreadPosted >= 50 &&
-      userStat.totalCommentGiven >= 300 &&
-      userStat.totalLikeReceived >= 250 &&
-      userStat.totalFollower >= 50 &&
-      userStat.totalViewReceived >= 10000
-    ) {
-      userStat.tieredProgression = "Veteran";
-    } else if (
-      differenceTwoDates(user.createdAt, new Date()) >= 30 &&
-      userStat.totalThreadPosted >= 10 &&
-      userStat.totalCommentGiven >= 50 &&
-      userStat.totalLikeReceived >= 50 &&
-      userStat.totalFollower >= 10 &&
-      userStat.totalViewReceived >= 1000
-    ) {
-      userStat.tieredProgression = "Contributor";
-    } else if (
-      differenceTwoDates(user.createdAt, new Date()) >= 1 &&
-      userStat.totalThreadPosted >= 1 &&
-      userStat.totalCommentGiven >= 1
-    ) {
-      userStat.tieredProgression = "Explorer";
-    } else {
-      userStat.tieredProgression = "Observer";
-    }
-
-    // for Skill & Reputation-Based Badges
-    if (
-      userStat.totalThreadPosted >= 75 &&
-      userStat.totalCommentGiven >= 500 &&
-      userStat.totalLikeReceived >= 500 &&
-      userStat.totalFollower >= 100 &&
-      userStat.totalViewReceived >= 25000
-    ) {
-      userStat.reputation = "Pro";
-    } else if (
-      userStat.totalThreadPosted >= 100 &&
-      userStat.totalCommentGiven >= 750 &&
-      userStat.totalLikeReceived >= 1000 &&
-      userStat.totalFollower >= 200 &&
-      userStat.totalViewReceived >= 50000
-    ) {
-      userStat.reputation = "Expert";
-    } else if (
-      userStat.totalThreadPosted >= 150 &&
-      userStat.totalCommentGiven >= 1000 &&
-      userStat.totalLikeReceived >= 2500 &&
-      userStat.totalFollower >= 400 &&
-      userStat.totalViewReceived >= 100000
-    ) {
-      userStat.reputation = "Top contributor";
-    }
-
-    // For social influencer
-    if (
-      differenceTwoDates(user.createdAt, new Date()) <= 30 &&
-      userStat.totalThreadPosted >= 5 &&
-      userStat.totalCommentGiven >= 20 &&
-      userStat.totalLikeReceived >= 50 &&
-      userStat.totalFollower >= 25 &&
-      userStat.totalViewReceived >= 5000
-    ) {
-      userStat.star = "Rising start";
-    }
-
-    // For influencer
-    if (
-      userStat.totalLikeReceived >= 2000 &&
-      userStat.totalFollower >= 500 &&
-      userStat.totalViewReceived >= 100000
-    ) {
-      userStat.influence = "Influencer";
-    }
-
-    // For quality badge
-    if (
-      differenceTwoDates(user.createdAt, new Date()) >= 90 &&
-      userStat.totalThreadPosted >= 20 &&
-      userStat.totalCommentGiven >= 20 &&
-      userStat.totalLikeReceived >= 1000 &&
-      userStat.totalFollower >= 100 &&
-      userStat.totalViewReceived >= 5000
-    ) {
-      userStat.quality = "Trusted member";
-    }
-
-    // For VIP badge
-    if (
-      userStat.totalFollower >= 1000 &&
-      userStat.totalViewReceived >= 250000
-    ) {
-      userStat.vip = "VIP";
-    }
+    // const badges = calculateForBadge(user, userStat);
+    const badgesWithoutImg = calculateForBadgeWithoutImage(user, userStat);
 
     return res.status(200).json({
       status: true,
@@ -497,7 +321,7 @@ const googleData = async (req, res) => {
       createdAt: user.createdAt,
       description: user.description,
       email,
-      stat: userStat,
+      stat: badgesWithoutImg,
     });
   } catch (error) {
     return res.status(500).json({
@@ -840,6 +664,7 @@ const updateUser = async (req, res) => {
     } = req.body;
     const { profileImg, bannerImg } = req.files;
     const userId = req.userId;
+    email = email.toLowerCase();
 
     link = link && link.length ? JSON.parse(link) : [];
     removeProfileImg =
@@ -971,104 +796,15 @@ const getUserDetailById = async (req, res) => {
       }
     }
 
-    // for Tiered Progression Badges
-    if (
-      differenceTwoDates(userDetail.createdAt, new Date()) >= 360 &&
-      userStat.totalThreadPosted >= 50 &&
-      userStat.totalCommentGiven >= 300 &&
-      userStat.totalLikeReceived >= 250 &&
-      userStat.totalFollower >= 50 &&
-      userStat.totalViewReceived >= 10000
-    ) {
-      userStat.tieredProgression = "Veteran";
-    } else if (
-      differenceTwoDates(userDetail.createdAt, new Date()) >= 30 &&
-      userStat.totalThreadPosted >= 10 &&
-      userStat.totalCommentGiven >= 50 &&
-      userStat.totalLikeReceived >= 50 &&
-      userStat.totalFollower >= 10 &&
-      userStat.totalViewReceived >= 1000
-    ) {
-      userStat.tieredProgression = "Contributor";
-    } else if (
-      differenceTwoDates(userDetail.createdAt, new Date()) >= 1 &&
-      userStat.totalThreadPosted >= 1 &&
-      userStat.totalCommentGiven >= 1
-    ) {
-      userStat.tieredProgression = "Explorer";
-    } else {
-      userStat.tieredProgression = "Observer";
-    }
+    // const badges = calculateForBadge(userDetail, userStat);
+    const badgesWithoutImg = calculateForBadgeWithoutImage(
+      userDetail,
+      userStat
+    );
 
-    // for Skill & Reputation-Based Badges
-    if (
-      userStat.totalThreadPosted >= 75 &&
-      userStat.totalCommentGiven >= 500 &&
-      userStat.totalLikeReceived >= 500 &&
-      userStat.totalFollower >= 100 &&
-      userStat.totalViewReceived >= 25000
-    ) {
-      userStat.reputation = "Pro";
-    } else if (
-      userStat.totalThreadPosted >= 100 &&
-      userStat.totalCommentGiven >= 750 &&
-      userStat.totalLikeReceived >= 1000 &&
-      userStat.totalFollower >= 200 &&
-      userStat.totalViewReceived >= 50000
-    ) {
-      userStat.reputation = "Expert";
-    } else if (
-      userStat.totalThreadPosted >= 150 &&
-      userStat.totalCommentGiven >= 1000 &&
-      userStat.totalLikeReceived >= 2500 &&
-      userStat.totalFollower >= 400 &&
-      userStat.totalViewReceived >= 100000
-    ) {
-      userStat.reputation = "Top contributor";
-    }
-
-    // For social influencer
-    if (
-      differenceTwoDates(userDetail.createdAt, new Date()) <= 30 &&
-      userStat.totalThreadPosted >= 5 &&
-      userStat.totalCommentGiven >= 20 &&
-      userStat.totalLikeReceived >= 50 &&
-      userStat.totalFollower >= 25 &&
-      userStat.totalViewReceived >= 5000
-    ) {
-      userStat.star = "Rising start";
-    }
-
-    // For influencer
-    if (
-      userStat.totalLikeReceived >= 2000 &&
-      userStat.totalFollower >= 500 &&
-      userStat.totalViewReceived >= 100000
-    ) {
-      userStat.influence = "Influencer";
-    }
-
-    // For quality badge
-    if (
-      differenceTwoDates(userDetail.createdAt, new Date()) >= 90 &&
-      userStat.totalThreadPosted >= 20 &&
-      userStat.totalCommentGiven >= 20 &&
-      userStat.totalLikeReceived >= 1000 &&
-      userStat.totalFollower >= 100 &&
-      userStat.totalViewReceived >= 5000
-    ) {
-      userStat.quality = "Trusted member";
-    }
-
-    // For VIP badge
-    if (
-      userStat.totalFollower >= 1000 &&
-      userStat.totalViewReceived >= 250000
-    ) {
-      userStat.vip = "VIP";
-    }
-
-    return res.status(200).json({ status: true, userDetail, stat: userStat });
+    return res
+      .status(200)
+      .json({ status: true, userDetail, stat: badgesWithoutImg });
   } catch (err) {
     console.log("ERROR:: ", err.message);
     return res.status(500).json({
@@ -1106,119 +842,13 @@ const getUserBadges = async (req, res) => {
       }
     }
 
-    // for Tiered Progression Badges
-    if (
-      differenceTwoDates(checkUser.createdAt, new Date()) >= 360 &&
-      userStat.totalThreadPosted >= 50 &&
-      userStat.totalCommentGiven >= 300 &&
-      userStat.totalLikeReceived >= 250 &&
-      userStat.totalFollower >= 50 &&
-      userStat.totalViewReceived >= 10000
-    ) {
-      userStat.tieredProgression = [
-        "Veteran",
-        "Contributor",
-        "Explorer",
-        "Observer",
-      ];
-    } else if (
-      differenceTwoDates(checkUser.createdAt, new Date()) >= 30 &&
-      userStat.totalThreadPosted >= 10 &&
-      userStat.totalCommentGiven >= 50 &&
-      userStat.totalLikeReceived >= 50 &&
-      userStat.totalFollower >= 10 &&
-      userStat.totalViewReceived >= 1000
-    ) {
-      userStat.tieredProgression = ["Contributor", "Explorer", "Observer"];
-    } else if (
-      differenceTwoDates(checkUser.createdAt, new Date()) >= 1 &&
-      userStat.totalThreadPosted >= 1 &&
-      userStat.totalCommentGiven >= 1
-    ) {
-      userStat.tieredProgression = ["Explorer", "Observer"];
-    } else {
-      userStat.tieredProgression = ["Observer"];
-    }
+    // const badges = calculateUserAllBadges(checkUser, userStat);
+    const badgesWithoutImg = calculateUserAllBadgesWithoutImg(
+      checkUser,
+      userStat
+    );
 
-    // for Skill & Reputation-Based Badges
-    if (
-      userStat.totalThreadPosted >= 75 &&
-      userStat.totalCommentGiven >= 500 &&
-      userStat.totalLikeReceived >= 500 &&
-      userStat.totalFollower >= 100 &&
-      userStat.totalViewReceived >= 25000
-    ) {
-      userStat.reputation = ["Pro", "Expert", "Top contributor"];
-    } else if (
-      userStat.totalThreadPosted >= 100 &&
-      userStat.totalCommentGiven >= 750 &&
-      userStat.totalLikeReceived >= 1000 &&
-      userStat.totalFollower >= 200 &&
-      userStat.totalViewReceived >= 50000
-    ) {
-      userStat.reputation = ["Expert", "Top contributor"];
-    } else if (
-      userStat.totalThreadPosted >= 150 &&
-      userStat.totalCommentGiven >= 1000 &&
-      userStat.totalLikeReceived >= 2500 &&
-      userStat.totalFollower >= 400 &&
-      userStat.totalViewReceived >= 100000
-    ) {
-      userStat.reputation = ["Top contributor"];
-    } else {
-      userStat.reputation = [];
-    }
-
-    // For social influencer
-    if (
-      differenceTwoDates(checkUser.createdAt, new Date()) <= 30 &&
-      userStat.totalThreadPosted >= 5 &&
-      userStat.totalCommentGiven >= 20 &&
-      userStat.totalLikeReceived >= 50 &&
-      userStat.totalFollower >= 25 &&
-      userStat.totalViewReceived >= 5000
-    ) {
-      userStat.star = "Rising start";
-    } else {
-      userStat.star = "";
-    }
-
-    // For influencer
-    if (
-      userStat.totalLikeReceived >= 2000 &&
-      userStat.totalFollower >= 500 &&
-      userStat.totalViewReceived >= 100000
-    ) {
-      userStat.influence = "Influencer";
-    } else {
-      userStat.influence = "";
-    }
-
-    // For quality badge
-    if (
-      differenceTwoDates(checkUser.createdAt, new Date()) >= 90 &&
-      userStat.totalThreadPosted >= 20 &&
-      userStat.totalCommentGiven >= 20 &&
-      userStat.totalLikeReceived >= 1000 &&
-      userStat.totalFollower >= 100 &&
-      userStat.totalViewReceived >= 5000
-    ) {
-      userStat.quality = "Trusted member";
-    } else {
-      userStat.quality = "";
-    }
-
-    // For VIP badge
-    if (
-      userStat.totalFollower >= 1000 &&
-      userStat.totalViewReceived >= 250000
-    ) {
-      userStat.vip = "VIP";
-    } else {
-      userStat.vip = "";
-    }
-
-    return res.status(200).json({ status: true, userStat });
+    return res.status(200).json({ status: true, userStat: badgesWithoutImg });
   } catch (err) {
     console.log("ERROR::", err.message);
     return res.status(500).json({

@@ -13,7 +13,9 @@ const auth = {
 
 const adminSignUp = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    email = email.toLowerCase();
 
     if (!email || !password)
       return res
@@ -91,7 +93,8 @@ const adminSignUp = async (req, res) => {
 
 const adminSignIn = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    let { email, password, role } = req.body;
+    email = email.toLowerCase();
 
     if (!email || !password)
       return res
@@ -144,8 +147,9 @@ const adminSignIn = async (req, res) => {
 
 const adminSignUpBySuperAdmin = async (req, res) => {
   try {
-    const { email, password, username } = req.body;
+    let { email, password, username } = req.body;
     const role = req.role;
+    email = email.toLowerCase();
 
     if (role !== "SUPERADMIN")
       return res
@@ -269,8 +273,9 @@ const adminSignUpBySuperAdmin = async (req, res) => {
 
 const reviewerSignUpBySuperAdmin = async (req, res) => {
   try {
-    const { email, password, username } = req.body;
+    let { email, password, username } = req.body;
     const role = req.role;
+    email = email.toLowerCase();
 
     if (role !== "SUPERADMIN")
       return res.status(401).json({
