@@ -90,7 +90,7 @@ const addNews = async (req, res) => {
     <!-- Header -->
     <div style="background-color: #000000; padding: 30px 20px 20px; text-align: center;">
       <img src="https://res.cloudinary.com/dbtsrjssc/image/upload/v1753419169/Group_8866_an1zkz.png" alt="RWA Pros Logo" style="max-height: 40px; display: block; margin: 0 auto 20px;" />
-      <h1 style="color: #ffffff; font-size: 24px; margin: 0;">Latest RWA Market Insights Released</h1>
+      <h1 style="color: #ffffff; font-size: 24px; margin: 0;">Latest RWA News Update</h1>
     </div>
 
     <!-- Content -->

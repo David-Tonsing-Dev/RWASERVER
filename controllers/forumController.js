@@ -7,6 +7,7 @@ const ForumReaction = require("../models/forumReactionModel");
 const UserStat = require("../models/userStatModel");
 const normalizeEmoji = require("../helper/normalizeEmoji");
 const hotForumTopicsService = require("../services/hotForumTopicsService");
+const { getClientIP } = require("../helper/getClientIP");
 
 const createForum = async (req, res) => {
   try {
@@ -227,6 +228,8 @@ const getForumById = async (req, res) => {
       .populate({ path: "userId", select: "userName" })
       .populate({ path: "categoryId", select: "name" })
       .lean();
+
+    await getClientIP(req, id, forum.userId);
 
     if (!forum)
       return res
