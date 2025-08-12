@@ -9,8 +9,8 @@ const { authMiddleware } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.get("/allFollower", authMiddleware, getAllFollower);
-router.get("/allFollowing", authMiddleware, getAllFollowing);
+router.get("/allFollower/:userId", getAllFollower);
+router.get("/allFollowing/:userId", getAllFollowing);
 router.post("/:followId", authMiddleware, followUser);
 router.delete("/:followId", authMiddleware, unFollowUser);
 

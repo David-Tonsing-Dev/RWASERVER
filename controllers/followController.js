@@ -5,7 +5,7 @@ const sendPushNotificationForum = require("../helper/notifications/sendPushNotif
 
 const getAllFollower = async (req, res) => {
   try {
-    const userId = req.userId;
+    const { userId } = req.params;
     let { page, size, filter } = req.query;
 
     page = !page ? 1 : parseInt(page);
@@ -77,7 +77,7 @@ const getAllFollower = async (req, res) => {
 
 const getAllFollowing = async (req, res) => {
   try {
-    const userId = req.userId;
+    const { userId } = req.params;
     let { page, size, filter } = req.query;
 
     page = !page ? 1 : parseInt(page);
