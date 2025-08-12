@@ -43,6 +43,7 @@ const schedular = require("./cron/schedular");
 const analysticsData = require("./cron/analystics");
 const hightLight = require("./cron/highLight");
 const mobileAppGA4Data = require("./admin/routes/googleAnalyticsDataRouters");
+const cookieParser = require("cookie-parser");
 const allowedOrigins = [
   "https://rwa.guide",
   "http://localhost:3000",
@@ -67,9 +68,11 @@ const corsOptions = {
     }
     return callback(null, true);
   },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
+app.use(cookieParser());
 app.set("trust proxy", true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

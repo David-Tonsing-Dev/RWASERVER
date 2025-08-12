@@ -67,14 +67,14 @@ function generateUUID() {
   return crypto.randomUUID();
 }
 
-const getClientIP = async (req, id, userId = null) => {
+const getClientIP = async (req, res, id, userId = null) => {
   const ip = req.headers["x-forwarded-for"]?.split(",")[0];
   const userAgent = req.headers["user-agent"];
 
   let uuid = req.cookies?.device_Id;
   if (!uuid) {
     uuid = generateUUID();
-    req.res.cookie("device_Id", uuid, {
+    res.cookie("device_Id", uuid, {
       httpOnly: true,
       secure: true,
       sameSite: "strict",

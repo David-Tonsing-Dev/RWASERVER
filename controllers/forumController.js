@@ -229,7 +229,7 @@ const getForumById = async (req, res) => {
       .populate({ path: "categoryId", select: "name" })
       .lean();
 
-    await getClientIP(req, id, userId);
+    await getClientIP(req,res, id, userId);
 
     if (!forum)
       return res
