@@ -1,5 +1,6 @@
 const PageCount = require("../models/pageCountModel");
 const PageView = require("../models/pageViewModel");
+const TempPageView = require("../models/tempPageViewModel");
 const UserStat = require("../models/userStatModel");
 const crypto = require("crypto");
 
@@ -89,36 +90,51 @@ const getClientIP = async (req, res, id, userId = null) => {
     .digest("hex");
 
   const userKey = userId || deviceId;
-  let isUnique = false;
+  // let isUnique = false;
+
+  // try {
+  //   await PageView.create({ pageId: id, userKey, deviceId, ip, userAgent });
+  //   isUnique = true;
+  // } catch (err) {
+  //   if (err.code !== 11000) {
+  //     console.error("Unexpected error saving PageView:", err);
+  //   }
+  //   return;
+  // }
+
+  // if (isUnique) {
+  //   try {
+  //     await PageCount.updateOne(
+  //       { pageId: id },
+  //       { $inc: { views: 1 } },
+  //       { upsert: true }
+  //     );
+
+  //     if (userId) {
+  //       await UserStat.updateOne(
+  //         { userId },
+  //         { $inc: { totalViewReceived: 1 } },
+  //         { upsert: true }
+  //       );
+  //     }
+  //   } catch (err) {
+  //     console.error("Error", err);
+  //   }
+  // }
 
   try {
-    await PageView.create({ pageId: id, userKey, deviceId, ip, userAgent });
-    isUnique = true;
+    await TempPageView.create({
+      pageId: id,
+      userKey,
+      deviceId,
+      ip,
+      userAgent,
+    });
   } catch (err) {
     if (err.code !== 11000) {
-      console.error("Unexpected error saving PageView:", err);
+      console.error("Unexpected error saving TempPageView:", err);
     }
     return;
-  }
-
-  if (isUnique) {
-    try {
-      await PageCount.updateOne(
-        { pageId: id },
-        { $inc: { views: 1 } },
-        { upsert: true }
-      );
-
-      if (userId) {
-        await UserStat.updateOne(
-          { userId },
-          { $inc: { totalViewReceived: 1 } },
-          { upsert: true }
-        );
-      }
-    } catch (err) {
-      console.error("Error", err);
-    }
   }
 };
 
