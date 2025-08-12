@@ -77,7 +77,6 @@ app.use(cookieParser());
 app.set("trust proxy", true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
 app.use("/static", express.static(path.join(__dirname, "public")));
 
 app.use("/api/users", userRouter);
