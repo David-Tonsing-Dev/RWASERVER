@@ -78,7 +78,7 @@ const getClientIP = async (req, res, id, userId = null) => {
     res.cookie("device_Id", uuid, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
     });
   }
