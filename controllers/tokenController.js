@@ -687,8 +687,6 @@ const getTopGainer = async (req, res) => {
 const getBlog = async (req, res) => {
   try {
     let { page = 1, size = 10, filter, sortBy, order } = req.query;
-    const ip = getClientIP(req);
-    console.log(ip, "============>ip");
     page = parseInt(page);
     size = parseInt(size);
     sortBy = sortBy || "createdAt";
@@ -887,7 +885,9 @@ const getNews = async (req, res) => {
 const getNewsDetail = async (req, res) => {
   try {
     const { slug } = req.params;
-    await getClientIP(req, slug);
+
+    const userId = req.userId;
+    await getClientIP(req, slug, userId);
 
     const newsObj = await News.findOne({ slug });
 
@@ -909,7 +909,9 @@ const getNewsDetail = async (req, res) => {
 const getBlogDetail = async (req, res) => {
   try {
     const { slug } = req.params;
-    await getClientIP(req, slug);
+    const userId = req.userId;
+
+    await getClientIP(req, slug, userId);
 
     const getBlog = await Blog.findOne({ slug });
 
