@@ -67,7 +67,7 @@ const views = async () => {
         await PageCount.bulkWrite(pageCountOps);
         await UserStat.bulkWrite(userStatOps);
 
-        await TempPageView.deleteMany({});
+        // await TempPageView.deleteMany({});
 
         console.log(`Processed ${views.length} views successfully.`);
       } catch (error) {

@@ -76,13 +76,17 @@ const getClientIP = async (req, res, id, userId = null) => {
   let uuid = req.cookies?.device_Id;
   if (!uuid) {
     uuid = generateUUID();
-    res.cookie("device_Id", uuid, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
-    });
   }
+
+  //  if (!uuid) {
+  //     uuid = generateUUID();
+  //     res.cookie("device_Id", uuid, {
+  //       httpOnly: true,
+  //       secure: process.env.NODE_ENV === "production",
+  //       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  //       maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
+  //     });
+  //   }
 
   const fingerprint = generateFingerprint(ip, userAgent);
   const deviceId = crypto
@@ -91,6 +95,15 @@ const getClientIP = async (req, res, id, userId = null) => {
     .digest("hex");
 
   const userKey = userId || deviceId;
+
+  if (!req.cookies?.device_Id) {
+    res.cookie("device_Id", deviceId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
+    });
+  }
   // let isUnique = false;
 
   // try {

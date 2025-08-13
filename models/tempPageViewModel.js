@@ -15,6 +15,11 @@ const tempPageViewSchema = new mongoose.Schema(
     deviceId: { type: String, required: true },
     userAgent: { type: String },
     userId: { type: String },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      expires: "7d",
+    },
   },
   { timestamps: true }
 );
