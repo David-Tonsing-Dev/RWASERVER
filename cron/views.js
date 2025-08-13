@@ -6,7 +6,7 @@ const UserStat = require("../models/userStatModel");
 
 const views = async () => {
   try {
-    cron.schedule("*/10 * * * *", async () => {
+    cron.schedule("*/1 * * * *", async () => {
       console.log("Processing page views...");
 
       const views = await TempPageView.find();
