@@ -55,14 +55,32 @@ const views = async () => {
           })
         );
 
+        // const userStatOps = Object.entries(userStatMap).map(
+        //   ([userId, count]) => ({
+        //     updateOne: {
+        //       filter: { userId },
+        //       update: { $inc: { totalViewReceived: count } },
+        //       upsert: true,
+        //     },
+        //   })
+        // );
+
         const userStatOps = Object.entries(userStatMap).map(
-          ([userId, count]) => ({
-            updateOne: {
-              filter: { userId: mongoose.Types.ObjectId(userId) },
-              update: { $inc: { totalViewReceived: count } },
-              upsert: true,
-            },
-          })
+          ([userId, count]) => {
+            let filterId = userId;
+
+            if (mongoose.Types.ObjectId.isValid(userId)) {
+              filterId = new mongoose.Types.ObjectId(userId);
+            }
+
+            return {
+              updateOne: {
+                filter: { userId: filterId },
+                update: { $inc: { totalViewReceived: count } },
+                upsert: true,
+              },
+            };
+          }
         );
 
         await PageCount.bulkWrite(pageCountOps);
