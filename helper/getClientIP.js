@@ -132,6 +132,7 @@ const getClientIP = async (req, res, id, userId = null) => {
         deviceId,
         ip,
         userAgent,
+        userId,
       });
     }
   } catch (err) {
