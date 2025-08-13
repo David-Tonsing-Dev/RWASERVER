@@ -78,7 +78,7 @@ const getClientIP = async (req, res, id, userId = null) => {
     uuid = generateUUID();
     res.cookie("device_Id", uuid, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
     });
@@ -124,13 +124,16 @@ const getClientIP = async (req, res, id, userId = null) => {
   // }
 
   try {
-    await TempPageView.create({
-      pageId: id,
-      userKey,
-      deviceId,
-      ip,
-      userAgent,
-    });
+    const exists = await TempPageView.findOne({ pageId: id, userKey });
+    if (!exists) {
+      await TempPageView.create({
+        pageId: id,
+        userKey,
+        deviceId,
+        ip,
+        userAgent,
+      });
+    }
   } catch (err) {
     if (err.code !== 11000) {
       console.error("Unexpected error saving TempPageView:", err);
