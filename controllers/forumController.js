@@ -8,6 +8,7 @@ const UserStat = require("../models/userStatModel");
 const normalizeEmoji = require("../helper/normalizeEmoji");
 const hotForumTopicsService = require("../services/hotForumTopicsService");
 const { getClientIP } = require("../helper/getClientIP");
+const { calculateForBadge } = require("../helper/calculationForBadges");
 
 const createForum = async (req, res) => {
   try {
@@ -228,8 +229,7 @@ const getForumById = async (req, res) => {
       .populate({ path: "userId", select: "userName" })
       .populate({ path: "categoryId", select: "name" })
       .lean();
-
-    await getClientIP(req,res, id, userId);
+    await getClientIP(req, res, id, userId);
 
     if (!forum)
       return res
@@ -251,6 +251,17 @@ const getForumById = async (req, res) => {
     } else {
       forum.isReact = false;
       forum.isDislike = false;
+    }
+    if (forum.userId?._id) {
+      const userStat = await UserStat.findOneAndUpdate(
+        { userId: forum.userId._id },
+        {},
+        { upsert: true, new: true, lean: true }
+      );
+
+      const badges = calculateForBadge({ ...forum.userId }, userStat);
+
+      forum.userId.tieredProgression = badges.tieredProgression;
     }
 
     return res.status(200).json({ status: true, forum });

@@ -69,7 +69,8 @@ function generateUUID() {
 }
 
 const getClientIP = async (req, res, id, userId = null) => {
-  const ip = req.headers["x-forwarded-for"]?.split(",")[0];
+  let ip = req.headers["x-forwarded-for"]?.split(",")[0];
+  // let ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim();
   const userAgent = req.headers["user-agent"];
 
   let uuid = req.cookies?.device_Id;
