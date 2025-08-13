@@ -7,7 +7,7 @@ const { default: mongoose } = require("mongoose");
 
 const views = async () => {
   try {
-    cron.schedule("*/1 * * * *", async () => {
+    cron.schedule("*/10 * * * *", async () => {
       console.log("Processing page views...");
 
       const views = await TempPageView.find();
@@ -86,7 +86,7 @@ const views = async () => {
         await PageCount.bulkWrite(pageCountOps);
         await UserStat.bulkWrite(userStatOps);
 
-        // await TempPageView.deleteMany({});
+        await TempPageView.deleteMany({});
 
         console.log(`Processed ${views.length} views successfully.`);
       } catch (error) {
