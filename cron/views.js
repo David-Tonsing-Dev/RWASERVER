@@ -3,7 +3,6 @@ const TempPageView = require("../models/tempPageViewModel");
 const PageView = require("../models/pageViewModel");
 const PageCount = require("../models/pageCountModel");
 const UserStat = require("../models/userStatModel");
-const mongoose = require("mongoose");
 
 const views = async () => {
   try {
@@ -58,7 +57,7 @@ const views = async () => {
         const userStatOps = Object.entries(userStatMap).map(
           ([userId, count]) => ({
             updateOne: {
-              filter: { userId: mongoose.Types.ObjectId(userId) },
+              filter: { userId },
               update: { $inc: { totalViewReceived: count } },
               upsert: true,
             },
