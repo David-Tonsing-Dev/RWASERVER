@@ -68,7 +68,7 @@ function generateUUID() {
   return crypto.randomUUID();
 }
 
-const getClientIP = async (req, res, id, userId = null) => {
+const getClientIP = async (req, res, id, userId) => {
   let ip = req.headers["x-forwarded-for"]?.split(",")[0];
   // let ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim();
   const userAgent = req.headers["user-agent"];
