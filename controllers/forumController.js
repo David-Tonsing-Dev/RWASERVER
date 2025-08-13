@@ -226,11 +226,10 @@ const getForumById = async (req, res) => {
       return res.status(400).json({ message: "Invalid forum Id" });
 
     const forum = await Forum.findById(id)
-      .populate({ path: "userId", select: "userName" })
+      .populate({ path: "userId", select: "userName createdAt" })
       .populate({ path: "categoryId", select: "name" })
       .lean();
     await getClientIP(req, res, id, userId);
-
     if (!forum)
       return res
         .status(404)
@@ -254,13 +253,14 @@ const getForumById = async (req, res) => {
     }
     if (forum.userId?._id) {
       const userStat = await UserStat.findOneAndUpdate(
-        { userId: forum.userId._id },
+        {
+          userId: forum.userId?._id,
+        },
         {},
-        { upsert: true, new: true, lean: true }
-      );
+        { upsert: true }
+      ).lean();
 
-      const badges = calculateForBadge({ ...forum.userId }, userStat);
-
+      const badges = calculateForBadge(forum.userId, userStat);
       forum.userId.tieredProgression = badges.tieredProgression;
     }
 
