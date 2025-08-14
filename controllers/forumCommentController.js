@@ -27,15 +27,10 @@ const addComment = async (req, res) => {
         .status(403)
         .json({ status: false, message: "Sign in to comment" });
 
-    const user = await Comment.find({ userId }).populate({
-      path: "userId",
-      select: "userName",
-    });
-
     const comment = new Comment({
       forumId,
       text,
-      username: user.userName,
+      username,
       userId,
       quotedCommentedId: quotedCommentId || null,
     });
