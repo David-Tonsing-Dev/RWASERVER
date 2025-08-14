@@ -27,10 +27,15 @@ const addComment = async (req, res) => {
         .status(403)
         .json({ status: false, message: "Sign in to comment" });
 
+    const user = await Comment.find({ userId }).populate({
+      path: "userId",
+      select: "userName",
+    });
+
     const comment = new Comment({
       forumId,
       text,
-      username,
+      username: user.userName,
       userId,
       quotedCommentedId: quotedCommentId || null,
     });
@@ -373,7 +378,7 @@ const getCommentsByForumId = async (req, res) => {
     const skip = (page - 1) * size;
 
     const comments = await Comment.find({ forumId })
-      .populate({ path: "userId", select: "userName createdAt" })
+      .populate({ path: "userId", select: "createdAt" })
       .populate("quotedCommentedId", "text username")
       .sort({ createdAt: -1 })
       .skip(skip)
