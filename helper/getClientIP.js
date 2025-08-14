@@ -96,7 +96,7 @@ const getClientIP = async (req, res, id, userId) => {
   // const userKey = userId;
 
   let deviceId = req.cookies?.device_Id;
-
+  console.log(deviceId, "===========================================>");
   if (!deviceId) {
     deviceId = crypto.randomUUID();
     res.cookie("device_Id", deviceId, {
@@ -104,6 +104,7 @@ const getClientIP = async (req, res, id, userId) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
+      path: "/",
     });
   }
   // const deviceId = uuid;
