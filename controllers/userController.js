@@ -677,10 +677,17 @@ const updateUser = async (req, res) => {
     removeBannerImg =
       removeBannerImg && removeBannerImg === "true" ? true : false;
 
-    if (!userName)
-      return res
-        .status(400)
-        .json({ status: false, message: "Username cannot be empty" });
+    // if (!userName)
+    //   return res
+    //     .status(400)
+    //     .json({ status: false, message: "Username cannot be empty" });
+
+    if (!userName || userName?.trim().length < 3) {
+      return res.status(400).json({
+        status: false,
+        message: "Username must be at least 3 characters",
+      });
+    }
 
     if (!email)
       return res
