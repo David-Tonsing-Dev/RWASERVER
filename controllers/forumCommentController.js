@@ -373,7 +373,7 @@ const getCommentsByForumId = async (req, res) => {
     const skip = (page - 1) * size;
 
     const comments = await Comment.find({ forumId })
-      .populate({ path: "userId", select: "createdAt" })
+      .populate({ path: "userId", select: "userName createdAt" })
       .populate("quotedCommentedId", "text username")
       .sort({ createdAt: -1 })
       .skip(skip)
