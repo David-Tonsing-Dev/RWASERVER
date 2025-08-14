@@ -698,7 +698,7 @@ const updateUser = async (req, res) => {
     if (userName) checkUser.userName = userName;
     if (email) checkUser.email = email;
     if (link && link.length > 0) checkUser.link = link;
-    if (description) checkUser.description = description;
+    if (description !== undefined) checkUser.description = description;
     // if (link && link.length > 0) {
     //   if (checkUser.link.length > 0) {
     //     const linkMap = new Map();
