@@ -151,7 +151,7 @@ const getClientIP = async (req, res, id, userId) => {
 
   try {
     // const exists = await TempPageView.findOne({ pageId: id, userKey });
-    if (!req.cookies?.device_Id) {
+    if (req.cookies?.device_Id) {
       await TempPageView.create({
         pageId: id,
         // userKey,
