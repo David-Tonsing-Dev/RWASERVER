@@ -10,7 +10,7 @@ const views = async () => {
     cron.schedule("*/10 * * * *", async () => {
       console.log("Processing page views...");
 
-      const views = await TempPageView.find();
+      const views = await TempPageView.find({ isCounted: false });
       if (views.length === 0) {
         console.log("No views to process.");
         return;
@@ -19,6 +19,7 @@ const views = async () => {
       const pageViewOps = [];
       const pageCountMap = {};
       const userStatMap = {};
+      const viewIds = [];
 
       views.forEach((v) => {
         pageViewOps.push({
@@ -39,6 +40,8 @@ const views = async () => {
         if (v.userId) {
           userStatMap[v.userId] = (userStatMap[v.userId] || 0) + 1;
         }
+
+        viewIds.push(v._id);
       });
 
       try {
@@ -86,7 +89,10 @@ const views = async () => {
         await UserStat.bulkWrite(userStatOps);
 
         // await TempPageView.deleteMany({});
-
+        await TempPageView.updateMany(
+          { _id: { $in: viewIds } },
+          { $set: { isCounted: true } }
+        );
         console.log(`Processed ${views.length} views successfully.`);
       } catch (error) {
         console.error("Error processing views:", error);

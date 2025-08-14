@@ -15,6 +15,7 @@ const tempPageViewSchema = new mongoose.Schema(
     deviceId: { type: String, required: true },
     // userAgent: { type: String },
     userId: { type: String },
+    isCounted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
