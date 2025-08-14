@@ -96,20 +96,19 @@ const getClientIP = async (req, res, id, userId) => {
   // const userKey = userId;
 
   let deviceId = req.cookies?.device_Id;
-  console.log(deviceId, "===========================================>");
-  if (!deviceId) {
-    deviceId = crypto.randomUUID();
-    res.cookie("device_Id", deviceId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
-      path: "/",
-    });
-  }
+  // if (!deviceId) {
+  //   deviceId = crypto.randomUUID();
+  //   res.cookie("device_Id", deviceId, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === "production",
+  //     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  //     maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
+  //   });
+  // }
   // const deviceId = uuid;
 
-  // if (!req.cookies?.device_Id) {
+  // if (!deviceId) {
+  //   deviceId = crypto.randomUUID();
   //   res.cookie("device_Id", deviceId, {
   //     httpOnly: true,
   //     secure: process.env.NODE_ENV === "production",
@@ -149,23 +148,46 @@ const getClientIP = async (req, res, id, userId) => {
   //   }
   // }
 
-  try {
-    // const exists = await TempPageView.findOne({ pageId: id, userKey });
-    if (req.cookies?.device_Id) {
+  // try {
+  //   // const exists = await TempPageView.findOne({ pageId: id, userKey });
+  //   if (req.cookies?.device_Id) {
+  //     await TempPageView.create({
+  //       pageId: id,
+  //       // userKey,
+  //       deviceId,
+  //       ip,
+  //       // userAgent,
+  //       userId,
+  //     });
+  //   }
+  // } catch (err) {
+  //   if (err.code !== 11000) {
+  //     console.error("Unexpected error saving TempPageView:", err);
+  //   }
+  //   return;
+  // }
+
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    res.cookie("device_Id", deviceId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
+    });
+
+    try {
       await TempPageView.create({
         pageId: id,
-        // userKey,
         deviceId,
         ip,
-        // userAgent,
         userId,
       });
+    } catch (err) {
+      if (err.code !== 11000) {
+        console.error("Unexpected error saving TempPageView:", err);
+      }
     }
-  } catch (err) {
-    if (err.code !== 11000) {
-      console.error("Unexpected error saving TempPageView:", err);
-    }
-    return;
   }
 };
 
