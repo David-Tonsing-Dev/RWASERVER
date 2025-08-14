@@ -13,7 +13,7 @@ const commentSchema = new mongoose.Schema(
     },
     username: {
       type: String,
-      required: true,
+      // required: true,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
