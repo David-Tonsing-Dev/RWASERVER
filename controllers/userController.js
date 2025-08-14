@@ -291,9 +291,11 @@ const googleData = async (req, res) => {
       process.env.JWT_SECRET_KEY
     );
 
+    const currentUser = user || addUser;
+
     const userStat = await UserStat.findOneAndUpdate(
       {
-        userId: user._id,
+        userId: currentUser._id,
       },
       {},
       { upsert: true }
@@ -308,18 +310,21 @@ const googleData = async (req, res) => {
     }
 
     // const badges = calculateForBadge(user, userStat);
-    const badgesWithoutImg = calculateForBadgeWithoutImage(user, userStat);
+    const badgesWithoutImg = calculateForBadgeWithoutImage(
+      currentUser,
+      userStat
+    );
 
     return res.status(200).json({
       status: true,
       message: "Token generated successfully",
-      id: addUser ? addUser._id : user._id,
-      name: user.userName,
+      id: currentUser._id,
+      name: currentUser.userName,
       token: verificationToken,
-      profileImg: user.profileImg,
-      bannerImg: user.bannerImg,
-      createdAt: user.createdAt,
-      description: user.description,
+      profileImg: currentUser.profileImg,
+      bannerImg: currentUser.bannerImg,
+      createdAt: currentUser.createdAt,
+      description: currentUser.description,
       email,
       stat: badgesWithoutImg,
     });

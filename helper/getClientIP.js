@@ -56,13 +56,13 @@ const crypto = require("crypto");
 
 // module.exports = { getClientIP };
 
-function generateFingerprint(ip, userAgent) {
-  const secret = process.env.FINGERPRINT_KEY;
-  return crypto
-    .createHash("sha256")
-    .update(ip + userAgent + secret)
-    .digest("hex");
-}
+// function generateFingerprint(ip, userAgent) {
+//   const secret = process.env.FINGERPRINT_KEY;
+//   return crypto
+//     .createHash("sha256")
+//     .update(ip + userAgent + secret)
+//     .digest("hex");
+// }
 
 function generateUUID() {
   return crypto.randomUUID();
@@ -70,8 +70,7 @@ function generateUUID() {
 
 const getClientIP = async (req, res, id, userId) => {
   let ip = req.headers["x-forwarded-for"]?.split(",")[0];
-  // let ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim();
-  const userAgent = req.headers["user-agent"];
+  // const userAgent = req.headers["user-agent"];
 
   let uuid = req.cookies?.device_Id;
   if (!uuid) {
@@ -88,13 +87,14 @@ const getClientIP = async (req, res, id, userId) => {
   //     });
   //   }
 
-  const fingerprint = generateFingerprint(ip, userAgent);
-  const deviceId = crypto
-    .createHash("sha256")
-    .update(uuid + fingerprint)
-    .digest("hex");
+  // const fingerprint = generateFingerprint(ip, userAgent);
+  // const deviceId = crypto
+  //   .createHash("sha256")
+  //   .update(uuid + fingerprint)
+  //   .digest("hex");
 
-  const userKey = userId || deviceId;
+  // const userKey = userId;
+  const deviceId = uuid;
 
   if (!req.cookies?.device_Id) {
     res.cookie("device_Id", deviceId, {
@@ -137,14 +137,14 @@ const getClientIP = async (req, res, id, userId) => {
   // }
 
   try {
-    const exists = await TempPageView.findOne({ pageId: id, userKey });
-    if (!exists) {
+    // const exists = await TempPageView.findOne({ pageId: id, userKey });
+    if (!req.cookies?.device_Id) {
       await TempPageView.create({
         pageId: id,
-        userKey,
+        // userKey,
         deviceId,
         ip,
-        userAgent,
+        // userAgent,
         userId,
       });
     }

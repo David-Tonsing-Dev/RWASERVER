@@ -23,12 +23,11 @@ const views = async () => {
       views.forEach((v) => {
         pageViewOps.push({
           updateOne: {
-            filter: { pageId: v.pageId, userKey: v.userKey },
+            filter: { pageId: v.pageId },
             update: {
               $setOnInsert: {
                 deviceId: v.deviceId,
                 ip: v.ip,
-                userAgent: v.userAgent,
               },
             },
             upsert: true,
@@ -86,7 +85,7 @@ const views = async () => {
         await PageCount.bulkWrite(pageCountOps);
         await UserStat.bulkWrite(userStatOps);
 
-        await TempPageView.deleteMany({});
+        // await TempPageView.deleteMany({});
 
         console.log(`Processed ${views.length} views successfully.`);
       } catch (error) {
