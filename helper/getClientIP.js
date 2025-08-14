@@ -174,19 +174,24 @@ const getClientIP = async (req, res, id, userId) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
+      path: "/",
     });
-
-    try {
-      await TempPageView.create({
-        pageId: id,
-        deviceId,
-        ip,
-        userId,
-      });
-    } catch (err) {
-      if (err.code !== 11000) {
-        console.error("Unexpected error saving TempPageView:", err);
-      }
+  }
+  try {
+    // await TempPageView.create({
+    //   pageId: id,
+    //   deviceId,
+    //   ip,
+    //   userId,
+    // });
+    await TempPageView.updateOne(
+      { pageId: id, deviceId },
+      { $setOnInsert: { ip, userId } },
+      { upsert: true }
+    );
+  } catch (err) {
+    if (err.code !== 11000) {
+      console.error("Unexpected error saving TempPageView:", err);
     }
   }
 };
