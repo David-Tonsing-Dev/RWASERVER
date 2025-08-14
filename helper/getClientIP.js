@@ -64,18 +64,18 @@ const crypto = require("crypto");
 //     .digest("hex");
 // }
 
-function generateUUID() {
-  return crypto.randomUUID();
-}
+// function generateUUID() {
+//   return crypto.randomUUID();
+// }
 
 const getClientIP = async (req, res, id, userId) => {
   let ip = req.headers["x-forwarded-for"]?.split(",")[0];
   // const userAgent = req.headers["user-agent"];
 
-  let uuid = req.cookies?.device_Id;
-  if (!uuid) {
-    uuid = generateUUID();
-  }
+  // let uuid = req.cookies?.device_Id;
+  // if (!uuid) {
+  //   uuid = generateUUID();
+  // }
 
   //  if (!uuid) {
   //     uuid = generateUUID();
@@ -94,9 +94,11 @@ const getClientIP = async (req, res, id, userId) => {
   //   .digest("hex");
 
   // const userKey = userId;
-  const deviceId = uuid;
 
-  if (!req.cookies?.device_Id) {
+  let deviceId = req.cookies?.device_Id;
+
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
     res.cookie("device_Id", deviceId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -104,6 +106,16 @@ const getClientIP = async (req, res, id, userId) => {
       maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
     });
   }
+  // const deviceId = uuid;
+
+  // if (!req.cookies?.device_Id) {
+  //   res.cookie("device_Id", deviceId, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === "production",
+  //     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  //     maxAge: 1000 * 60 * 60 * 24 * 365 * 2,
+  //   });
+  // }
   // let isUnique = false;
 
   // try {
