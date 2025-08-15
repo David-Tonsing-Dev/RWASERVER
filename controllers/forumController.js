@@ -488,8 +488,7 @@ const reactToForum = async (req, res) => {
       io.to(forumId).emit("reactToForum", socketResponse); // For mobile
 
       await UserStat.findOneAndUpdate(
-        // { userId: Forum.userId },
-        { userId },
+        { userId: Forum.userId },
         { $inc: { totalLikeReceived: 1 } },
         { upsert: true }
       );
@@ -533,7 +532,7 @@ const reactToForum = async (req, res) => {
         io.to(forumId).emit("reactToForum", socketResponse); // for mobile
 
         await UserStat.findOneAndUpdate(
-          { userId },
+          { userId: Forum.userId },
           { $inc: { totalLikeReceived: -1 } },
           { upsert: true }
         );
@@ -635,11 +634,11 @@ const reactToForumDislike = async (req, res) => {
 
       io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
 
-      // await UserStat.findOneAndUpdate(
-      //   { userId },
-      //   { $inc: { totalLikeReceived: 1 } },
-      //   { upsert: true }
-      // );
+      await UserStat.findOneAndUpdate(
+        { userId: Forum.userId },
+        { $inc: { totalLikeReceived: 1 } },
+        { upsert: true }
+      );
 
       return res
         .status(201)
@@ -680,7 +679,7 @@ const reactToForumDislike = async (req, res) => {
         io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
 
         await UserStat.findOneAndUpdate(
-          { userId },
+          { userId: Forum.userId },
           { $inc: { totalLikeReceived: -1 } },
           { upsert: true }
         );
