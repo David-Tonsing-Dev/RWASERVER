@@ -16,6 +16,7 @@ const {
   calculateUserAllBadges,
   calculateUserAllBadgesWithoutImg,
 } = require("../helper/calculationForBadges");
+const Comment = require("../models/forumCommentModel");
 
 const createToken = (id) => {
   const jwtkey = process.env.JWT_SECRET_KEY;
@@ -702,7 +703,10 @@ const updateUser = async (req, res) => {
     if (!checkUser)
       return res.status(404).json({ status: false, message: "User not found" });
 
-    if (userName) checkUser.userName = userName;
+    if (userName && userName !== checkUser.userName) {
+      checkUser.userName = userName;
+      await Comment.updateMany({ userId }, { $set: { username: userName } });
+    }
     if (email) checkUser.email = email;
     if (link && link.length > 0) checkUser.link = link;
     if (description !== undefined) checkUser.description = description;
