@@ -745,6 +745,12 @@ const reactToForumDislike = async (req, res) => {
 
         io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
 
+        await UserStat.findOneAndUpdate(
+          { userId },
+          { $inc: { totalLikeReceived: -1 } },
+          { upsert: true }
+        );
+
         return res.status(201).json({
           status: true,
           message: "Reaction dislike updated.",
