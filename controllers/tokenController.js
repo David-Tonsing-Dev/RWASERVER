@@ -16,6 +16,7 @@ const MobileAppAnalyticsData = require("../models/mobileAppAnalyticsDataModel");
 const HighLight = require("../models/highLightModel");
 const fetchHighLightData = require("../helper/fetchAndStoreHighlightData");
 const { getClientIP } = require("../helper/getClientIP");
+const PageCount = require("../models/pageCountModel");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&per_page=250&sparkline=true&price_change_percentage=1h,7d";
@@ -703,7 +704,8 @@ const getBlog = async (req, res) => {
       const getBlog = await Blog.find()
         .skip((page - 1) * size)
         .limit(size)
-        .sort(sortOptions);
+        .sort(sortOptions)
+        .lean();
 
       if (!getBlog || getBlog.length <= 0)
         return res
@@ -711,6 +713,16 @@ const getBlog = async (req, res) => {
           .json({ status: false, message: "No blog found" });
 
       const total = await Blog.countDocuments();
+
+      const blogIds = getBlog.map((b) => b.slug);
+      const counts = await PageCount.find({ pageId: { $in: blogIds } }).select(
+        "pageId views"
+      );
+
+      getBlog.forEach((b) => {
+        const countDoc = counts.find((c) => c.pageId === b.slug);
+        b.views = countDoc ? countDoc?.views : 0;
+      });
 
       return res.status(200).json({ status: true, blog: getBlog, total });
     }
@@ -725,7 +737,8 @@ const getBlog = async (req, res) => {
     })
       .skip((page - 1) * size)
       .limit(size)
-      .sort(sortOptions);
+      .sort(sortOptions)
+      .lean();
 
     if (!getBlog || getBlog.length <= 0)
       return res.status(200).json({ status: false, message: "No blog found" });
@@ -737,6 +750,17 @@ const getBlog = async (req, res) => {
         { category: { $regex: filter, $options: "i" } },
         { author: { $regex: filter, $options: "i" } },
       ],
+    });
+
+    const blogIds = getBlog.map((b) => b.slug);
+
+    const counts = await PageCount.find({ pageId: { $in: blogIds } }).select(
+      "pageId views"
+    );
+
+    getBlog.forEach((b) => {
+      const countDoc = counts.find((c) => c.pageId === b.slug);
+      b.views = countDoc ? countDoc.views : 0;
     });
 
     return res.status(200).json({ status: true, blog: getBlog, total });
