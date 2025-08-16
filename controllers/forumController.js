@@ -544,21 +544,11 @@ const reactToForum = async (req, res) => {
 
         io.to(forumId).emit("reactToForum", socketResponse); // for mobile
 
-        // await UserStat.findOneAndUpdate(
-        //   { userId },
-        //   { $inc: { totalLikeReceived: -1 } },
-        //   { upsert: true }
-        // );
-        const stat = await UserStat.findOne({ userId }).select(
-          "totalLikeReceived"
+        await UserStat.findOneAndUpdate(
+          { userId },
+          { $inc: { totalLikeReceived: -1 } },
+          { upsert: true }
         );
-        if (stat && stat.totalLikeReceived > 0) {
-          await UserStat.findOneAndUpdate(
-            { userId },
-            { $inc: { totalLikeReceived: -1 } },
-            { upsert: true }
-          );
-        }
 
         return res
           .status(200)
@@ -600,6 +590,12 @@ const reactToForum = async (req, res) => {
         io.to(forumId).emit("reactToForumDetail", socketResponse);
 
         io.to(forumId).emit("reactToForum", socketResponse); // for mobile
+
+        await UserStat.findOneAndUpdate(
+          { userId },
+          { $inc: { totalLikeReceived: 1 } },
+          { upsert: true }
+        );
 
         return res.status(201).json({
           status: true,
@@ -707,16 +703,7 @@ const reactToForumDislike = async (req, res) => {
         //   { $inc: { totalLikeReceived: -1 } },
         //   { upsert: true }
         // );
-        const stat = await UserStat.findOne({ userId }).select(
-          "totalLikeReceived"
-        );
-        if (stat && stat.totalLikeReceived > 0) {
-          await UserStat.findOneAndUpdate(
-            { userId },
-            { $inc: { totalLikeReceived: -1 } },
-            { upsert: true }
-          );
-        }
+
         return res
           .status(200)
           .json({ status: true, message: "Reaction dislike removed." });
