@@ -9,6 +9,7 @@ const normalizeEmoji = require("../helper/normalizeEmoji");
 const hotForumTopicsService = require("../services/hotForumTopicsService");
 const { getClientIP } = require("../helper/getClientIP");
 const { calculateForBadge } = require("../helper/calculationForBadges");
+const PageCount = require("../models/pageCountModel");
 
 const createForum = async (req, res) => {
   try {
@@ -179,6 +180,17 @@ const getAllForums = async (req, res) => {
       .lean();
 
     const total = await Forum.countDocuments(filter);
+
+    const forumIds = forums.map((f) => f._id.toString());
+
+    const counts = await PageCount.find({ pageId: { $in: forumIds } }).select(
+      "pageId views"
+    );
+
+    forums.forEach((f) => {
+      const countDoc = counts.find((c) => c.pageId === f._id.toString());
+      f.views = countDoc ? countDoc.views : 0;
+    });
 
     if (userId) {
       const forumIds = forums.map((c) => c._id);
@@ -488,7 +500,8 @@ const reactToForum = async (req, res) => {
       io.to(forumId).emit("reactToForum", socketResponse); // For mobile
 
       await UserStat.findOneAndUpdate(
-        { userId: Forum.userId },
+        // { userId: Forum.userId },
+        { userId },
         { $inc: { totalLikeReceived: 1 } },
         { upsert: true }
       );
@@ -532,7 +545,7 @@ const reactToForum = async (req, res) => {
         io.to(forumId).emit("reactToForum", socketResponse); // for mobile
 
         await UserStat.findOneAndUpdate(
-          { userId: Forum.userId },
+          { userId },
           { $inc: { totalLikeReceived: -1 } },
           { upsert: true }
         );
@@ -635,7 +648,8 @@ const reactToForumDislike = async (req, res) => {
       io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
 
       await UserStat.findOneAndUpdate(
-        { userId: Forum.userId },
+        // { userId: Forum.userId },
+        { userId },
         { $inc: { totalLikeReceived: 1 } },
         { upsert: true }
       );
@@ -679,7 +693,7 @@ const reactToForumDislike = async (req, res) => {
         io.to(forumId).emit("reactToForumDislike", socketResponse); // For mobile
 
         await UserStat.findOneAndUpdate(
-          { userId: Forum.userId },
+          { userId },
           { $inc: { totalLikeReceived: -1 } },
           { upsert: true }
         );
