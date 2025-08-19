@@ -10,12 +10,14 @@ const tempPageViewSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // userKey: { type: String, required: true },
-
     deviceId: { type: String, required: true },
-    // userAgent: { type: String },
     userId: { type: String },
     isCounted: { type: Boolean, default: false },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      expires: "10d",
+    },
   },
   { timestamps: true }
 );
