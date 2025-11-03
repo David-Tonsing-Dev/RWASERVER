@@ -55,6 +55,7 @@ const allowedOrigins = [
   "https://condobase.io",
   "https://rwapros.com",
   "https://rwaprosnew.netlify.app",
+  "https://ethwclub.netlify.app",
 ];
 
 const corsOptions = {
