@@ -16,6 +16,7 @@ const {
   calculateUserAllBadges,
   calculateUserAllBadgesWithoutImg,
 } = require("../helper/calculationForBadges");
+const Comment = require("../models/forumCommentModel");
 
 const createToken = (id) => {
   const jwtkey = process.env.JWT_SECRET_KEY;
@@ -291,9 +292,11 @@ const googleData = async (req, res) => {
       process.env.JWT_SECRET_KEY
     );
 
+    const currentUser = user || addUser;
+
     const userStat = await UserStat.findOneAndUpdate(
       {
-        userId: user._id,
+        userId: currentUser._id,
       },
       {},
       { upsert: true }
@@ -308,18 +311,21 @@ const googleData = async (req, res) => {
     }
 
     // const badges = calculateForBadge(user, userStat);
-    const badgesWithoutImg = calculateForBadgeWithoutImage(user, userStat);
+    const badgesWithoutImg = calculateForBadgeWithoutImage(
+      currentUser,
+      userStat
+    );
 
     return res.status(200).json({
       status: true,
       message: "Token generated successfully",
-      id: addUser ? addUser._id : user._id,
-      name: user.userName,
+      id: currentUser._id,
+      name: currentUser.userName,
       token: verificationToken,
-      profileImg: user.profileImg,
-      bannerImg: user.bannerImg,
-      createdAt: user.createdAt,
-      description: user.description,
+      profileImg: currentUser.profileImg,
+      bannerImg: currentUser.bannerImg,
+      createdAt: currentUser.createdAt,
+      description: currentUser.description,
       email,
       stat: badgesWithoutImg,
     });
@@ -672,10 +678,17 @@ const updateUser = async (req, res) => {
     removeBannerImg =
       removeBannerImg && removeBannerImg === "true" ? true : false;
 
-    if (!userName)
-      return res
-        .status(400)
-        .json({ status: false, message: "Username cannot be empty" });
+    // if (!userName)
+    //   return res
+    //     .status(400)
+    //     .json({ status: false, message: "Username cannot be empty" });
+
+    if (!userName || userName?.trim().length < 3) {
+      return res.status(400).json({
+        status: false,
+        message: "Username must be at least 3 characters",
+      });
+    }
 
     if (!email)
       return res
@@ -690,10 +703,13 @@ const updateUser = async (req, res) => {
     if (!checkUser)
       return res.status(404).json({ status: false, message: "User not found" });
 
-    if (userName) checkUser.userName = userName;
+    if (userName && userName !== checkUser.userName) {
+      checkUser.userName = userName;
+      await Comment.updateMany({ userId }, { $set: { username: userName } });
+    }
     if (email) checkUser.email = email;
     if (link && link.length > 0) checkUser.link = link;
-    if (description) checkUser.description = description;
+    if (description !== undefined) checkUser.description = description;
     // if (link && link.length > 0) {
     //   if (checkUser.link.length > 0) {
     //     const linkMap = new Map();

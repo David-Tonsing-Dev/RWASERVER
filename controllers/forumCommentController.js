@@ -6,6 +6,9 @@ const UserStat = require("../models/userStatModel");
 const { io } = require("../socket/socket");
 const normalizeEmoji = require("../helper/normalizeEmoji");
 const hotForumTopicsService = require("../services/hotForumTopicsService");
+const {
+  calculateForBadgeWithoutImage,
+} = require("../helper/calculationForBadges");
 
 const addComment = async (req, res) => {
   try {
@@ -90,6 +93,7 @@ const addComment = async (req, res) => {
     return res.status(500).json({
       status: false,
       message: "Something went wrong, try again later",
+      error: err.message,
     });
   }
 };
@@ -369,6 +373,7 @@ const getCommentsByForumId = async (req, res) => {
     const skip = (page - 1) * size;
 
     const comments = await Comment.find({ forumId })
+      .populate({ path: "userId", select: "createdAt" })
       .populate("quotedCommentedId", "text username")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -376,6 +381,27 @@ const getCommentsByForumId = async (req, res) => {
       .lean();
 
     const total = await Comment.countDocuments({ forumId });
+
+    const userIds = comments.map((c) => c.userId?._id);
+
+    const userStats = await UserStat.find({
+      userId: { $in: userIds },
+    }).lean();
+
+    const userStatsMap = {};
+    userStats.forEach((stat) => {
+      userStatsMap[stat.userId] = stat;
+    });
+    comments.forEach((c) => {
+      const stat = userStatsMap[c.userId?._id];
+
+      if (stat) {
+        const badge = calculateForBadgeWithoutImage(c.userId, stat);
+        c.tieredProgression = badge.tieredProgression;
+      } else {
+        c.tieredProgression = "Observer";
+      }
+    });
 
     if (userId) {
       const commentIds = comments.map((c) => c._id);

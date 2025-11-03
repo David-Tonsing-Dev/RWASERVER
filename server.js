@@ -43,6 +43,8 @@ const schedular = require("./cron/schedular");
 const analysticsData = require("./cron/analystics");
 const hightLight = require("./cron/highLight");
 const mobileAppGA4Data = require("./admin/routes/googleAnalyticsDataRouters");
+const cookieParser = require("cookie-parser");
+const views = require("./cron/views");
 const allowedOrigins = [
   "https://rwa.guide",
   "http://localhost:3000",
@@ -68,13 +70,14 @@ const corsOptions = {
     }
     return callback(null, true);
   },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
+app.use(cookieParser());
 app.set("trust proxy", true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
 app.use("/static", express.static(path.join(__dirname, "public")));
 
 app.use("/api/users", userRouter);
@@ -117,5 +120,6 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
     schedular();
     analysticsData();
     hightLight();
+    views();
   });
 });

@@ -16,6 +16,7 @@ const MobileAppAnalyticsData = require("../models/mobileAppAnalyticsDataModel");
 const HighLight = require("../models/highLightModel");
 const fetchHighLightData = require("../helper/fetchAndStoreHighlightData");
 const { getClientIP } = require("../helper/getClientIP");
+const PageCount = require("../models/pageCountModel");
 
 const apiRWACoins =
   "https://pro-api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=real-world-assets-rwa&per_page=250&sparkline=true&price_change_percentage=1h,7d";
@@ -687,8 +688,6 @@ const getTopGainer = async (req, res) => {
 const getBlog = async (req, res) => {
   try {
     let { page = 1, size = 10, filter, sortBy, order } = req.query;
-    const ip = getClientIP(req);
-    console.log(ip, "============>ip");
     page = parseInt(page);
     size = parseInt(size);
     sortBy = sortBy || "createdAt";
@@ -705,7 +704,8 @@ const getBlog = async (req, res) => {
       const getBlog = await Blog.find()
         .skip((page - 1) * size)
         .limit(size)
-        .sort(sortOptions);
+        .sort(sortOptions)
+        .lean();
 
       if (!getBlog || getBlog.length <= 0)
         return res
@@ -713,6 +713,16 @@ const getBlog = async (req, res) => {
           .json({ status: false, message: "No blog found" });
 
       const total = await Blog.countDocuments();
+
+      const blogIds = getBlog.map((b) => b.slug);
+      const counts = await PageCount.find({ pageId: { $in: blogIds } }).select(
+        "pageId views"
+      );
+
+      getBlog.forEach((b) => {
+        const countDoc = counts.find((c) => c.pageId === b.slug);
+        b.views = countDoc ? countDoc?.views : 0;
+      });
 
       return res.status(200).json({ status: true, blog: getBlog, total });
     }
@@ -727,7 +737,8 @@ const getBlog = async (req, res) => {
     })
       .skip((page - 1) * size)
       .limit(size)
-      .sort(sortOptions);
+      .sort(sortOptions)
+      .lean();
 
     if (!getBlog || getBlog.length <= 0)
       return res.status(200).json({ status: false, message: "No blog found" });
@@ -739,6 +750,17 @@ const getBlog = async (req, res) => {
         { category: { $regex: filter, $options: "i" } },
         { author: { $regex: filter, $options: "i" } },
       ],
+    });
+
+    const blogIds = getBlog.map((b) => b.slug);
+
+    const counts = await PageCount.find({ pageId: { $in: blogIds } }).select(
+      "pageId views"
+    );
+
+    getBlog.forEach((b) => {
+      const countDoc = counts.find((c) => c.pageId === b.slug);
+      b.views = countDoc ? countDoc.views : 0;
     });
 
     return res.status(200).json({ status: true, blog: getBlog, total });
@@ -887,7 +909,9 @@ const getNews = async (req, res) => {
 const getNewsDetail = async (req, res) => {
   try {
     const { slug } = req.params;
-    await getClientIP(req, slug);
+
+    const userId = req.userId;
+    await getClientIP(req, res, slug, userId);
 
     const newsObj = await News.findOne({ slug });
 
@@ -909,7 +933,9 @@ const getNewsDetail = async (req, res) => {
 const getBlogDetail = async (req, res) => {
   try {
     const { slug } = req.params;
-    await getClientIP(req, slug);
+    const userId = req.userId;
+
+    await getClientIP(req, res, slug, userId);
 
     const getBlog = await Blog.findOne({ slug });
 

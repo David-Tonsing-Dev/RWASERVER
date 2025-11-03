@@ -26,10 +26,10 @@ router.get("/rwa/highlight", getHighLightData);
 router.get("/rwa/graph/coinOHLC/:coinId", getCoinGraphData);
 router.get("/rwa/trend", getTrends);
 router.get("/rwa/blog", getBlog);
-router.get("/rwa/blog/:slug", getBlogDetail);
+router.get("/rwa/blog/:slug", nonAuthMiddleware, getBlogDetail);
 router.get("/rwa/news", getNews);
 router.get("/rwa/news/featured", getFeaturedNews);
-router.get("/rwa/news/:slug", getNewsDetail);
+router.get("/rwa/news/:slug", nonAuthMiddleware, getNewsDetail);
 router.get("/rwa/topGainer", getTopGainer);
 
 module.exports = router;
