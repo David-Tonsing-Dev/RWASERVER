@@ -59,6 +59,7 @@ const allowedOrigins = [
   "https://rwaprosnew.netlify.app",
   "https://ethwclub.netlify.app",
   "https://ethw.club",
+  "http://ethw.club",
 ];
 
 const corsOptions = {
