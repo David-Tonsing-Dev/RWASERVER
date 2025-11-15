@@ -60,6 +60,7 @@ const allowedOrigins = [
   "https://ethwclub.netlify.app",
   "https://ethw.club",
   "http://ethw.club",
+  "http://localhost:5173",
 ];
 
 const corsOptions = {
